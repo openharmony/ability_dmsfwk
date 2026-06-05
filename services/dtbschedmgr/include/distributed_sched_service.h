@@ -350,6 +350,7 @@ private:
         DSchedEventState state, int32_t ret);
     bool CheckCallingUid();
     int32_t ScheduleAutoUnload();
+    void AutoUnloadTask();
     int32_t PrepareSvcDConnection(const DExtConnectInfo& connectInfo, AAFwk::Want& want, bool& isDelay);
         sptr<IDExtension> WaitAndGetDExtensionProxy(const std::string bundleName);
     int32_t GetDeviceDisplayName(const DExtConnectInfo& connectInfo, std::string& displayName,
@@ -404,6 +405,7 @@ private:
     std::atomic<bool> dExtensionConnected_ {false};
     std::mutex unloadMutex_;
     std::condition_variable unloadCondition_;
+    std::atomic<bool> isUnloadScheduled_ {false};
     std::map<std::string, sptr<AppStateObserver>> bundleNameMap_;
     sptr<DistributedMissionFocusedListener> missionFocusedListener_ = nullptr;
 

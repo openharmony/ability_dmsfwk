@@ -949,6 +949,58 @@ HWTEST_F(DistributedSchedServiceNewTest, ScheduleAutoUnload_Test02, TestSize.Lev
 }
 
 /**
+ * @tc.name  : ScheduleAutoUnload_Test03
+ * @tc.desc  : Test ScheduleAutoUnload when already scheduled and dExtensionConnected_ is true,
+ *             should keep current timer without resetting it.
+ * @tc.type  : FUNC
+ */
+HWTEST_F(DistributedSchedServiceNewTest, ScheduleAutoUnload_Test03, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceNewTest ScheduleAutoUnload_Test03 start" << std::endl;
+
+    DistributedSchedService::GetInstance().SetDExtensionConnected(true);
+
+    int32_t ret = DistributedSchedService::GetInstance().ScheduleAutoUnload();
+    EXPECT_EQ(ret, ERR_OK);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+    ret = DistributedSchedService::GetInstance().ScheduleAutoUnload();
+    EXPECT_EQ(ret, ERR_OK);
+
+    DistributedSchedService::GetInstance().SetDExtensionConnected(true);
+
+    DTEST_LOG << "DistributedSchedServiceNewTest ScheduleAutoUnload_Test03 end" << std::endl;
+}
+
+/**
+ * @tc.name  : ScheduleAutoUnload_Test04
+ * @tc.desc  : Test ScheduleAutoUnload when already scheduled and dExtensionConnected_ is false,
+ *             should reset timer via notify_one.
+ * @tc.type  : FUNC
+ */
+HWTEST_F(DistributedSchedServiceNewTest, ScheduleAutoUnload_Test04, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceNewTest ScheduleAutoUnload_Test04 start" << std::endl;
+
+    DistributedSchedService::GetInstance().SetDExtensionConnected(true);
+
+    int32_t ret = DistributedSchedService::GetInstance().ScheduleAutoUnload();
+    EXPECT_EQ(ret, ERR_OK);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+    DistributedSchedService::GetInstance().SetDExtensionConnected(false);
+
+    ret = DistributedSchedService::GetInstance().ScheduleAutoUnload();
+    EXPECT_EQ(ret, ERR_OK);
+
+    DistributedSchedService::GetInstance().SetDExtensionConnected(true);
+
+    DTEST_LOG << "DistributedSchedServiceNewTest ScheduleAutoUnload_Test04 end" << std::endl;
+}
+
+/**
  * @tc.name  : FinalizeDExtensionConnection_Test03
  * @tc.desc  : Test FinalizeDExtensionConnection when proxy is nullptr and isDelay is false.
  *             TriggerProxyCallbacks should set result to FAILED.
