@@ -17,12 +17,14 @@
 
 #include "distributed_intent_service.h"
 #include "distributed_intent_error_code.h"
+#include "distributed_intent_provider_mock.h"
 #include "dtbschedmgr_device_info_storage_mock.h"
 #include "test_log.h"
 #include "want.h"
 #include "mock_remote_stub.h"
 
 #define private public
+#include "distributed_intent_service_stub.h"
 #include "remote_intent_manager.h"
 #undef private
 
@@ -54,6 +56,7 @@ public:
 protected:
     std::shared_ptr<DistributedIntentService> service_;
     std::shared_ptr<DtbschedmgrDeviceInfoStorageMock> storageMock_;
+    std::shared_ptr<MockIntentProvider> providerMock_;
 };
 
 void DistributedIntentServiceTest::SetUpTestCase()
@@ -72,13 +75,16 @@ void DistributedIntentServiceTest::SetUp()
     service_ = std::make_shared<DistributedIntentService>();
     storageMock_ = std::make_shared<DtbschedmgrDeviceInfoStorageMock>();
     IDtbschedmgrDeviceInfoStorage::storageMock = storageMock_;
+    providerMock_ = std::make_shared<MockIntentProvider>();
 }
 
 void DistributedIntentServiceTest::TearDown()
 {
     DTEST_LOG << "DistributedIntentServiceTest::TearDown" << std::endl;
+    DistributedIntentServiceStub::SetProvider(nullptr);
     IDtbschedmgrDeviceInfoStorage::storageMock = nullptr;
     service_ = nullptr;
+    providerMock_ = nullptr;
 }
 
 /**
@@ -351,6 +357,126 @@ HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_CallBack_Null_001, Test
     sptr<IRemoteObject> callback = nullptr;
 
     EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: StartRemoteIntent_ProviderNull_001
+ * @tc.desc: StartRemoteIntent when provider is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_ProviderNull_001, TestSize.Level3)
+{
+    OHOS::AAFwk::Want want;
+    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentCallerInfo callerInfo;
+    sptr<IRemoteObject> callback = new MockRemoteStub();
+
+    EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_SYSTEM_WORK_ABNORMALLY);
+}
+
+/**
+ * @tc.name: StartRemoteIntent_GetLocalDeviceIdFail_ProviderSet_001
+ * @tc.desc: StartRemoteIntent when GetLocalDeviceId returns false with provider set
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_GetLocalDeviceIdFail_ProviderSet_001, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(providerMock_.get());
+    EXPECT_CALL(*providerMock_, GetLocalDeviceId(_))
+        .WillOnce(Return(false));
+
+    OHOS::AAFwk::Want want;
+    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentCallerInfo callerInfo;
+    sptr<IRemoteObject> callback = new MockRemoteStub();
+
+    EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: StartRemoteIntent_DstDeviceIdEmpty_ProviderSet_001
+ * @tc.desc: StartRemoteIntent when dstDeviceId is empty with provider set and GetLocalDeviceId success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_DstDeviceIdEmpty_ProviderSet_001, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(providerMock_.get());
+    EXPECT_CALL(*providerMock_, GetLocalDeviceId(_))
+        .WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
+
+    OHOS::AAFwk::Want want;
+    want.SetElementName("", BUNDLE_NAME, ABILITY_NAME);
+    IntentCallerInfo callerInfo;
+    sptr<IRemoteObject> callback = new MockRemoteStub();
+
+    EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: StartRemoteIntent_NoElementSet_ProviderSet_001
+ * @tc.desc: StartRemoteIntent when Want has no element with provider set and GetLocalDeviceId success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_NoElementSet_ProviderSet_001, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(providerMock_.get());
+    EXPECT_CALL(*providerMock_, GetLocalDeviceId(_))
+        .WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
+
+    OHOS::AAFwk::Want want;
+    IntentCallerInfo callerInfo;
+    sptr<IRemoteObject> callback = new MockRemoteStub();
+
+    EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: StartRemoteIntent_NormalPath_ProviderSet_001
+ * @tc.desc: StartRemoteIntent normal path with provider set, GetLocalDeviceId success, valid dstDeviceId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_NormalPath_ProviderSet_001, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(providerMock_.get());
+    EXPECT_CALL(*providerMock_, GetLocalDeviceId(_))
+        .WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
+
+    OHOS::AAFwk::Want want;
+    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentCallerInfo callerInfo;
+    callerInfo.callerUid = TEST_CALLER_UID;
+    callerInfo.requestCode = TEST_REQUEST_CODE;
+    callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    sptr<IRemoteObject> callback = new MockRemoteStub();
+
+    int32_t result = service_->StartRemoteIntent(want, callerInfo, callback);
+    EXPECT_NE(result, ERR_DI_OK);
+}
+
+/**
+ * @tc.name: StartRemoteIntent_GetLocalDeviceIdEmptyOut_ProviderSet_001
+ * @tc.desc: StartRemoteIntent when GetLocalDeviceId returns true but localDeviceId is empty with provider set
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_GetLocalDeviceIdEmptyOut_ProviderSet_001, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(providerMock_.get());
+    EXPECT_CALL(*providerMock_, GetLocalDeviceId(_))
+        .WillOnce(DoAll(SetArgReferee<0>(EMPTY_STRING), Return(true)));
+
+    OHOS::AAFwk::Want want;
+    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentCallerInfo callerInfo;
+    sptr<IRemoteObject> callback = new MockRemoteStub();
+
+    int32_t result = service_->StartRemoteIntent(want, callerInfo, callback);
+    EXPECT_NE(result, ERR_DI_OK);
 }
 
 } // namespace DistributedSchedule
