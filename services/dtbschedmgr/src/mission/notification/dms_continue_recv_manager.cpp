@@ -153,8 +153,14 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
             return NO_MISSION_INFO_FOR_MISSION_ID;
         }
     }
-    obj->AddDeathRecipient(missionDiedListener_);
-    iterItem->second.emplace_back(obj);
+    wptr<IRemoteObject> weakObj = obj;
+    sptr<IRemoteObject> validatedObj = weakObj.promote();
+    if (validatedObj == nullptr) {
+        HILOGE("obj promotion failed, type: %{public}s", type.c_str());
+        return INVALID_PARAMETERS_ERR;
+    }
+    validatedObj->AddDeathRecipient(missionDiedListener_);
+    iterItem->second.emplace_back(validatedObj);
     HILOGI("RegisterOnListener end");
     return ERR_OK;
 }
