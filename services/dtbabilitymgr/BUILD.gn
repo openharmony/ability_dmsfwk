@@ -36,6 +36,7 @@ ohos_shared_library("distributed_ability_manager_svr") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     integer_overflow = true
     ubsan = true
@@ -72,6 +73,8 @@ ohos_shared_library("distributed_ability_manager_svr") {
     "-Wl,-z,relro",
     "-Wl,-z,now",
   ]
+
+  cflags_cc = [ "-Oz" ]
 
   deps = [
     "../../interfaces/innerkits/common:common_sdk",

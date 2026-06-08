@@ -34,6 +34,7 @@ ohos_executable("dms_sdk_demo") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
 

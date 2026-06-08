@@ -19,6 +19,7 @@ ohos_shared_library("distributed_extension_ability_native") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
 
@@ -62,7 +63,7 @@ ohos_shared_library("distributed_extension_ability_native") {
     "runtime_core:ani",
   ]
 
-  cflags_cc = []
+  cflags_cc = [ "-Oz" ]
 
   use_exceptions = true
   relative_install_dir = "extensionability"
@@ -79,6 +80,7 @@ ohos_shared_library("distributed_extension_sa") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
 
@@ -104,7 +106,7 @@ ohos_shared_library("distributed_extension_sa") {
     #"-ffunction-sections",
     #"-fno-unwind-tables",
     #"-fno-asynchronous-unwind-tables",
-    #"-Os",
+    "-Oz",
   ]
 
   use_exceptions = true

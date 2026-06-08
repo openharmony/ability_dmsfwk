@@ -37,8 +37,11 @@ ohos_shared_library("dtbcollab_av_stream_trans_provider") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
+
+  cflags_cc = [ "-Oz" ]
 
   deps = [
     "${dms_path}/common:distributed_sched_utils",
