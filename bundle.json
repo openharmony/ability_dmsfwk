@@ -95,7 +95,8 @@
           "storage_service",
           "distributed_notification_service",
           "i18n",
-          "hiappevent"
+          "hiappevent",
+          "taihe_ffi_gen"
         ],
         "third_party": []
       },
