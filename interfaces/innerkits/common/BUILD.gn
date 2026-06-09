@@ -43,6 +43,8 @@ config("dmsfwk_idl_config") {
 }
 
 ohos_source_set("dmsfwk_idl_source") {
+  branch_protector_ret = "pac_ret"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -66,6 +68,8 @@ ohos_source_set("dmsfwk_idl_source") {
 }
 
 ohos_source_set("dmsfwk_idl_head") {
+  branch_protector_ret = "pac_ret"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true

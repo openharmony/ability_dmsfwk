@@ -16,6 +16,8 @@ import("//build/ohos_var.gni")
 import("../dmsfwk.gni")
 
 ohos_shared_library("distributed_sched_utils") {
+  branch_protector_ret = "pac_ret"
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
