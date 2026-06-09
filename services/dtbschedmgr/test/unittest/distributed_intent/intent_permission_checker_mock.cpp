@@ -94,5 +94,21 @@ bool IntentPermissionChecker::CheckCustomPermission(const AppExecFwk::AbilityInf
     return IIntentPermissionChecker::permCheckerMock->CheckCustomPermission(targetAbility, dAccessToken);
 }
 
+int32_t IntentPermissionChecker::CheckCallerPermission(const AAFwk::Want& want, uint64_t accessToken)
+{
+    if (IIntentPermissionChecker::permCheckerMock == nullptr) {
+        return ERR_DI_SYSTEM_WORK_ABNORMALLY;
+    }
+    return IIntentPermissionChecker::permCheckerMock->CheckCallerPermission(want, accessToken);
+}
+
+bool IntentPermissionChecker::GetOsAccountData(IDistributedSched::AccountInfo& dmsAccountInfo)
+{
+    if (IIntentPermissionChecker::permCheckerMock == nullptr) {
+        return false;
+    }
+    return IIntentPermissionChecker::permCheckerMock->GetOsAccountData(dmsAccountInfo);
+}
+
 } // namespace DistributedSchedule
 } // namespace OHOS

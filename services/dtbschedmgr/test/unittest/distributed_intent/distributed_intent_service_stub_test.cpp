@@ -27,6 +27,7 @@
 #include "distributedsched_ipc_interface_code.h"
 #include "mock_remote_stub.h"
 #include "distributed_intent_error_code.h"
+#include "distributed_intent_provider_mock.h"
 #include "dtbschedmgr_device_info_storage_mock.h"
 #include "distributed_sched_permission.h"
 
@@ -50,8 +51,6 @@ const std::string ABILITY_NAME = "MainAbility";
 const std::string TEST_RESULT_MSG = "test_result_message";
 }
 
-static bool g_isFoundationCall = true;
-
 class DistributedIntentServiceStubTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -62,6 +61,7 @@ public:
 protected:
     sptr<DistributedIntentService> service_;
     std::shared_ptr<DtbschedmgrDeviceInfoStorageMock> deviceInfoMock_;
+    std::shared_ptr<MockIntentProvider> providerMock_;
 };
 
 void DistributedIntentServiceStubTest::SetUpTestCase()
@@ -80,13 +80,15 @@ void DistributedIntentServiceStubTest::SetUp()
     service_ = new DistributedIntentService();
     deviceInfoMock_ = std::make_shared<DtbschedmgrDeviceInfoStorageMock>();
     IDtbschedmgrDeviceInfoStorage::storageMock = deviceInfoMock_;
-    g_isFoundationCall = true;
+    providerMock_ = std::make_shared<MockIntentProvider>();
 }
 
 void DistributedIntentServiceStubTest::TearDown()
 {
     DTEST_LOG << "DistributedIntentServiceStubTest::TearDown" << std::endl;
+    DistributedIntentServiceStub::SetProvider(nullptr);
     IDtbschedmgrDeviceInfoStorage::storageMock = nullptr;
+    providerMock_ = nullptr;
 }
 
 void DistributedSchedPermission::RemoveRemoteObjectFromWant(
@@ -165,376 +167,6 @@ HWTEST_F(DistributedIntentServiceStubTest, OnRemoteRequest_CodeZero_004, TestSiz
 }
 
 /**
- * @tc.name: StartRemoteIntentInner_NotFoundation_001
- * @tc.desc: StartRemoteIntentInner when IsFoundationCall returns false
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_NotFoundation_001, TestSize.Level3)
-{
-    g_isFoundationCall = false;
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    want.Marshalling(data);
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: StartRemoteIntentInner_WantNull_002
- * @tc.desc: StartRemoteIntentInner when Want deserialization returns nullptr
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_WantNull_002, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: StartRemoteIntentInner_MissingCallerUid_003
- * @tc.desc: StartRemoteIntentInner when callerUid is missing after Want
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_MissingCallerUid_003, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    want.Marshalling(data);
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: StartRemoteIntentInner_MissingRequestCode_004
- * @tc.desc: StartRemoteIntentInner when requestCode is missing after callerUid
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_MissingRequestCode_004, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    want.Marshalling(data);
-    data.WriteInt32(TEST_CALLER_UID);
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: StartRemoteIntentInner_MissingAccessToken_005
- * @tc.desc: StartRemoteIntentInner when accessToken is missing after requestCode
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_MissingAccessToken_005, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    want.Marshalling(data);
-    data.WriteInt32(TEST_CALLER_UID);
-    data.WriteUint64(TEST_REQUEST_CODE);
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: StartRemoteIntentInner_MissingSpecifyTokenId_006
- * @tc.desc: StartRemoteIntentInner when specifyTokenId is missing after accessToken
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_MissingSpecifyTokenId_006, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    want.Marshalling(data);
-    data.WriteInt32(TEST_CALLER_UID);
-    data.WriteUint64(TEST_REQUEST_CODE);
-    data.WriteUint32(TEST_ACCESS_TOKEN);
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: StartRemoteIntentInner_NormalCallbackNull_007
- * @tc.desc: StartRemoteIntentInner normal path with callback nullptr
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_NormalCallbackNull_007, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    want.Marshalling(data);
-    data.WriteInt32(TEST_CALLER_UID);
-    data.WriteUint64(TEST_REQUEST_CODE);
-    data.WriteUint32(TEST_ACCESS_TOKEN);
-    data.WriteUint32(TEST_SPECIFY_TOKEN_ID);
-    data.WriteRemoteObject(nullptr);
-
-    EXPECT_CALL(*deviceInfoMock_, GetLocalDeviceId(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>("local_device_id"), Return(true)));
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: StartRemoteIntentInner_NormalCallbackNonNull_008
- * @tc.desc: StartRemoteIntentInner normal path with non-null callback
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_NormalCallbackNonNull_008, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    data.WriteParcelable(&want);
-    data.WriteInt32(TEST_CALLER_UID);
-    data.WriteUint64(TEST_REQUEST_CODE);
-    data.WriteUint32(TEST_ACCESS_TOKEN);
-    data.WriteUint32(TEST_SPECIFY_TOKEN_ID);
-    sptr<IRemoteObject> cb = new MockRemoteStub();
-    data.WriteRemoteObject(cb);
-
-    EXPECT_CALL(*deviceInfoMock_, GetLocalDeviceId(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>("local_device_id"), Return(true)));
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-
-/**
- * @tc.name: SendIntentResultInner_NotFoundation_001
- * @tc.desc: SendIntentResultInner when IsFoundationCall returns false
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_NotFoundation_001, TestSize.Level3)
-{
-    g_isFoundationCall = false;
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    want.Marshalling(data);
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: SendIntentResultInner_WantNull_002
- * @tc.desc: SendIntentResultInner when Want deserialization returns nullptr
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_WantNull_002, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: SendIntentResultInner_MissingCallerUid_003
- * @tc.desc: SendIntentResultInner when callerUid is missing after Want
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_MissingCallerUid_003, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    want.Marshalling(data);
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: SendIntentResultInner_MissingRequestCode_004
- * @tc.desc: SendIntentResultInner when requestCode is missing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_MissingRequestCode_004, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    want.Marshalling(data);
-    data.WriteInt32(TEST_CALLER_UID);
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: SendIntentResultInner_MissingAccessToken_005
- * @tc.desc: SendIntentResultInner when accessToken is missing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_MissingAccessToken_005, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    want.Marshalling(data);
-    data.WriteInt32(TEST_CALLER_UID);
-    data.WriteUint64(TEST_REQUEST_CODE);
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: SendIntentResultInner_MissingSpecifyTokenId_006
- * @tc.desc: SendIntentResultInner when specifyTokenId is missing
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_MissingSpecifyTokenId_006, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    want.Marshalling(data);
-    data.WriteInt32(TEST_CALLER_UID);
-    data.WriteUint64(TEST_REQUEST_CODE);
-    data.WriteUint32(TEST_ACCESS_TOKEN);
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: SendIntentResultInner_NormalWithMsg_007
- * @tc.desc: SendIntentResultInner normal path with non-empty resultMsg
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_NormalWithMsg_007, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    data.WriteParcelable(&want);
-    data.WriteInt32(TEST_CALLER_UID);
-    data.WriteUint64(TEST_REQUEST_CODE);
-    data.WriteUint32(TEST_ACCESS_TOKEN);
-    data.WriteUint32(TEST_SPECIFY_TOKEN_ID);
-    data.WriteString(TEST_RESULT_MSG);
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: SendIntentResultInner_NormalEmptyMsg_008
- * @tc.desc: SendIntentResultInner normal path with empty resultMsg
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_NormalEmptyMsg_008, TestSize.Level3)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
-    OHOS::AAFwk::Want want;
-    data.WriteParcelable(&want);
-    data.WriteInt32(TEST_CALLER_UID);
-    data.WriteUint64(TEST_REQUEST_CODE);
-    data.WriteUint32(TEST_ACCESS_TOKEN);
-    data.WriteUint32(TEST_SPECIFY_TOKEN_ID);
-    data.WriteString("");
-
-    EXPECT_EQ(service_->OnRemoteRequest(
-        static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-
-/**
  * @tc.name: RequestHandlers_RegisteredCorrectly_001
  * @tc.desc: Verify requestHandlers_ has exactly 2 entries for START_REMOTE_INTENT and SEND_INTENT_RESULT
  * @tc.type: FUNC
@@ -549,6 +181,209 @@ HWTEST_F(DistributedIntentServiceStubTest, RequestHandlers_RegisteredCorrectly_0
         static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT)),
         service_->requestHandlers_.end());
     EXPECT_EQ(service_->requestHandlers_.size(), 2u);
+}
+
+/**
+ * @tc.name: StartRemoteIntentInner_ProviderNull_009
+ * @tc.desc: StartRemoteIntentInner when provider is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_ProviderNull_009, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
+
+    EXPECT_EQ(service_->StartRemoteIntentInner(data, reply), ERR_DI_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: StartRemoteIntentInner_NotFoundationWithProvider_010
+ * @tc.desc: StartRemoteIntentInner when provider is set but IsFoundationCall returns false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_NotFoundationWithProvider_010, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(providerMock_.get());
+    EXPECT_CALL(*providerMock_, IsFoundationCall())
+        .WillOnce(Return(false));
+
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
+    OHOS::AAFwk::Want want;
+    want.Marshalling(data);
+
+    EXPECT_EQ(service_->StartRemoteIntentInner(data, reply), ERR_DI_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: StartRemoteIntentInner_WantNullWithProvider_011
+ * @tc.desc: StartRemoteIntentInner when Want deserialization returns nullptr with provider set
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_WantNullWithProvider_011, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(providerMock_.get());
+    EXPECT_CALL(*providerMock_, IsFoundationCall())
+        .WillOnce(Return(true));
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_EQ(service_->StartRemoteIntentInner(data, reply), ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: StartRemoteIntentInner_CallbackNullWithProvider_012
+ * @tc.desc: StartRemoteIntentInner when resultCallback is nullptr with provider set
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_CallbackNullWithProvider_012, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(providerMock_.get());
+    EXPECT_CALL(*providerMock_, IsFoundationCall())
+        .WillOnce(Return(true));
+    EXPECT_CALL(*providerMock_, RemoveRemoteObjectFromWant(_))
+        .Times(1);
+
+    MessageParcel data;
+    MessageParcel reply;
+    OHOS::AAFwk::Want want;
+    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    data.WriteParcelable(&want);
+    data.WriteString("test_module");
+    data.WriteInt32(TEST_CALLER_UID);
+    data.WriteUint64(TEST_REQUEST_CODE);
+    data.WriteUint32(TEST_ACCESS_TOKEN);
+    data.WriteUint32(TEST_SPECIFY_TOKEN_ID);
+    data.WriteRemoteObject(nullptr);
+
+    EXPECT_EQ(service_->StartRemoteIntentInner(data, reply), ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: StartRemoteIntentInner_FullPathWithProvider_013
+ * @tc.desc: StartRemoteIntentInner full path with all valid params and provider set
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_FullPathWithProvider_013, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(providerMock_.get());
+    EXPECT_CALL(*providerMock_, IsFoundationCall())
+        .WillOnce(Return(true));
+    EXPECT_CALL(*providerMock_, RemoveRemoteObjectFromWant(_))
+        .Times(1);
+    EXPECT_CALL(*providerMock_, MarkUriPermission(_, TEST_ACCESS_TOKEN))
+        .Times(1);
+
+    MessageParcel data;
+    MessageParcel reply;
+    OHOS::AAFwk::Want want;
+    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    data.WriteParcelable(&want);
+    data.WriteString("test_module");
+    data.WriteInt32(TEST_CALLER_UID);
+    data.WriteUint64(TEST_REQUEST_CODE);
+    data.WriteUint32(TEST_ACCESS_TOKEN);
+    data.WriteUint32(TEST_SPECIFY_TOKEN_ID);
+    sptr<IRemoteObject> cb = new MockRemoteStub();
+    data.WriteRemoteObject(cb);
+
+    int32_t result = service_->StartRemoteIntentInner(data, reply);
+    EXPECT_NE(result, ERR_DI_PERMISSION_DENIED);
+    EXPECT_NE(result, ERR_NULL_OBJECT);
+    EXPECT_NE(result, ERR_FLATTEN_OBJECT);
+}
+
+/**
+ * @tc.name: SendIntentResultInner_ProviderNull_009
+ * @tc.desc: SendIntentResultInner when provider is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_ProviderNull_009, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
+
+    EXPECT_EQ(service_->SendIntentResultInner(data, reply), ERR_DI_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: SendIntentResultInner_NotFoundationWithProvider_010
+ * @tc.desc: SendIntentResultInner when provider is set but IsFoundationCall returns false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_NotFoundationWithProvider_010, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(providerMock_.get());
+    EXPECT_CALL(*providerMock_, IsFoundationCall())
+        .WillOnce(Return(false));
+
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
+    OHOS::AAFwk::Want want;
+    want.Marshalling(data);
+
+    EXPECT_EQ(service_->SendIntentResultInner(data, reply), ERR_DI_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: SendIntentResultInner_WantNullWithProvider_011
+ * @tc.desc: SendIntentResultInner when Want deserialization returns nullptr with provider set
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_WantNullWithProvider_011, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(providerMock_.get());
+    EXPECT_CALL(*providerMock_, IsFoundationCall())
+        .WillOnce(Return(true));
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_EQ(service_->SendIntentResultInner(data, reply), ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: SendIntentResultInner_FullPathWithProvider_012
+ * @tc.desc: SendIntentResultInner full path with all valid params and provider set
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_FullPathWithProvider_012, TestSize.Level3)
+{
+    DistributedIntentServiceStub::SetProvider(providerMock_.get());
+    EXPECT_CALL(*providerMock_, IsFoundationCall())
+        .WillOnce(Return(true));
+
+    MessageParcel data;
+    MessageParcel reply;
+    OHOS::AAFwk::Want want;
+    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    data.WriteParcelable(&want);
+    data.WriteInt32(TEST_CALLER_UID);
+    data.WriteUint64(TEST_REQUEST_CODE);
+    data.WriteUint32(TEST_ACCESS_TOKEN);
+    data.WriteUint32(TEST_SPECIFY_TOKEN_ID);
+    data.WriteString(TEST_RESULT_MSG);
+
+    int32_t result = service_->SendIntentResultInner(data, reply);
+    EXPECT_NE(result, ERR_DI_PERMISSION_DENIED);
+    EXPECT_NE(result, ERR_NULL_OBJECT);
+    EXPECT_NE(result, ERR_FLATTEN_OBJECT);
 }
 
 } // namespace DistributedSchedule

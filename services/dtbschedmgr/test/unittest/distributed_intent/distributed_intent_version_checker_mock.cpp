@@ -12,24 +12,20 @@
  * limitations under the License.
  */
 
-#include "ability_manager_client_mock.h"
-#include "ability_manager_client.h"
-#include "single_instance.h"
+#include "distributed_intent_version_checker_mock.h"
+#include "distributed_intent_version_checker.h"
 
 namespace OHOS {
-namespace AAFwk {
+namespace DistributedSchedule {
 
-const int ERR_FAIL = -1;
-
-ErrCode AbilityManagerClient::ExecuteIntentForDistributed(const Want& want,
-    const std::string& srcDeviceId, uint64_t requestCode, uint64_t dAccessToken)
+int32_t DistributedIntentVersionChecker::CheckRemoteDistributedIntentSupport(
+    const std::string& remoteDeviceId)
 {
-    if (IAbilityManagerClient::abilityMock == nullptr) {
-        return ERR_FAIL;
+    if (IDistributedIntentVersionChecker::versionCheckerMock == nullptr) {
+        return ERR_DI_VERSION_NOT_COMPATIBLE;
     }
-    return IAbilityManagerClient::abilityMock->ExecuteIntentForDistributed(want,
-        srcDeviceId, requestCode, dAccessToken);
+    return IDistributedIntentVersionChecker::versionCheckerMock->CheckRemoteDistributedIntentSupport(remoteDeviceId);
 }
 
-} // namespace AAFwk
+} // namespace DistributedSchedule
 } // namespace OHOS

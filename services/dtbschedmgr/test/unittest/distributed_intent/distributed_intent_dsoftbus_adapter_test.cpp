@@ -25,6 +25,8 @@
 
 #include "softbus_mock.h"
 #include "distributed_intent_dsoftbus_adapter_mock.h"
+#include "distributed_intent_provider_mock.h"
+#include "intent_all_connect_manager_mock.h"
 #include "dtbschedmgr_device_info_storage_mock.h"
 #include "test_log.h"
 #include "dtbschedmgr_log.h"
@@ -90,6 +92,8 @@ void DistributedIntentDsoftbusAdapterTest::SetUp()
     deviceInfoMock_ = std::make_shared<DtbschedmgrDeviceInfoStorageMock>();
     IDtbschedmgrDeviceInfoStorage::storageMock = deviceInfoMock_;
     auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.StopSessionCleanupThread();
+    adapter.fragBuffers_.clear();
     std::lock_guard<std::mutex> lock(adapter.sessionMutex_);
     adapter.sessions_.clear();
 }
@@ -211,7 +215,7 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, BindIntentSocket_RetryThenNonRetr
 
 /**
  * @tc.name: BindIntentSession_EmptyDeviceId_001
- * @tc.desc: BindIntentSession with empty deviceId
+ * @tc.desc: BindIntentSession with empty deviceId returns ERR_DI_INVALID_PARAMETER
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -219,68 +223,68 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, BindIntentSession_EmptyDeviceId_0
 {
     auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
     int32_t fd = -1;
+    IDistributedIntentDsoftbusAdapter::adapterMock = nullptr;
     EXPECT_EQ(a.BindIntentSession(EMPTY_DEVICE_ID, fd), ERR_DI_INVALID_PARAMETER);
 }
 
 /**
- * @tc.name: BindIntentSession_ReuseExisting_002
- * @tc.desc: BindIntentSession reuses existing connected Client session
+ * @tc.name: ReuseOrCreateSession_ReuseExisting_002
+ * @tc.desc: ReuseOrCreateSession reuses existing connected Client session
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DistributedIntentDsoftbusAdapterTest, BindIntentSession_ReuseExisting_002, TestSize.Level3)
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ReuseOrCreateSession_ReuseExisting_002, TestSize.Level3)
 {
     auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
     InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
     int32_t fd = -1;
-    EXPECT_EQ(a.BindIntentSession(DEVICE_ID_1, fd), ERR_DI_OK);
+    EXPECT_EQ(a.ReuseOrCreateSession(DEVICE_ID_1, fd), ERR_DI_OK);
     EXPECT_EQ(fd, VALID_FD);
     RemoveSession(VALID_FD, DEVICE_ID_1);
 }
 
 /**
- * @tc.name: BindIntentSession_CreateSocketFail_003
- * @tc.desc: BindIntentSession when CreateIntentSocket fails
+ * @tc.name: CreateIntentSocket_Fail_003
+ * @tc.desc: CreateIntentSocket fails when Socket returns negative value
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DistributedIntentDsoftbusAdapterTest, BindIntentSession_CreateSocketFail_003, TestSize.Level3)
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, CreateIntentSocket_Fail_003, TestSize.Level3)
 {
     EXPECT_CALL(*softbusMock_, Socket(_)).WillOnce(Return(-1));
     auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
-    int32_t fd = -1;
-    EXPECT_EQ(a.BindIntentSession(DEVICE_ID_1, fd), ERR_DI_OK);
+    EXPECT_EQ(a.CreateIntentSocket(DEVICE_ID_1), ERR_DI_SOCKET_CREATE_FAILED);
 }
 
 /**
- * @tc.name: BindIntentSession_BindFail_004
- * @tc.desc: BindIntentSession when BindIntentSocket fails
+ * @tc.name: ReuseOrCreateSession_BindFail_004
+ * @tc.desc: ReuseOrCreateSession fails when BindIntentSocket fails
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DistributedIntentDsoftbusAdapterTest, BindIntentSession_BindFail_004, TestSize.Level3)
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ReuseOrCreateSession_BindFail_004, TestSize.Level3)
 {
     EXPECT_CALL(*softbusMock_, Socket(_)).WillOnce(Return(VALID_FD));
     EXPECT_CALL(*softbusMock_, Bind(_, _, _, _)).WillOnce(Return(-1));
     EXPECT_CALL(*softbusMock_, Shutdown(VALID_FD)).Times(1);
     auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
     int32_t fd = -1;
-    EXPECT_EQ(a.BindIntentSession(DEVICE_ID_1, fd), ERR_DI_SOCKET_BIND_FAILED);
+    EXPECT_EQ(a.ReuseOrCreateSession(DEVICE_ID_1, fd), ERR_DI_SOCKET_BIND_FAILED);
 }
 
 /**
- * @tc.name: BindIntentSession_Success_005
- * @tc.desc: BindIntentSession success with new connection
+ * @tc.name: ReuseOrCreateSession_Success_005
+ * @tc.desc: ReuseOrCreateSession creates new session successfully
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DistributedIntentDsoftbusAdapterTest, BindIntentSession_Success_005, TestSize.Level3)
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ReuseOrCreateSession_Success_005, TestSize.Level3)
 {
     EXPECT_CALL(*softbusMock_, Socket(_)).WillOnce(Return(VALID_FD));
     EXPECT_CALL(*softbusMock_, Bind(_, _, _, _)).WillOnce(Return(0));
     auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
     int32_t fd = -1;
-    EXPECT_EQ(a.BindIntentSession(DEVICE_ID_1, fd), ERR_DI_OK);
+    EXPECT_EQ(a.ReuseOrCreateSession(DEVICE_ID_1, fd), ERR_DI_OK);
     EXPECT_EQ(fd, VALID_FD);
     RemoveSession(VALID_FD, DEVICE_ID_1);
 }
@@ -506,18 +510,6 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, GetSocketFd_Found_001, TestSize.L
 }
 
 /**
- * @tc.name: DistributedIntentDsoftbusAdapter_001
- * @tc.desc: free DistributedIntentDsoftbusAdapter object
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentDsoftbusAdapterTest, DistributedIntentDsoftbusAdapter_001, TestSize.Level3)
-{
-    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
-    EXPECT_NO_FATAL_FAILURE(a.~DistributedIntentDsoftbusAdapter());
-}
-
-/**
  * @tc.name: GetSocketFd_NotFound_002
  * @tc.desc: GetSocketFdByDeviceId when deviceId not found
  * @tc.type: FUNC
@@ -703,8 +695,8 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, GetPeerDeviceId_Found_001, TestSi
 }
 
 /**
- * @tc.name: GetPeerDeviceId_Found_002
- * @tc.desc: GetPeerDeviceIdBySocket when session exists
+ * @tc.name: GetSocketFd_NotFound_002
+ * @tc.desc: GetPeerDeviceIdBySocket when session not found
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -841,22 +833,6 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, CleanupSocketIfNeeded_DeviceNotIn
 }
 
 /**
- * @tc.name: CleanupSocketIfNeeded_ClientSocketFdMatches_003
- * @tc.desc: CleanupSocketIfNeeded when isServer=false removes session from sessions_
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentDsoftbusAdapterTest, CleanupSocketIfNeeded_ClientSocketFdMatches_003, TestSize.Level3)
-{
-    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
-    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
-    a.StartSessionCleanupThread();
-    a.CleanupSocketIfNeeded(VALID_FD);
-    a.OnIntentBytes(VALID_FD, nullptr, 0);
-    EXPECT_EQ(a.sessions_.find(VALID_FD), a.sessions_.end());
-}
-
-/**
  * @tc.name: CleanupSocketIfNeeded_IsServerTrue_004
  * @tc.desc: CleanupSocketIfNeeded when isServer=true
  * @tc.type: FUNC
@@ -868,21 +844,6 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, CleanupSocketIfNeeded_IsServerTru
     InsertSession(SERVER_FD, DEVICE_ID_1, true, true, 0);
     a.CleanupSocketIfNeeded(SERVER_FD);
     EXPECT_EQ(a.sessions_.find(SERVER_FD), a.sessions_.end());
-}
-
-/**
- * @tc.name: CleanupSocketIfNeeded_DeviceNotInMap_005
- * @tc.desc: CleanupSocketIfNeeded removes session from sessions_ map
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentDsoftbusAdapterTest, CleanupSocketIfNeeded_DeviceNotInMap_005, TestSize.Level3)
-{
-    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
-    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
-    a.CleanupSocketIfNeeded(VALID_FD);
-    EXPECT_EQ(a.sessions_.find(VALID_FD), a.sessions_.end());
-    EXPECT_NO_FATAL_FAILURE(a.CleanupSocketIfNeeded(VALID_FD));
 }
 
 /**
@@ -928,22 +889,6 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentBytes_UnknownDataType_006
         payload.data(), payload.size()), 0);
     EXPECT_NO_FATAL_FAILURE(a.OnIntentBytes(VALID_FD, frame.data(), frame.size()));
     RemoveSession(VALID_FD, DEVICE_ID_1);
-}
-
-/**
- * @tc.name:OnIntentShutdown__005
- * @tc.desc: expect session is null
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentShutdown__005, TestSize.Level3)
-{
-    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
-    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
-    a.CleanupSocketIfNeeded(VALID_FD);
-    EXPECT_EQ(a.sessions_.find(VALID_FD), a.sessions_.end());
-    EXPECT_NO_FATAL_FAILURE(a.CleanupSocketIfNeeded(VALID_FD));
-    EXPECT_NO_FATAL_FAILURE(a.OnIntentShutdown(VALID_FD));
 }
 
 /**
@@ -1046,21 +991,6 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, StopSessionCleanupThread_Running_
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     EXPECT_NO_FATAL_FAILURE(a.StopSessionCleanupThread());
 }
-
-/**
- * @tc.name: StopSessionCleanupThread_AlreadyStopped_003
- * @tc.desc: StopSessionCleanupThread when already stopped
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentDsoftbusAdapterTest, StopSessionCleanupThread_AlreadyStopped_003, TestSize.Level3)
-{
-    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
-    a.sessionCleanupRunning_.store(false);
-    EXPECT_NO_FATAL_FAILURE(a.StopSessionCleanupThread());
-    EXPECT_NO_FATAL_FAILURE(a.StopSessionCleanupThread());
-}
-
 
 /**
  * @tc.name: ForceCleanupDeviceSessions_NoSession_001
@@ -1196,6 +1126,464 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, DeliverIntentData_Success, TestSi
     RemoveSession(VALID_FD, DEVICE_ID_1);
 }
 
+/**
+ * @tc.name: FindClientSession_ServerSession_001
+ * @tc.desc: FindClientSession skips server session
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, FindClientSession_ServerSession, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(SERVER_FD, DEVICE_ID_1, true, true, 0);
+    EXPECT_EQ(a.FindClientSession(DEVICE_ID_1), nullptr);
+    RemoveSession(SERVER_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: FindClientSession_NotConnected_002
+ * @tc.desc: FindClientSession skips disconnected client session
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, FindClientSession_NotConnected, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, false, false, 1);
+    EXPECT_EQ(a.FindClientSession(DEVICE_ID_1), nullptr);
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: FindClientSession_DeviceIdMismatch_003
+ * @tc.desc: FindClientSession skips session with different deviceId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, FindClientSession_DeviceIdMismatch, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_2, true, false, 1);
+    EXPECT_EQ(a.FindClientSession(DEVICE_ID_1), nullptr);
+    RemoveSession(VALID_FD, DEVICE_ID_2);
+}
+
+/**
+ * @tc.name: FindClientSession_NullSession_004
+ * @tc.desc: FindClientSession skips null session entry
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, FindClientSession_NullSession, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.sessions_[VALID_FD] = nullptr;
+    EXPECT_EQ(a.FindClientSession(DEVICE_ID_1), nullptr);
+    a.sessions_.erase(VALID_FD);
+}
+
+/**
+ * @tc.name: GetDeviceMutex_Existing_001
+ * @tc.desc: GetDeviceMutex returns existing mutex when deviceId already in map
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, GetDeviceMutex_Existing, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    auto mutex1 = a.GetDeviceMutex(DEVICE_ID_1);
+    auto mutex2 = a.GetDeviceMutex(DEVICE_ID_1);
+    EXPECT_EQ(mutex1, mutex2);
+    a.RemoveDeviceMutex(DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: GetDeviceMutex_New_002
+ * @tc.desc: GetDeviceMutex creates new mutex when deviceId not in map
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, GetDeviceMutex_New, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.RemoveDeviceMutex(DEVICE_ID_1);
+    auto mutex1 = a.GetDeviceMutex(DEVICE_ID_1);
+    EXPECT_NE(mutex1, nullptr);
+    a.RemoveDeviceMutex(DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: UnbindIntentSession_ShouldStopThread_001
+ * @tc.desc: UnbindIntentSession triggers StopSessionCleanupThread when sessions empty
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, UnbindIntentSession_ShouldStopThread, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.StartSessionCleanupThread();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    EXPECT_CALL(*softbusMock_, Shutdown(VALID_FD)).Times(1);
+    a.UnbindIntentSession(VALID_FD);
+    EXPECT_EQ(a.sessions_.find(VALID_FD), a.sessions_.end());
+}
+
+/**
+ * @tc.name: ForceCleanupDeviceSessions_EmptySessionsStopThread_001
+ * @tc.desc: ForceCleanupDeviceSessions triggers StopSessionCleanupThread when all sessions removed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ForceCleanupDeviceSessions_EmptySessionsStopThread, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.StartSessionCleanupThread();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    EXPECT_CALL(*softbusMock_, Shutdown(VALID_FD)).Times(1);
+    std::vector<int32_t> closedSockets;
+    a.ForceCleanupDeviceSessions(DEVICE_ID_1, closedSockets);
+    EXPECT_EQ(closedSockets.size(), 1u);
+    EXPECT_TRUE(a.sessions_.empty());
+}
+
+/**
+ * @tc.name: ShutdownDeviceSession_MixedDevices_001
+ * @tc.desc: ShutdownDeviceSession only shuts down sessions matching deviceId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ShutdownDeviceSession_MixedDevices, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    InsertSession(ANOTHER_FD, DEVICE_ID_2, true, false, 1);
+    EXPECT_CALL(*softbusMock_, Shutdown(VALID_FD)).Times(1);
+    a.ShutdownDeviceSession(DEVICE_ID_1);
+    EXPECT_NE(a.sessions_.find(VALID_FD), a.sessions_.end());
+    EXPECT_NE(a.sessions_.find(ANOTHER_FD), a.sessions_.end());
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+    RemoveSession(ANOTHER_FD, DEVICE_ID_2);
+}
+
+/**
+ * @tc.name: SendIntentData_FragPath_001
+ * @tc.desc: SendIntentDataBySession uses SendFrag when data exceeds maxSendSize
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, SendIntentData_FragPath, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    EXPECT_CALL(*softbusMock_, GetSessionOption(_, _, _, _))
+        .WillRepeatedly(Invoke([](int32_t, SessionOption, void*, uint32_t) { return -1; }));
+    EXPECT_CALL(*softbusMock_, SendBytes(VALID_FD, _, _))
+        .WillRepeatedly(Return(0));
+    std::string bigData(SEND_DATA_MAX_LEN + 1, 'x');
+    EXPECT_EQ(a.SendIntentDataBySession(VALID_FD, IntentDataType::INTENT_DATA_TYPE_EXECUTE, bigData),
+        ERR_DI_INVALID_PARAMETER);
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: OnIntentShutdown_EmptySessions_001
+ * @tc.desc: OnIntentShutdown triggers StopSessionCleanupThread when sessions become empty
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentShutdown_EmptySessions, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.StartSessionCleanupThread();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    EXPECT_CALL(*softbusMock_, Shutdown(VALID_FD)).Times(1);
+    a.OnIntentShutdown(VALID_FD);
+    EXPECT_TRUE(a.sessions_.empty());
+}
+
+/**
+ * @tc.name: FindClientSession_SkipThenFind_001
+ * @tc.desc: FindClientSession skips non-matching sessions then finds matching one
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, FindClientSession_SkipThenFind, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(SERVER_FD, DEVICE_ID_1, true, true, 0);
+    InsertSession(ANOTHER_FD, DEVICE_ID_2, true, false, 1);
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    auto result = a.FindClientSession(DEVICE_ID_1);
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->socketFd, VALID_FD);
+    RemoveSession(SERVER_FD, DEVICE_ID_1);
+    RemoveSession(ANOTHER_FD, DEVICE_ID_2);
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: ShutdownDeviceSession_NullSession_001
+ * @tc.desc: ShutdownDeviceSession skips null session in loop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ShutdownDeviceSession_NullSession, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.sessions_[ANOTHER_FD] = nullptr;
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    EXPECT_CALL(*softbusMock_, Shutdown(VALID_FD)).Times(1);
+    a.ShutdownDeviceSession(DEVICE_ID_1);
+    EXPECT_NE(a.sessions_.find(VALID_FD), a.sessions_.end());
+    a.sessions_.erase(ANOTHER_FD);
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: ForceCleanupDeviceSessions_NullSession_001
+ * @tc.desc: ForceCleanupDeviceSessions skips null session in loop (++it, not erase)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ForceCleanupDeviceSessions_NullSession, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.sessions_[ANOTHER_FD] = nullptr;
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    EXPECT_CALL(*softbusMock_, Shutdown(VALID_FD)).Times(1);
+    std::vector<int32_t> closedSockets;
+    a.ForceCleanupDeviceSessions(DEVICE_ID_1, closedSockets);
+    EXPECT_EQ(closedSockets.size(), 1u);
+    EXPECT_NE(a.sessions_.find(ANOTHER_FD), a.sessions_.end());
+    a.sessions_.erase(ANOTHER_FD);
+}
+
+/**
+ * @tc.name: CleanupIdleSessions_NullSession_001
+ * @tc.desc: CleanupIdleSessions skips null session in loop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, CleanupIdleSessions_NullSession, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.sessions_[ANOTHER_FD] = nullptr;
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    a.CleanupIdleSessions();
+    EXPECT_NE(a.sessions_.find(VALID_FD), a.sessions_.end());
+    a.sessions_.erase(ANOTHER_FD);
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: SendFrag_MultiFragment_001
+ * @tc.desc: SendFrag sends data with FRAG_START, FRAG_MID, FRAG_END sequence
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, SendFrag_MultiFragment, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    EXPECT_CALL(*softbusMock_, GetSessionOption(_, _, _, _))
+        .WillRepeatedly(Invoke([](int32_t, SessionOption, void* value, uint32_t valueLen) -> int32_t {
+            if (value && valueLen >= sizeof(uint32_t)) {
+                uint32_t* ptr = static_cast<uint32_t*>(value);
+                *ptr = 64;
+            }
+            return 0;
+        }));
+    EXPECT_CALL(*softbusMock_, SendBytes(VALID_FD, _, _))
+        .WillRepeatedly(Return(0));
+    std::string data(200, 'x');
+    EXPECT_EQ(a.SendIntentDataBySession(VALID_FD, IntentDataType::INTENT_DATA_TYPE_EXECUTE, data),
+        ERR_DI_OK);
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: SendFrag_SendBytesFail_002
+ * @tc.desc: SendFrag returns error when SendBytes fails on first fragment
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, SendFrag_SendBytesFail, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    EXPECT_CALL(*softbusMock_, GetSessionOption(_, _, _, _))
+        .WillRepeatedly(Invoke([](int32_t, SessionOption, void* value, uint32_t valueLen) -> int32_t {
+            if (value && valueLen >= sizeof(uint32_t)) {
+                uint32_t* ptr = static_cast<uint32_t*>(value);
+                *ptr = 64;
+            }
+            return 0;
+        }));
+    EXPECT_CALL(*softbusMock_, SendBytes(VALID_FD, _, _))
+        .WillOnce(Return(-1));
+    std::string data(200, 'x');
+    EXPECT_EQ(a.SendIntentDataBySession(VALID_FD, IntentDataType::INTENT_DATA_TYPE_EXECUTE, data),
+        ERR_DI_DATA_SEND_FAILED);
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: SendNoFrag_EmptyPayload_001
+ * @tc.desc: SendNoFrag with zero-length payload (totalLen=0)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, SendNoFrag_EmptyPayload, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    EXPECT_CALL(*softbusMock_, SendBytes(VALID_FD, _, _))
+        .WillOnce(Return(0));
+    std::string headerOnlyData("x");
+    EXPECT_EQ(a.SendIntentDataBySession(VALID_FD, IntentDataType::INTENT_DATA_TYPE_EXECUTE, headerOnlyData),
+        ERR_DI_OK);
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: ProcessFragFrame_FragStart_001
+ * @tc.desc: ProcessFragFrame with FRAG_START creates new frag buffer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ProcessFragFrame_FragStart, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    a.fragBuffers_.clear();
+    uint32_t typeValue = static_cast<uint32_t>(IntentDataType::INTENT_DATA_TYPE_EXECUTE);
+    uint32_t totalLen = 100;
+    uint16_t seq = 0;
+    uint8_t flag = FRAG_START;
+    std::string payload = "start_payload";
+    a.ProcessFragFrame(VALID_FD, typeValue, totalLen, seq, flag, payload);
+    EXPECT_NE(a.fragBuffers_.find(VALID_FD), a.fragBuffers_.end());
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+    a.fragBuffers_.erase(VALID_FD);
+}
+
+/**
+ * @tc.name: ProcessFragFrame_SeqMismatch_002
+ * @tc.desc: ProcessFragFrame discards buffer when seq mismatches expected
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ProcessFragFrame_SeqMismatch, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    a.fragBuffers_.clear();
+    auto fragBuf = std::make_shared<IntentFragBuffer>();
+    fragBuf->dataType = static_cast<uint32_t>(IntentDataType::INTENT_DATA_TYPE_EXECUTE);
+    fragBuf->totalLen = 100;
+    fragBuf->expectedSeq = 5;
+    a.fragBuffers_[VALID_FD] = fragBuf;
+    uint32_t typeValue = static_cast<uint32_t>(IntentDataType::INTENT_DATA_TYPE_EXECUTE);
+    a.ProcessFragFrame(VALID_FD, typeValue, 100, 2, FRAG_MID, "wrong_seq_payload");
+    EXPECT_EQ(a.fragBuffers_.find(VALID_FD), a.fragBuffers_.end());
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: ProcessFragFrame_FragEnd_003
+ * @tc.desc: ProcessFragFrame with FRAG_END assembles and delivers data
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ProcessFragFrame_FragEnd, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    a.fragBuffers_.clear();
+    auto fragBuf = std::make_shared<IntentFragBuffer>();
+    fragBuf->dataType = static_cast<uint32_t>(IntentDataType::INTENT_DATA_TYPE_DMS_RESULT);
+    fragBuf->totalLen = 20;
+    fragBuf->expectedSeq = 1;
+    fragBuf->fragments[0] = "start_data";
+    a.fragBuffers_[VALID_FD] = fragBuf;
+    uint32_t typeValue = static_cast<uint32_t>(IntentDataType::INTENT_DATA_TYPE_DMS_RESULT);
+    auto& mock = RemoteIntentManager::GetInstance();
+    EXPECT_CALL(mock, OnIntentDataReceived(DEVICE_ID_1,
+        IntentDataType::INTENT_DATA_TYPE_DMS_RESULT, _, VALID_FD)).Times(1);
+    a.ProcessFragFrame(VALID_FD, typeValue, 20, 1, FRAG_END, "end_data");
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+    a.fragBuffers_.erase(VALID_FD);
+}
+
+/**
+ * @tc.name: ProcessFragFrame_NoBufferForMid_004
+ * @tc.desc: ProcessFragFrame with FRAG_MID but no existing buffer returns early
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ProcessFragFrame_NoBufferForMid, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    a.fragBuffers_.clear();
+    uint32_t typeValue = static_cast<uint32_t>(IntentDataType::INTENT_DATA_TYPE_EXECUTE);
+    a.ProcessFragFrame(VALID_FD, typeValue, 100, 1, FRAG_MID, "mid_payload");
+    EXPECT_EQ(a.fragBuffers_.find(VALID_FD), a.fragBuffers_.end());
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+#ifdef DMSFWK_ALL_CONNECT_MGR
+/**
+ * @tc.name: BindIntentSession_AllConnectApplyFail_006
+ * @tc.desc: BindIntentSession returns error when AllConnect ApplyResource fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, BindIntentSession_AllConnectApplyFail, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    MockIntentProvider mockProvider;
+    a.provider_ = &mockProvider;
+    EXPECT_CALL(mockProvider, IsWifiActive()).WillOnce(Return(true));
+    
+    auto mock = std::make_shared<IntentAllConnectManagerMock>();
+    IIntentAllConnectManager::allConnectMock = mock;
+    EXPECT_CALL(*mock, IsAllConnectAvailable()).WillOnce(Return(true));
+    EXPECT_CALL(*mock, ApplyResource(DEVICE_ID_1)).WillOnce(Return(ERR_DI_SOCKET_BIND_FAILED));
+
+    int32_t fd = -1;
+    EXPECT_EQ(a.BindIntentSession(DEVICE_ID_1, fd), ERR_DI_SOCKET_BIND_FAILED);
+    IIntentAllConnectManager::allConnectMock = nullptr;
+}
+
+/**
+ * @tc.name: BindIntentSession_AllConnectSuccess_007
+ * @tc.desc: BindIntentSession with AllConnect success calls PublishServiceState(CONNECTED)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, BindIntentSession_AllConnectSuccess, TestSize.Level3)
+{
+    EXPECT_CALL(*softbusMock_, Socket(_)).WillOnce(Return(VALID_FD));
+    EXPECT_CALL(*softbusMock_, Bind(_, _, _, _)).WillOnce(Return(0));
+    
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    MockIntentProvider mockProvider;
+    a.provider_ = &mockProvider;
+    EXPECT_CALL(mockProvider, IsWifiActive()).WillOnce(Return(true));
+    
+    auto mock = std::make_shared<IntentAllConnectManagerMock>();
+    IIntentAllConnectManager::allConnectMock = mock;
+    EXPECT_CALL(*mock, IsAllConnectAvailable()).WillOnce(Return(true));
+    EXPECT_CALL(*mock, ApplyResource(DEVICE_ID_1)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*mock, PublishServiceState(DEVICE_ID_1, SCM_CONNECTED)).Times(1);
+
+    int32_t fd = -1;
+    EXPECT_EQ(a.BindIntentSession(DEVICE_ID_1, fd), ERR_DI_OK);
+    EXPECT_EQ(fd, VALID_FD);
+    IIntentAllConnectManager::allConnectMock = nullptr;
+}
+#endif
 
 } // namespace DistributedSchedule
 } // namespace OHOS

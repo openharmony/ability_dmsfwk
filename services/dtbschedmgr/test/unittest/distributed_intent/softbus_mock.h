@@ -31,17 +31,21 @@ public:
         const ISocketListener* listener) = 0;
     virtual int32_t SendBytes(int32_t socket, const void* data, uint32_t len) = 0;
     virtual void Shutdown(int32_t socket) = 0;
+    virtual int32_t GetSessionOption(int32_t socket, SessionOption option,
+        void* value, uint32_t valueLen) = 0;
 public:
     static inline std::shared_ptr<ISoftbusInterface> softbusMock = nullptr;
 };
 
 class SoftbusMock : public ISoftbusInterface {
 public:
-    MOCK_METHOD1(Socket, int32_t(SocketInfo info));
-    MOCK_METHOD4(Bind, int32_t(int32_t socket, const QosTV qos[], uint32_t qosCount,
-        const ISocketListener* listener));
-    MOCK_METHOD3(SendBytes, int32_t(int32_t socket, const void* data, uint32_t len));
-    MOCK_METHOD1(Shutdown, void(int32_t socket));
+    MOCK_METHOD(int32_t, Socket, (SocketInfo info), (override));
+    MOCK_METHOD(int32_t, Bind, (int32_t socket, const QosTV qos[], uint32_t qosCount,
+        const ISocketListener* listener), (override));
+    MOCK_METHOD(int32_t, SendBytes, (int32_t socket, const void* data, uint32_t len), (override));
+    MOCK_METHOD(void, Shutdown, (int32_t socket), (override));
+    MOCK_METHOD(int32_t, GetSessionOption, (int32_t socket, SessionOption option,
+        void* value, uint32_t valueLen), (override));
 };
 
 } // namespace DistributedSchedule

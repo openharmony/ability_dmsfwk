@@ -1524,9 +1524,15 @@ ohos_unittest("distributedintentdsoftbusadaptertest") {
     "unittest/distributed_intent/distributed_intent_dsoftbus_adapter_test.cpp",
     "unittest/distributed_intent/distributed_sched_permission_mock.cpp",
     "unittest/distributed_intent/dtbschedmgr_device_info_storage_mock.cpp",
+    "unittest/distributed_intent/intent_all_connect_manager_mock.cpp",
     "unittest/distributed_intent/softbus_mock.cpp",
     "unittest/mock_remote_stub.cpp",
   ]
+  if (!dmsfwk_softbus_adapter_common) {
+    defines = [
+      "DMSFWK_ALL_CONNECT_MGR",
+    ]
+  }
   sources += dtbschedmgr_sources
   configs = [
     ":intentAdapter_config",
@@ -1631,8 +1637,8 @@ ohos_unittest("distributedremoteintentmanagertest") {
     "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/distributed_intent_provider_impl.cpp",
     "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/distributed_intent_service.cpp",
     "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/distributed_intent_service_stub.cpp",
-    "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/distributed_intent_version_checker.cpp",
-    "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/intent_permission_checker.cpp",
+    "unittest/distributed_intent/distributed_intent_version_checker_mock.cpp",
+    "unittest/distributed_intent/intent_permission_checker_mock.cpp",
     "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/remote_intent_manager.cpp",
     "unittest/distributed_intent/ability_manager_client_mock.cpp",
     "unittest/distributed_intent/access_token_kit_mock.cpp",

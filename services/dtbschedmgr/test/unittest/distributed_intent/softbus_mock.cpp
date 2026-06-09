@@ -49,6 +49,14 @@ void Shutdown(int32_t socket)
         ISoftbusInterface::softbusMock->Shutdown(socket);
     }
 }
+
+int32_t GetSessionOption(int32_t socket, SessionOption option, void* value, uint32_t valueLen)
+{
+    if (ISoftbusInterface::softbusMock == nullptr) {
+        return -1;
+    }
+    return ISoftbusInterface::softbusMock->GetSessionOption(socket, option, value, valueLen);
+}
 }
 
 } // namespace DistributedSchedule

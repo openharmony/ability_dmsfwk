@@ -43,6 +43,8 @@ public:
         const CallerInfo& callerInfo, uint64_t dAccessToken) = 0;
     virtual int32_t CheckBusinessResultPermission(const std::string& srcDeviceId,
         const AAFwk::Want& want, const IntentContext& ctx) = 0;
+    virtual int32_t CheckCallerPermission(const AAFwk::Want& want, uint64_t accessToken) = 0;
+    virtual bool GetOsAccountData(IDistributedSched::AccountInfo& dmsAccountInfo) = 0;
     virtual bool CheckComponentPermission(const AppExecFwk::AbilityInfo& targetAbility) const = 0;
     virtual bool CheckCustomPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const uint64_t dAccessToken) const = 0;
@@ -64,6 +66,8 @@ public:
         const CallerInfo& callerInfo, uint64_t dAccessToken));
     MOCK_METHOD3(CheckBusinessResultPermission, int32_t(const std::string& srcDeviceId,
         const AAFwk::Want& want, const IntentContext& ctx));
+    MOCK_METHOD2(CheckCallerPermission, int32_t(const AAFwk::Want& want, uint64_t accessToken));
+    MOCK_METHOD1(GetOsAccountData, bool(IDistributedSched::AccountInfo& dmsAccountInfo));
     MOCK_CONST_METHOD1(CheckComponentPermission, bool(const AppExecFwk::AbilityInfo& targetAbility));
     MOCK_CONST_METHOD2(CheckCustomPermission, bool(const AppExecFwk::AbilityInfo& targetAbility,
         const uint64_t dAccessToken));

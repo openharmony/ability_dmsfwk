@@ -288,5 +288,106 @@ HWTEST_F(DistributedIntentAllConnectManagerTest, WaitForApplyResult_Rejected, Te
         DMS_CONNECT_APPLY_REJECT_FAILED);
 }
 
+/**
+ * @tc.name: Init_LoadAllConnectSoFail_001
+ * @tc.desc: Verify Init returns error when LoadAllConnectSo fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentAllConnectManagerTest, Init_LoadAllConnectSoFail, TestSize.Level3)
+{
+    auto& manager = IntentAllConnectManager::GetInstance();
+    manager.api_ = {};
+    manager.dllHandle_ = nullptr;
+    manager.isAvailable_ = false;
+    EXPECT_NE(manager.Init(), ERR_OK);
+    EXPECT_FALSE(manager.isAvailable_);
+}
+
+/**
+ * @tc.name: Init_RegisterLifecycleCallbackFail_001
+ * @tc.desc: Verify Init returns error when RegisterLifecycleCallback fails (api null)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentAllConnectManagerTest, Init_RegisterLifecycleCallbackFail, TestSize.Level3)
+{
+    auto& manager = IntentAllConnectManager::GetInstance();
+    manager.api_ = {};
+    manager.dllHandle_ = nullptr;
+    manager.isAvailable_ = false;
+    manager.api_.ServiceCollaborationManager_RegisterLifecycleCallback = nullptr;
+    EXPECT_NE(manager.Init(), ERR_OK);
+    EXPECT_FALSE(manager.isAvailable_);
+}
+
+/**
+ * @tc.name: PublishServiceState_ApiCallFail_001
+ * @tc.desc: Verify PublishServiceState returns error when api call returns non-ERR_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentAllConnectManagerTest, PublishServiceState_ApiCallFail, TestSize.Level3)
+{
+    auto& manager = IntentAllConnectManager::GetInstance();
+    manager.api_ = {};
+    manager.api_.ServiceCollaborationManager_PublishServiceState =
+        [](const char*, const char*, const char*, ServiceCollaborationManagerBussinessStatus) -> int32_t {
+            return INVALID_PARAMETERS_ERR;
+        };
+    EXPECT_EQ(manager.PublishServiceState(PEER_NETWORK_ID, SCM_IDLE), INVALID_PARAMETERS_ERR);
+}
+
+/**
+ * @tc.name: PublishServiceState_ApiCallSuccess_001
+ * @tc.desc: Verify PublishServiceState returns ERR_OK when api call succeeds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentAllConnectManagerTest, PublishServiceState_ApiCallSuccess, TestSize.Level3)
+{
+    auto& manager = IntentAllConnectManager::GetInstance();
+    manager.api_ = {};
+    manager.api_.ServiceCollaborationManager_PublishServiceState =
+        [](const char*, const char*, const char*, ServiceCollaborationManagerBussinessStatus) -> int32_t {
+            return ERR_OK;
+        };
+    EXPECT_EQ(manager.PublishServiceState(PEER_NETWORK_ID, SCM_IDLE), ERR_OK);
+}
+
+/**
+ * @tc.name: RegisterLifecycleCallback_ApiCallFail_001
+ * @tc.desc: Verify RegisterLifecycleCallback returns error when api call returns non-ERR_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentAllConnectManagerTest, RegisterLifecycleCallback_ApiCallFail, TestSize.Level3)
+{
+    auto& manager = IntentAllConnectManager::GetInstance();
+    manager.api_ = {};
+    manager.api_.ServiceCollaborationManager_RegisterLifecycleCallback =
+        [](const char*, ServiceCollaborationManager_Callback*) -> int32_t {
+            return INVALID_PARAMETERS_ERR;
+        };
+    EXPECT_EQ(manager.RegisterLifecycleCallback(), INVALID_PARAMETERS_ERR);
+}
+
+/**
+ * @tc.name: RegisterLifecycleCallback_ApiCallSuccess_001
+ * @tc.desc: Verify RegisterLifecycleCallback returns ERR_OK when api call succeeds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentAllConnectManagerTest, RegisterLifecycleCallback_ApiCallSuccess, TestSize.Level3)
+{
+    auto& manager = IntentAllConnectManager::GetInstance();
+    manager.api_ = {};
+    manager.api_.ServiceCollaborationManager_RegisterLifecycleCallback =
+        [](const char*, ServiceCollaborationManager_Callback*) -> int32_t {
+            return ERR_OK;
+        };
+    EXPECT_EQ(manager.RegisterLifecycleCallback(), ERR_OK);
+}
+
 } // namespace DistributedSchedule
 } // namespace OHOS
