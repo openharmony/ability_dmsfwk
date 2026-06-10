@@ -53,12 +53,61 @@ const std::string PERMISSION_START_ABILITIES_FROM_BACKGROUND = "ohos.permission.
 const std::string PERMISSION_START_INVISIBLE_ABILITY = "ohos.permission.START_INVISIBLE_ABILITY";
 const std::string DISTRIBUTED_FILES_PATH = "/data/storage/el2/distributedfiles/";
 const std::string BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
+static const char URL_ESCAPE_CHAR = '%';
+static const uint32_t HEX_ESCAPE_LENGTH = 2;
+static const uint32_t HEX_DIGIT_INVALID = 0xFFFFFFFF;
+static const uint32_t HEX_BASE = 10;
+static const uint32_t HEX_SHIFT_BITS = 4;
 constexpr int32_t DEFAULT_DMS_API_VERSION = 9;
 const int DEFAULT_DMS_MISSION_ID = -1;
 const int FA_MODULE_ALLOW_MIN_API_VERSION = 8;
 const int DEFAULT_DEVICE_SECURITY_LEVEL = -1;
 const int HIGH_CONTINUE_ACL_VERSION = 6;
 const int NUMBER_OF_VERSION_TRUNCATION = 3;
+
+uint32_t HexCharToDigit(char c)
+{
+    if (c >= '0' && c <= '9') {
+        return static_cast<uint32_t>(c - '0');
+    }
+    if (c >= 'a' && c <= 'f') {
+        return static_cast<uint32_t>(c - 'a' + HEX_BASE);
+    }
+    if (c >= 'A' && c <= 'F') {
+        return static_cast<uint32_t>(c - 'A' + HEX_BASE);
+    }
+    return HEX_DIGIT_INVALID;
+}
+
+static std::string SingleUrlDecode(const std::string& encoded)
+{
+    std::string decoded;
+    decoded.reserve(encoded.length());
+    for (size_t i = 0; i < encoded.length(); ++i) {
+        if (encoded[i] == URL_ESCAPE_CHAR && i + HEX_ESCAPE_LENGTH < encoded.length()) {
+            uint32_t digit1 = HexCharToDigit(encoded[i + 1]);
+            uint32_t digit2 = HexCharToDigit(encoded[i + 2]);
+            if (digit1 != HEX_DIGIT_INVALID && digit2 != HEX_DIGIT_INVALID) {
+                decoded += static_cast<char>((digit1 << HEX_SHIFT_BITS) | digit2);
+                i += HEX_ESCAPE_LENGTH;
+                continue;
+            }
+        }
+        decoded += encoded[i];
+    }
+    return decoded;
+}
+
+std::string UrlDecode(const std::string& encoded)
+{
+    std::string decoded = encoded;
+    std::string previous;
+    do {
+        previous = decoded;
+        decoded = SingleUrlDecode(previous);
+    } while (decoded != previous);
+    return decoded;
+}
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedPermission);
@@ -719,11 +768,16 @@ void DistributedSchedPermission::MarkUriPermission(OHOS::AAFwk::Want& want, uint
 
 bool DistributedSchedPermission::IsDistributedFile(const std::string& path) const
 {
-    if (path.compare(0, DISTRIBUTED_FILES_PATH.size(), DISTRIBUTED_FILES_PATH) == 0) {
-        return true;
+    std::string decodedPath = UrlDecode(path);
+    if (decodedPath.find("..") != std::string::npos) {
+        HILOGE("Path traversal detected: '..' in path");
+        return false;
     }
-    HILOGE("uri path is false.");
-    return false;
+    if (decodedPath.compare(0, DISTRIBUTED_FILES_PATH.size(), DISTRIBUTED_FILES_PATH) != 0) {
+        HILOGE("uri path is false.");
+        return false;
+    }
+    return true;
 }
 
 bool DistributedSchedPermission::VerifyPermission(uint64_t accessToken, const std::string& permissionName) const
