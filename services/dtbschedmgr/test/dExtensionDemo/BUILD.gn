@@ -20,6 +20,7 @@ ohos_executable("distributed_extension_test") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
  

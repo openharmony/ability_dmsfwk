@@ -41,8 +41,11 @@ ohos_shared_library("dtbcollab_channel_manager") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
+
+  cflags_cc = [ "-Oz" ]
 
   sources = [
     "av_trans_data_buffer.cpp",

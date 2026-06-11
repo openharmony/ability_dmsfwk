@@ -43,8 +43,11 @@ ohos_shared_library("distributed_ability_connection_manager") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
+
+  cflags_cc = [ "-Oz" ]
 
   install_enable = true
 

@@ -24,6 +24,7 @@ ohos_static_library("distributedextensioncontext_napi_fwk") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
 
@@ -65,8 +66,11 @@ ohos_shared_library("distributedextensioncontext") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
+
+  cflags_cc = [ "-Oz" ]
 
   deps = [
     ":distributed_extension_context_abc",

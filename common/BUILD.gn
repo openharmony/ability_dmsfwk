@@ -21,8 +21,11 @@ ohos_shared_library("distributed_sched_utils") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
+
+  cflags_cc = [ "-Oz" ]
 
   include_dirs = [
     "${dms_path}/common/include",

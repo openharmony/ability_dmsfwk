@@ -27,6 +27,7 @@ ohos_unittest("DistributedSchedUtilsTest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
 

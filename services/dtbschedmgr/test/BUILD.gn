@@ -246,6 +246,7 @@ ohos_unittest("svcdistributedconnectiontest") {
     blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
   module_out_path = module_output_path
@@ -362,6 +363,7 @@ ohos_unittest("distributedcalltest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "./cfi_blocklist.txt"
   }
@@ -394,6 +396,7 @@ ohos_unittest("dmsfreeinstallcbtest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "./cfi_blocklist.txt"
   }
@@ -422,6 +425,7 @@ ohos_unittest("dschedcontinuationtest") {
     blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
   module_out_path = module_output_path
@@ -459,6 +463,7 @@ ohos_unittest("dmsversionmanagertest") {
     blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
   module_out_path = module_output_path
@@ -519,6 +524,7 @@ ohos_unittest("dschedpermissiontest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "./cfi_blocklist.txt"
   }
@@ -555,6 +561,7 @@ ohos_unittest("distributedmissionmanagertest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "./cfi_blocklist.txt"
   }
@@ -606,6 +613,7 @@ ohos_unittest("dmscontinueconditionmgrtest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "${dms_path}/services/dtbschedmgr/test/cfi_blocklist.txt"
   }
@@ -647,6 +655,7 @@ ohos_unittest("dmscontinuemanagertest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "./cfi_blocklist.txt"
   }
@@ -688,6 +697,7 @@ ohos_unittest("dschedsynce2etest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "./cfi_blocklist.txt"
   }
@@ -730,6 +740,7 @@ ohos_unittest("dmscontinuerecommendmgrtest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "${dms_path}/services/dtbschedmgr/test/cfi_blocklist.txt"
   }
@@ -778,6 +789,7 @@ ohos_unittest("dmscontinuemgrtest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "${dms_path}/services/dtbschedmgr/test/cfi_blocklist.txt"
   }
@@ -870,6 +882,7 @@ ohos_unittest("bundlemanagerinternaltest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "./cfi_blocklist.txt"
   }
@@ -929,6 +942,7 @@ ohos_unittest("hisyseventreporttest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "./cfi_blocklist.txt"
   }
@@ -974,6 +988,7 @@ ohos_unittest("distributedwanttest") {
     blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
   module_out_path = module_output_path
@@ -1006,6 +1021,7 @@ ohos_unittest("dmsbasetest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "./cfi_blocklist.txt"
   }
@@ -1044,6 +1060,7 @@ ohos_unittest("dmscollabtest") {
     blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
   module_out_path = module_output_path
@@ -1087,6 +1104,7 @@ ohos_unittest("dmscollabmgrtest") {
     blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
   module_out_path = module_output_path
@@ -1127,6 +1145,7 @@ ohos_unittest("dmscollabsuptest") {
     blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
   module_out_path = module_output_path
@@ -1166,6 +1185,7 @@ ohos_unittest("dmscollabstatetest") {
     blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
   module_out_path = module_output_path
@@ -1201,6 +1221,7 @@ ohos_unittest("dmscollabeventtest") {
     blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
   module_out_path = module_output_path
@@ -1237,6 +1258,7 @@ ohos_unittest("dmscollabsrcstattest") {
     blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
   module_out_path = module_output_path
@@ -1272,6 +1294,7 @@ ohos_unittest("dschedswitchstatustest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "./cfi_blocklist.txt"
   }

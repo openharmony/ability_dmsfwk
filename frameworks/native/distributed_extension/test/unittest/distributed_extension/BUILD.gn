@@ -148,6 +148,7 @@ ohos_unittest("distributed_extension_proxy_test") {
     integer_overflow = true
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
     blocklist = "${dms_path}/services/dtbschedmgr/test/cfi_blocklist.txt"
   }
@@ -316,6 +317,7 @@ ohos_unittest("distributed_connection_test") {
     integer_overflow = true
     cfi = true
     cfi_cross_dso = true
+    cfi_no_nvcall = true
     debug = false
   }
 
