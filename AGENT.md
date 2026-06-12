@@ -43,6 +43,17 @@ ability_dmsfwk_my/                 # 分布式任务调度框架
 ├── reference/                     # 知识库文档
 └── docs/                          # 其他文档
 ```
+
+### 常用修改路径映射
+
+| 任务类型 | 主要路径 | 关键文件 |
+| --- | --- | --- |
+| 接续业务 | services/dtbschedmgr/src/ | distributed_sched_continuation.cpp, dsched_continue_*.cpp |
+| 协同业务 | services/dtbcollabmgr/src/ | ability_connection_manager.cpp, av_trans_*.cpp |
+| IPC通信 | services/dtbschedmgr/src/ | distributed_sched_stub.cpp, distributed_sched_proxy.cpp |
+| Bundle管理 | services/dtbschedmgr/src/ | bundle_manager_internal.cpp |
+| 权限校验 | services/dtbschedmgr/src/ | distributed_sched_permission.cpp |
+
 ---
 
 ## 知识索引
@@ -89,6 +100,16 @@ ability_dmsfwk_my/                 # 分布式任务调度框架
 - 修改接续规则判定逻辑
 - 新增或删除公开API接口
 
+### 高风险文件
+
+| 文件路径 | 风险类型 | 说明 |
+| --- | --- | --- |
+| services/dtbschedmgr/src/distributed_sched_stub.cpp | IPC协议 | 处理远端请求，修改影响跨设备通信 |
+| services/dtbschedmgr/src/distributed_sched_proxy.cpp | IPC协议 | 发送远端请求，修改影响跨设备通信 |
+| services/dtbschedmgr/src/distributed_sched_permission.cpp | 权限校验 | 权限逻辑修改需安全评审 |
+| services/dtbschedmgr/src/distributed_sched_continuation.cpp | 接续核心 | 接续流程核心，修改需遵循 [03_continue_rules.md](reference/03_continue_rules.md) 约束 |
+| services/dtbschedmgr/src/mission/notification/dms_continue_recommend_info.cpp | 接续推荐 | 接续推荐相关，修改需遵循接续规则 |
+
 ---
 
 ## 验证要求
@@ -113,11 +134,19 @@ ability_dmsfwk_my/                 # 分布式任务调度框架
 # ./build.sh --product-name rk3568 --build-target dmsfwk_test --ccache
 ```
 
+### 单元测试目录
+
+| 业务 | 单测目录 |
+| --- | --- |
+| 接续业务 | services/dtbschedmgr/test/unittest/continue/, distributed_sched_continuation_test.cpp |
+| 协同业务 | services/dtbschedmgr/test/unittest/collab/, services/dtbcollabmgr/test/unittest/ |
+
 ### 完成定义
 
 任务完成需满足:
 1. 构建通过（无编译错误）
-2. 所有单元测试通过
+2. 所有单元测试通过。**重要**:单独修改接续或者协同功能，也需要全部单元测试都通过
+3. 双设备组网后xts验证通过
 
 ### 无法验证时的处理
 
@@ -125,3 +154,16 @@ ability_dmsfwk_my/                 # 分布式任务调度框架
 1. 明确说明验证未执行的原因
 2. 手动审查修改的代码逻辑
 3. 列出潜在风险点供人工确认
+4. 失败或为执行测试用例人工复测
+
+---
+
+## 常见失败模式
+
+| 模式 | 描述 | 防止方法 |
+| --- | --- | --- |
+| 绕过接续规则 | 未遵循 [03_continue_rules.md](reference/03_continue_rules.md) 和 [04_01_06_sink_bundle_matching.md](reference/04_01_06_sink_bundle_matching.md) 的接续约束 | 修改接续代码前必读这两个文件 |
+| IPC协议不兼容 | 修改消息格式导致跨版本不兼容 | IPC修改需协议评审 |
+| 权限校验遗漏 | 新增功能未添加必要权限校验 | 参考 distributed_sched_permission.cpp |
+| 知识库未读取 | 未读取相关章节即修改代码 | 遵循编辑前置条件 |
+| 修改废弃模块 | 在 dtbabilitymgr 新增功能 | 该目录已废弃，新功能应放入 dtbcollabmgr 或 dtbschedmgr |
