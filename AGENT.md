@@ -58,16 +58,16 @@ ability_dmsfwk_my/                 # 分布式任务调度框架
 
 ## 知识索引
 
-| 场景 | 先读 |
-| --- | --- |
-| 基础概念/术语定义/模块别名/账号概念/设备角色/SRC端/SINK端 | reference/01_terminology.md |
-| 依赖关系/外部接口/AMS/软总线/BMS/设备管理/权限管理/KV存储 | reference/02_dependencies.md |
-| 接续规则/接续约束/三元组/bundleName/continueType/abilityName/匹配规则/前置条件/可接续判定 | reference/03_continue_rules.md **[优先级最高]** |
-| 接续流程/广播阶段/接续阶段/MMI事件/广播触发/事件监听/事件冻结 | reference/04_continue_flow.md |
+| 场景 | 先读                                                     |
+| --- |--------------------------------------------------------|
+| 基础概念/术语定义/模块别名/账号概念/设备角色/SRC端/SINK端 | reference/01_terminology.md**[重要概念]**                  |
+| 依赖关系/外部接口/AMS/软总线/BMS/设备管理/权限管理/KV存储 | reference/02_dependencies.md                           |
+| 接续规则/接续约束/三元组/bundleName/continueType/abilityName/匹配规则/前置条件/可接续判定 | reference/03_continue_rules.md **[优先级最高]**             |
+| 接续流程/广播阶段/接续阶段/MMI事件/广播触发/事件监听/事件冻结 | reference/04_continue_flow.md                          |
 | 包名匹配/SINK端匹配/AppIdentifierList/continueBundleName/普通场景/引导安装/推荐安装开关 | reference/04_01_06_sink_bundle_matching.md **[优先级最高]** |
-| IPC通信/Stub/Proxy/服务端/客户端/角色映射/分布式调度 | reference/05_ipc_architecture.md |
-| 事件监听/获焦/失焦/前台/后台/进程死亡/生命周期/DmsContinueConditionMgr | reference/06_event_listener.md |
-| Bundle交互/BMS接口/Bundle查询/Ability匹配/跨应用接续/权限验证/接续类型ID | reference/07_bundle_interaction.md |
+| IPC通信/Stub/Proxy/服务端/客户端/角色映射/分布式调度 | reference/05_ipc_architecture.md                       |
+| 事件监听/获焦/失焦/前台/后台/进程死亡/生命周期/DmsContinueConditionMgr | reference/06_event_listener.md                         |
+| Bundle交互/BMS接口/Bundle查询/Ability匹配/跨应用接续/权限验证/接续类型ID | reference/07_bundle_interaction.md                     |
 
 ---
 
