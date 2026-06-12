@@ -21,7 +21,7 @@
 ## 代码结构
 
 ```
-ability_dmsfwk_my/                 # 分布式任务调度框架
+ability_dmsfwk/                 # 分布式任务调度框架
 ├── services/                      # 服务实现
 │   ├── dtbschedmgr/               # 接续业务（核心）
 │   │   ├── src/                   # 源代码
