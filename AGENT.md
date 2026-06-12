@@ -1,15 +1,5 @@
 # DMS模块仓库指引
 
-## 作用域声明
-
-```yaml
-适用范围:
-  仓库: ability_dmsfwk
-  子系统: 分布式任务调度子系统
-  模块: DMS (Distributed Mission Scheduler Framework)
-  目标智能体: 通用编码智能体 (Claude Code, Codex, Copilot, Cursor等)
-```
-
 ---
 
 ## 约束声明
