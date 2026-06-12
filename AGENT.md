@@ -60,7 +60,7 @@ ability_dmsfwk_my/                 # 分布式任务调度框架
 
 | 场景 | 先读                                                     |
 | --- |--------------------------------------------------------|
-| 基础概念/术语定义/模块别名/账号概念/设备角色/SRC端/SINK端 | reference/01_terminology.md**[重要概念]**                  |
+| 基础概念/术语定义/模块别名/账号概念/设备角色/SRC端/SINK端 | reference/01_terminology.md **[重要概念]**                 |
 | 依赖关系/外部接口/AMS/软总线/BMS/设备管理/权限管理/KV存储 | reference/02_dependencies.md                           |
 | 接续规则/接续约束/三元组/bundleName/continueType/abilityName/匹配规则/前置条件/可接续判定 | reference/03_continue_rules.md **[优先级最高]**             |
 | 接续流程/广播阶段/接续阶段/MMI事件/广播触发/事件监听/事件冻结 | reference/04_continue_flow.md                          |
