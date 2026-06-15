@@ -2,12 +2,6 @@
 
 ---
 
-## 约束声明
-
-> **重要**: [03_continue_rules.md](reference/03_continue_rules.md) 和 [04_01_06_sink_bundle_matching.md](reference/04_01_06_sink_bundle_matching.md) 为接续业务整体约束，优先级最高。
-
----
-
 ## 代码结构
 
 ```
@@ -76,7 +70,7 @@ ability_dmsfwk/                 # 分布式任务调度框架
 ### 禁止事项
 
 - **不要**修改分布式接续的公开API签名（需兼容性评审）
-- **不要**绕过 [03_continue_rules.md](reference/03_continue_rules.md) 和 [04_01_06_sink_bundle_matching.md](reference/04_01_06_sink_bundle_matching.md) 定义的接续规则
+- **不要**绕过接续规则（知识索引中标注优先级最高的接续规则文档）
 - **不要**修改IPC协议格式或消息ID（需协议兼容性评审）
 - **不要**删除或绕过权限校验逻辑（需安全评审）
 - **不要**在 dtbabilitymgr 目录新增功能（已废弃，仅维护）
@@ -89,16 +83,6 @@ ability_dmsfwk/                 # 分布式任务调度框架
 - 修改跨设备通信行为
 - 修改接续规则判定逻辑
 - 新增或删除公开API接口
-
-### 高风险文件
-
-| 文件路径 | 风险类型 | 说明 |
-| --- | --- | --- |
-| services/dtbschedmgr/src/distributed_sched_stub.cpp | IPC协议 | 处理远端请求，修改影响跨设备通信 |
-| services/dtbschedmgr/src/distributed_sched_proxy.cpp | IPC协议 | 发送远端请求，修改影响跨设备通信 |
-| services/dtbschedmgr/src/distributed_sched_permission.cpp | 权限校验 | 权限逻辑修改需安全评审 |
-| services/dtbschedmgr/src/distributed_sched_continuation.cpp | 接续核心 | 接续流程核心，修改需遵循 [03_continue_rules.md](reference/03_continue_rules.md) 约束 |
-| services/dtbschedmgr/src/mission/notification/dms_continue_recommend_info.cpp | 接续推荐 | 接续推荐相关，修改需遵循接续规则 |
 
 ---
 
@@ -136,7 +120,6 @@ ability_dmsfwk/                 # 分布式任务调度框架
 任务完成需满足:
 1. 构建通过（无编译错误）
 2. 所有单元测试通过。**重要**:单独修改接续或者协同功能，也需要全部单元测试都通过
-3. 双设备组网后xts验证通过
 
 ### 无法验证时的处理
 
@@ -145,15 +128,3 @@ ability_dmsfwk/                 # 分布式任务调度框架
 2. 手动审查修改的代码逻辑
 3. 列出潜在风险点供人工确认
 4. 失败或为执行测试用例人工复测
-
----
-
-## 常见失败模式
-
-| 模式 | 描述 | 防止方法 |
-| --- | --- | --- |
-| 绕过接续规则 | 未遵循 [03_continue_rules.md](reference/03_continue_rules.md) 和 [04_01_06_sink_bundle_matching.md](reference/04_01_06_sink_bundle_matching.md) 的接续约束 | 修改接续代码前必读这两个文件 |
-| IPC协议不兼容 | 修改消息格式导致跨版本不兼容 | IPC修改需协议评审 |
-| 权限校验遗漏 | 新增功能未添加必要权限校验 | 参考 distributed_sched_permission.cpp |
-| 知识库未读取 | 未读取相关章节即修改代码 | 遵循编辑前置条件 |
-| 修改废弃模块 | 在 dtbabilitymgr 新增功能 | 该目录已废弃，新功能应放入 dtbcollabmgr 或 dtbschedmgr |

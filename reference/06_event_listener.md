@@ -4,8 +4,6 @@
 
 ```yaml
 任务级别监听:
-  类: DistributedMissionFocusedListener
-  文件: mission/distributed_mission_focused_listener.h
   事件:
     OnMissionFocused: 任务获得焦点
     OnMissionUnfocused: 任务失去焦点
@@ -20,8 +18,6 @@
 
 ```yaml
 应用级别监听:
-  类: AppStateObserver
-  文件: app_state_observer.h
   事件:
     OnForegroundApplicationChanged: 应用前台/后台状态变化
     OnAbilityStateChanged: Ability状态变化
@@ -34,8 +30,6 @@
 
 ```yaml
 事件处理管理器:
-  类: DmsContinueConditionMgr
-  文件: mission/dms_continue_condition_manager.h
   方法:
     OnMissionFocused: 处理任务获焦事件
     OnMissionUnfocused: 处理任务失焦事件
@@ -49,8 +43,6 @@
 
 ```yaml
 协作生命周期监听:
-  类: AbilityLifecycleObserver
-  文件: collab/ability_state_observer.h
   方法:
     OnForegroundApplicationChanged: 应用前台变化
 ```
