@@ -156,6 +156,10 @@ inline uint32_t SessionDataHeader::WritePacketLen(uint8_t* header, const uint32_
 int32_t SessionDataHeader::WriteTlvItemToBuffer(const TlvItem& tlvItem,
     uint8_t* header, const uint32_t bufLen)
 {
+    if (header == nullptr) {
+        HILOGE("header is null.");
+        return INVALID_PARAMETERS_ERR;
+    }
     uint8_t* current = header;
     uint16_t typeInt = static_cast<uint16_t>(tlvItem.type);
     *current++ = typeInt >> DSCHED_SHIFT_8;

@@ -138,14 +138,18 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
     onType_ = type;
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(type);
-    if (iterItem == registerOnListener_.end() && registerOnListener_.size() < REGIST_MAX_SIZE) {
-        HILOGD("The itemItem does not exist in the registerOnListener_, adding, type: %{public}s", type.c_str());
-        std::vector<sptr<IRemoteObject>> objs;
-        obj->AddDeathRecipient(missionDiedListener_);
-        objs.emplace_back(obj);
-        registerOnListener_[type] = objs;
-        HILOGI("RegisterOnListener end");
-        return ERR_OK;
+    if (iterItem == registerOnListener_.end()) {
+        if (registerOnListener_.size() < REGIST_MAX_SIZE) {
+            HILOGD("The itemItem does not exist in the registerOnListener_, adding, type: %{public}s", type.c_str());
+            std::vector<sptr<IRemoteObject>> objs;
+            obj->AddDeathRecipient(missionDiedListener_);
+            objs.emplace_back(obj);
+            registerOnListener_[type] = objs;
+            HILOGI("RegisterOnListener end");
+            return ERR_OK;
+        }
+        HILOGE("registerOnListener_ is full, type: %{public}s", type.c_str());
+        return INVALID_PARAMETERS_ERR;
     }
     for (auto iter : iterItem->second) {
         if (iter == obj) {
