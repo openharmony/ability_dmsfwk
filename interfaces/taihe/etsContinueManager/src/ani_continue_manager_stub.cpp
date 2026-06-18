@@ -28,6 +28,7 @@ namespace {
 AniContinuationStateManagerStub::AniContinuationStateManagerStub()
 {
     callbackData_.callbackRef = nullptr;
+    callbackData_.missionId = 0;
 }
 
 AniContinuationStateManagerStub::~AniContinuationStateManagerStub()

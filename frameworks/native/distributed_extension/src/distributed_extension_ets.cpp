@@ -201,6 +201,10 @@ bool DistributedExtensionETS::CreateAndSetContextObject()
 bool DistributedExtensionETS::SetContextObject(ani_ref contextObj)
 {
     auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        HILOG_ERROR("env null");
+        return false;
+    }
     ani_ref contextGlobalRef = nullptr;
     ani_field field = nullptr;
     ani_status status = ANI_ERROR;
@@ -233,6 +237,10 @@ bool DistributedExtensionETS::SetContextObject(ani_ref contextObj)
 void DistributedExtensionETS::CacheMethods()
 {
     auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        HILOG_ERROR("env null.");
+        return;
+    }
     ani_status status = ANI_ERROR;
 
     // Cache methods for performance
