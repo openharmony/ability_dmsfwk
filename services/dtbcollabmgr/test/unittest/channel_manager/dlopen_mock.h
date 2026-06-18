@@ -25,7 +25,7 @@ public:
     MockDlfcn() {};
     virtual ~MockDlfcn() {};
 
-    virtual void *dlopen (const char *file, int mode) = 0;
+    virtual void *dlopen(const char *file, int mode) = 0;
 };
 
 class DlfcnMock : public MockDlfcn {
