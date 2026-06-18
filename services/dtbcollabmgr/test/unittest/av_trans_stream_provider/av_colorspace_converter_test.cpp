@@ -14,7 +14,10 @@
  */
 
 #include "av_colorspace_converter_test.h"
+#include "av_surface_buffer_cache.h"
+#include "buffer_extra_data.h"
 #include "dtbcollabmgr_log.h"
+#include "securec.h"
 #include "test_log.h"
 
 namespace OHOS {
@@ -40,6 +43,68 @@ void AVColorspaceConverterTest::TearDownTestCase()
 void AVColorspaceConverterTest::SetUp()
 {
     DTEST_LOG << "AVColorspaceConverterTest::SetUp" << std::endl;
+    videoProcessingMock_ = std::make_unique<VideoProcessingMock>();
+
+    ON_CALL(*videoProcessingMock_, InitializeEnvironment())
+        .WillByDefault(Return(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
+    ON_CALL(*videoProcessingMock_, Create(_, _))
+        .WillByDefault(Invoke([](OH_VideoProcessing** processor, int32_t type) {
+            *processor = reinterpret_cast<OH_VideoProcessing*>(new int64_t(1));
+            return VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS;
+        }));
+    ON_CALL(*videoProcessingMock_, CallbackCreate(_))
+        .WillByDefault(Invoke([](VideoProcessing_Callback** callback) {
+            *callback = reinterpret_cast<VideoProcessing_Callback*>(new int64_t(1));
+            return VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS;
+        }));
+    ON_CALL(*videoProcessingMock_, CallbackBindOnError(_, _))
+        .WillByDefault(Return(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
+    ON_CALL(*videoProcessingMock_, CallbackBindOnState(_, _))
+        .WillByDefault(Return(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
+    ON_CALL(*videoProcessingMock_, CallbackBindOnNewOutputBuffer(_, _))
+        .WillByDefault(Return(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
+    ON_CALL(*videoProcessingMock_, RegisterCallback(_, _, _))
+        .WillByDefault(Return(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
+    ON_CALL(*videoProcessingMock_, GetSurface(_, _))
+        .WillByDefault(Invoke([](OH_VideoProcessing* processor, OHNativeWindow** window) {
+            OHNativeWindow* nativeWindow = new OHNativeWindow();
+            nativeWindow->surface = IConsumerSurface::Create();
+            *window = nativeWindow;
+            return VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS;
+        }));
+    ON_CALL(*videoProcessingMock_, CreateNativeWindow(_))
+        .WillByDefault(Invoke([](void* pSurface) {
+            sptr<Surface>* surface = static_cast<sptr<Surface>*>(pSurface);
+            OHNativeWindow* nativeWindow = new OHNativeWindow();
+            nativeWindow->surface = *surface;
+            return nativeWindow;
+        }));
+    ON_CALL(*videoProcessingMock_, SetSurface(_, _))
+        .WillByDefault(Return(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
+    ON_CALL(*videoProcessingMock_, Start(_))
+        .WillByDefault(Return(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
+    ON_CALL(*videoProcessingMock_, Stop(_))
+        .WillByDefault(Return(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
+    ON_CALL(*videoProcessingMock_, NativeWindowHandleOpt(_, _))
+        .WillByDefault(Return(0));
+    ON_CALL(*videoProcessingMock_, SetColorSpace(_, _))
+        .WillByDefault(Return(0));
+    ON_CALL(*videoProcessingMock_, CallbackDestroy(_))
+        .WillByDefault(Invoke([](VideoProcessing_Callback* callback) {
+            delete reinterpret_cast<int64_t*>(callback);
+            return VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS;
+        }));
+    ON_CALL(*videoProcessingMock_, Destroy(_))
+        .WillByDefault(Invoke([](OH_VideoProcessing* processor) {
+            delete reinterpret_cast<int64_t*>(processor);
+            return VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS;
+        }));
+    ON_CALL(*videoProcessingMock_, DestroyNativeWindow(_))
+        .WillByDefault(Invoke([](OHNativeWindow* window) { delete window; }));
+    ON_CALL(*videoProcessingMock_, DeinitializeEnvironment())
+        .WillByDefault(Return(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
+
+    EXPECT_CALL(*videoProcessingMock_, InitializeEnvironment());
     converter_ = std::make_unique<AVColorspaceConverter>();
 }
 
@@ -47,6 +112,7 @@ void AVColorspaceConverterTest::TearDown()
 {
     DTEST_LOG << "AVColorspaceConverterTest::TearDown" << std::endl;
     converter_.reset();
+    videoProcessingMock_.reset();
 }
 
 #ifdef DMSFWK_UT_COVER
@@ -58,6 +124,12 @@ void AVColorspaceConverterTest::TearDown()
 HWTEST_F(AVColorspaceConverterTest, Init_Test, TestSize.Level1)
 {
     DTEST_LOG << "AVColorspaceConverterTest Init_Test begin" << std::endl;
+
+    EXPECT_CALL(*videoProcessingMock_, Create(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CallbackCreate(_));
+    EXPECT_CALL(*videoProcessingMock_, CallbackBindOnError(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CallbackBindOnState(_, _));
+    EXPECT_CALL(*videoProcessingMock_, RegisterCallback(_, _, _));
 
     int32_t ret = converter_->Init();
     EXPECT_EQ(ret, static_cast<int32_t>(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
@@ -73,6 +145,13 @@ HWTEST_F(AVColorspaceConverterTest, Init_Test, TestSize.Level1)
 HWTEST_F(AVColorspaceConverterTest, Callback_Test, TestSize.Level1)
 {
     DTEST_LOG << "AVColorspaceConverterTest Callback_Test begin" << std::endl;
+
+    EXPECT_CALL(*videoProcessingMock_, Create(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CallbackCreate(_));
+    EXPECT_CALL(*videoProcessingMock_, CallbackBindOnError(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CallbackBindOnState(_, _));
+    EXPECT_CALL(*videoProcessingMock_, RegisterCallback(_, _, _));
+    EXPECT_CALL(*videoProcessingMock_, GetSurface(_, _));
 
     int32_t ret = converter_->Init();
     EXPECT_EQ(ret, static_cast<int32_t>(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
@@ -99,6 +178,13 @@ HWTEST_F(AVColorspaceConverterTest, GetSurface_Test, TestSize.Level1)
 {
     DTEST_LOG << "AVColorspaceConverterTest GetSurface_Test begin" << std::endl;
 
+    EXPECT_CALL(*videoProcessingMock_, Create(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CallbackCreate(_));
+    EXPECT_CALL(*videoProcessingMock_, CallbackBindOnError(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CallbackBindOnState(_, _));
+    EXPECT_CALL(*videoProcessingMock_, RegisterCallback(_, _, _));
+    EXPECT_CALL(*videoProcessingMock_, GetSurface(_, _));
+
     int32_t ret = converter_->Init();
     EXPECT_EQ(ret, static_cast<int32_t>(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
 
@@ -116,6 +202,14 @@ HWTEST_F(AVColorspaceConverterTest, GetSurface_Test, TestSize.Level1)
 HWTEST_F(AVColorspaceConverterTest, SetSurface_Test, TestSize.Level1)
 {
     DTEST_LOG << "AVColorspaceConverterTest SetSurface_Test begin" << std::endl;
+
+    EXPECT_CALL(*videoProcessingMock_, Create(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CallbackCreate(_));
+    EXPECT_CALL(*videoProcessingMock_, CallbackBindOnError(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CallbackBindOnState(_, _));
+    EXPECT_CALL(*videoProcessingMock_, RegisterCallback(_, _, _));
+    EXPECT_CALL(*videoProcessingMock_, GetSurface(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CreateNativeWindow(_));
 
     int32_t ret = converter_->Init();
     EXPECT_EQ(ret, static_cast<int32_t>(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
@@ -137,6 +231,17 @@ HWTEST_F(AVColorspaceConverterTest, SetSurface_Test, TestSize.Level1)
 HWTEST_F(AVColorspaceConverterTest, Configure_Test, TestSize.Level1)
 {
     DTEST_LOG << "AVColorspaceConverterTest Configure_Test begin" << std::endl;
+
+    EXPECT_CALL(*videoProcessingMock_, Create(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CallbackCreate(_));
+    EXPECT_CALL(*videoProcessingMock_, CallbackBindOnError(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CallbackBindOnState(_, _));
+    EXPECT_CALL(*videoProcessingMock_, RegisterCallback(_, _, _));
+    EXPECT_CALL(*videoProcessingMock_, GetSurface(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CreateNativeWindow(_));
+    EXPECT_CALL(*videoProcessingMock_, NativeWindowHandleOpt(_, _));
+    EXPECT_CALL(*videoProcessingMock_, SetColorSpace(_, _));
+    EXPECT_CALL(*videoProcessingMock_, SetSurface(_, _));
 
     int32_t ret = converter_->Init();
     EXPECT_EQ(ret, static_cast<int32_t>(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));
@@ -181,6 +286,14 @@ HWTEST_F(AVColorspaceConverterTest, Stop_Test, TestSize.Level1)
 
     auto ret = converter_->Stop();
     EXPECT_EQ(ret, NULL_POINTER_ERROR);
+
+    EXPECT_CALL(*videoProcessingMock_, Create(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CallbackCreate(_));
+    EXPECT_CALL(*videoProcessingMock_, CallbackBindOnError(_, _));
+    EXPECT_CALL(*videoProcessingMock_, CallbackBindOnState(_, _));
+    EXPECT_CALL(*videoProcessingMock_, RegisterCallback(_, _, _));
+    EXPECT_CALL(*videoProcessingMock_, Stop(_))
+        .WillOnce(Return(VideoProcessing_ErrorCode::VIDEO_PROCESSING_ERROR_PROCESS_FAILED));
 
     ret = converter_->Init();
     EXPECT_EQ(ret, static_cast<int32_t>(VideoProcessing_ErrorCode::VIDEO_PROCESSING_SUCCESS));

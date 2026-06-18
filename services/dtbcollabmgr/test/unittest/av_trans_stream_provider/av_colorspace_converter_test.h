@@ -23,6 +23,7 @@
 #include "av_colorspace_converter.h"
 #undef private
 #include "native_window.h"
+#include "video_processing_mock.h"
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -35,6 +36,7 @@ public:
 
 protected:
     std::unique_ptr<AVColorspaceConverter> converter_;
+    std::unique_ptr<VideoProcessingMock> videoProcessingMock_;
 };
 }  // namespace DistributedCollab
 }  // namespace OHOS
