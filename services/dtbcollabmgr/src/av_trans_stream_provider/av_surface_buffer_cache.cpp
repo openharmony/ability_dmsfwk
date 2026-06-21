@@ -89,6 +89,10 @@ int32_t AVSurfaceBufferCache::AddSurfaceBuffer(const sptr<SurfaceBuffer>& buffer
         return INVALID_PARAMETERS_ERR;
     }
     std::unique_ptr<AVTransDataBuffer> data = std::make_unique<AVTransDataBuffer>(dataSize);
+    if (data->Capacity() < static_cast<size_t>(dataSize)) {
+        HILOGE("data buffer size too small.");
+        return READ_SURFACE_BUFFER_FAILED;
+    }
     int32_t ret = memcpy_s(data->Data(), data->Size(),
         dataPtr, dataSize);
     if (ret != ERR_OK) {

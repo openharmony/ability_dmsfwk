@@ -1376,6 +1376,10 @@ void AbilityConnectionSession::OnMessageReceived(int32_t channelId, const std::s
         return;
     }
     uint8_t *data = dataBuffer->Data();
+    if (dataBuffer->Size() < MessageDataHeader::HEADER_LEN) {
+        HILOGE("dataBuffer is less than header size.");
+        return;
+    }
     auto headerPara = MessageDataHeader::Deserialize(data, dataBuffer->Size());
     if (!headerPara) {
         HILOGE("read session header from buffer failed");
