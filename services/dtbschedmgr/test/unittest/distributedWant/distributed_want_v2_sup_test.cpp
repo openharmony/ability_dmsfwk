@@ -177,44 +177,6 @@ HWTEST_F(DistributedWantV2SupTest, DistributedSchedule_DistributedWantV2_ReadFro
 }
 
 /**
- * @tc.number: DistributedSchedule_DistributedWantV2_FromString_0100
- * @tc.name: distributedwantV2
- * @tc.desc: Verifying FromString to distributedwantV2.
- */
-HWTEST_F(DistributedWantV2SupTest, DistributedSchedule_DistributedWantV2_FromString_0100,
-    Function | MediumTest | Level3)
-{
-    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
-    ASSERT_NE(dwant, nullptr);
-    std::string test;
-    EXPECT_EQ(dwant->FromString(test), nullptr);
-
-    test = "test";
-    EXPECT_EQ(dwant->FromString(test), nullptr);
-
-    nlohmann::json wantJson;
-    wantJson["test"] = "test";
-    test = wantJson.dump();
-    EXPECT_EQ(dwant->FromString(test), nullptr);
-
-    wantJson.clear();
-    wantJson["deviceId"] = "deviceId";
-    wantJson["bundleName"] = "bundleName";
-    wantJson["abilityName"] = "abilityName";
-    wantJson["uri"] = "uri";
-    wantJson["type"] = "type";
-    wantJson["flags"] = 1u;
-    wantJson["action"] = "action";
-    wantJson["parameters"] = "parameters";
-    nlohmann::json testJson;
-    testJson.emplace_back("test");
-    wantJson["entities"] = testJson;
-
-    test = wantJson.dump();
-    EXPECT_NE(dwant->FromString(test), nullptr);
-}
-
-/**
  * @tc.number: GetLowerCaseScheme_test_001
  * @tc.name: GetLowerCaseScheme
  * @tc.desc: Test GetLowerCaseScheme.
