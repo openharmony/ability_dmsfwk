@@ -97,10 +97,9 @@ void FuzzOnIntentBytes(const uint8_t* data, size_t size)
     }
     FuzzedDataProvider fdp(data, size);
     int32_t socket = fdp.ConsumeIntegral<int32_t>();
-    uint32_t dataLen = fdp.ConsumeIntegral<uint32_t>();
     std::vector<uint8_t> bytes = fdp.ConsumeRemainingBytes<uint8_t>();
     const void* rawData = bytes.empty() ? nullptr : bytes.data();
-    DistributedIntentDsoftbusAdapter::GetInstance().OnIntentBytes(socket, rawData, dataLen);
+    DistributedIntentDsoftbusAdapter::GetInstance().OnIntentBytes(socket, rawData, bytes.size());
 }
 }
 }
