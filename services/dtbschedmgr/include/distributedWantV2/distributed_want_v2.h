@@ -696,8 +696,6 @@ public:
 
     std::string ToString() const;
 
-    static DistributedWantV2* FromString(std::string& string);
-
     std::shared_ptr<AAFwk::Want> ToWant();
 
     DistributedWantV2& SetDeviceId(const std::string& deviceId);

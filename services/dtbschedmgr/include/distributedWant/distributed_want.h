@@ -696,8 +696,6 @@ public:
 
     std::string ToString() const;
 
-    static DistributedWant* FromString(std::string& string);
-
     std::shared_ptr<AAFwk::Want> ToWant();
 
     /**

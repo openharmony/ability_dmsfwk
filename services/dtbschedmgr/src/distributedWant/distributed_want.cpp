@@ -1226,25 +1226,6 @@ std::string DistributedWant::ToString() const
     return ToJson().dump();
 }
 
-DistributedWant* DistributedWant::FromString(std::string& string)
-{
-    if (string.empty()) {
-        return nullptr;
-    }
-
-    nlohmann::json wantJson = nlohmann::json::parse(string, nullptr, false);
-    if (wantJson.is_discarded()) {
-        return nullptr;
-    }
-
-    DistributedWant* want = new (std::nothrow) DistributedWant();
-    if (want != nullptr && !want->ReadFromJson(wantJson)) {
-        delete want;
-        want = nullptr;
-    }
-    return want;
-}
-
 DistributedWant& DistributedWant::SetDeviceId(const std::string& deviceId)
 {
     operation_.SetDeviceId(deviceId);

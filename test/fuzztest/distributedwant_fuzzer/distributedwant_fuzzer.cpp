@@ -38,7 +38,7 @@ constexpr int32_t POS_3 = 3;
 constexpr int32_t OFFSET_24 = 24;
 constexpr int32_t OFFSET_16 = 16;
 constexpr int32_t OFFSET_8 = 8;
-constexpr uint32_t FUZZ_TEST_CASE_COUNT = 18;
+constexpr uint32_t FUZZ_TEST_CASE_COUNT = 17;
 
 enum FuzzTestCase : uint32_t {
     CASE_DISTRIBUTED_WANT_001,
@@ -55,7 +55,6 @@ enum FuzzTestCase : uint32_t {
     CASE_DISTRIBUTED_WANT_OPERATION_EQUALS,
     CASE_DISTRIBUTED_WANT_SET_URI,
     CASE_DISTRIBUTED_WANT_TO_JSON,
-    CASE_DISTRIBUTED_WANT_FROM_STRING,
     CASE_DISTRIBUTED_WANT_COPY_CTOR,
     CASE_DISTRIBUTED_WANT_ASSIGN_OPERATOR,
     CASE_DISTRIBUTED_WANT_FROM_WANT,
@@ -413,17 +412,6 @@ bool FuzzDistributedWantToJson(const uint8_t* data, size_t size)
     return true;
 }
 
-bool FuzzDistributedWantFromString(const uint8_t* data, size_t size)
-{
-    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
-        return false;
-    }
-    FuzzedDataProvider fdp(data, size);
-    std::string inputString = fdp.ConsumeRandomLengthString();
-    std::shared_ptr<DistributedWant> want(DistributedWant::FromString(inputString));
-    return true;
-}
-
 void DistributedWantCopyCtorFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size == 0) {
@@ -546,9 +534,6 @@ void HandleAdvancedFuzzCases(uint32_t testCase, const uint8_t* data, size_t size
             break;
         case CASE_DISTRIBUTED_WANT_TO_JSON:
             FuzzDistributedWantToJson(data, size);
-            break;
-        case CASE_DISTRIBUTED_WANT_FROM_STRING:
-            FuzzDistributedWantFromString(data, size);
             break;
         case CASE_DISTRIBUTED_WANT_COPY_CTOR:
             DistributedWantCopyCtorFuzzTest(data, size);

@@ -73,6 +73,10 @@ uint32_t MessageDataHeader::WriteTotalLen(uint8_t* header, const uint32_t bufLen
 int32_t MessageDataHeader::WriteTlvItemToBuffer(const MessageTlvItem& tlvItem,
     uint8_t* header, const uint32_t bufLen)
 {
+    if (header == nullptr) {
+        HILOGE("header is null");
+        return WRITE_TLV_ITEM_TO_BUFFER_FAILED;
+    }
     uint8_t* current = header;
     uint16_t typeInt = static_cast<uint16_t>(tlvItem.type);
     *current++ = typeInt >> DSCHED_SHIFT_8;

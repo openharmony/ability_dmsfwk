@@ -3517,54 +3517,6 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_HasParameter_0100, Fun
     want_->SetParam(key2, vector);
     EXPECT_EQ(true, want_->HasParameter(key2));
 }
-/**
- * @tc.number: DistributedScheduleWant_ToString_0100
- * @tc.name:    ToString and FromString
- * @tc.desc: Verify FromString()
- */
-HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ToString_0100, Function | MediumTest | Level3)
-{
-    std::string deviceId = "deviceId";
-    std::string bundleName = "bundleName";
-    std::string abilityName ="abilityName";
-    std::string uri = "url";
-    std::string type = "type";
-    unsigned int flags = 1;
-    std::string action = "action";
-    DistributedWantParams parameters;
-    std::vector<std::string> entities = {"entity.system.entity1", "entity.system.entity2"};
-
-    std::string keyBool = "key_bool";
-    bool valueBool = true;
-    parameters.SetParam(keyBool, Boolean::Box(valueBool));
-
-    std::string keyStr = "key_string";
-    std::string valueString = "123";
-    parameters.SetParam(keyStr, String::Box(valueString));
-
-    std::string keyInt = "key_int";
-    int valueInt = 111;
-    parameters.SetParam(keyStr, Integer::Box(valueInt));
-
-    std::shared_ptr<DistributedWant> want1 = std::make_shared<DistributedWant>();
-    ASSERT_NE(nullptr, want1);
-    want1->SetElementName(deviceId, bundleName, abilityName);
-    want1->SetUri(uri);
-    want1->SetType(type);
-    want1->SetFlags(flags);
-    want1->SetAction(action);
-    for (auto entity : entities) {
-        want1->AddEntity(entity);
-    }
-
-    std::string jsonString = want1->ToString();
-    DistributedWant* newWant = DistributedWant::FromString(jsonString);
-    ASSERT_NE(nullptr, newWant);
-    std::shared_ptr<DistributedWant> want2(newWant);
-
-    CompareWant(want1, want2);
-}
-
 /*
  * Feature: Array
  * Function: GetLength and GetType
@@ -3914,20 +3866,6 @@ HWTEST_F(DistributedWantBaseTest, ReadFromJson_test_001, TestSize.Level3)
     bool result = want.ReadFromJson(wantJson);
     EXPECT_EQ(result, false);
     GTEST_LOG_(INFO) << "ReadFromJson_test_001 end";
-}
-
-/**
- * @tc.number: ReadFromJson_test_002
- * @tc.name: ReadFromJson
- * @tc.desc: Test ReadFromJson.
- */
-HWTEST_F(DistributedWantBaseTest, ReadFromJson_test_002, TestSize.Level3)
-{
-    GTEST_LOG_(INFO) << "ReadFromJson_test_002 start";
-    DistributedWant want;
-    std::string str = "";
-    EXPECT_EQ(want.FromString(str), nullptr);
-    GTEST_LOG_(INFO) << "ReadFromJson_test_002 end";
 }
 
 /**
