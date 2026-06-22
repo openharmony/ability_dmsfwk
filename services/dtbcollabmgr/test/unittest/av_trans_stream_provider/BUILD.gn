@@ -480,7 +480,10 @@ ohos_unittest("AVColorspaceConverterTest") {
 
   include_dirs = [ "${dms_path}/services/dtbcollabmgr/test/unittest" ]
 
-  sources = [ "av_colorspace_converter_test.cpp" ]
+  sources = [
+    "av_colorspace_converter_test.cpp",
+    "video_processing_mock.cpp",
+  ]
 
   deps = [
     "${dms_path}/common:distributed_sched_utils",
@@ -494,6 +497,7 @@ ohos_unittest("AVColorspaceConverterTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gmock",
     "graphic_surface:surface",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -507,6 +511,7 @@ ohos_unittest("AVColorspaceConverterTest") {
   defines = []
 
   if (dmsfwk_vpe_enable) {
+    defines += [ "DMSFWK_VPE_ENABLE" ]
     external_deps += [ "video_processing_engine:video_processing" ]
   }
 

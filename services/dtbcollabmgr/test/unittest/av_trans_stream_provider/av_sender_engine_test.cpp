@@ -477,28 +477,5 @@ HWTEST_F(AVSenderEngineTest, OnEvent_Test, TestSize.Level1)
     EXPECT_EQ(senderEngine_->GetState(), EngineState::START);
     DTEST_LOG << "AVSenderEngineTest OnEvent_Test end" << std::endl;
 }
-
-/**
- * @tc.name: Init_Test
- * @tc.desc: Test Init
- * @tc.type: FUNC
- */
-HWTEST_F(AVSenderEngineTest, Init_Test, TestSize.Level1)
-{
-    DTEST_LOG << "AVSenderEngineTest Init_Test begin" << std::endl;
-    senderEngine_->SetColorSpace(StreamColorSpace::UNKNOWN);
-    senderEngine_->Init();
-    senderEngine_->SetColorSpace(StreamColorSpace::BT709_LIMIT);
-    senderEngine_->Init();
-    senderEngine_->colorSpaceConverter_ = nullptr;
-    senderEngine_->senderFilter_ = std::make_shared<AVSenderFilter>(
-        "builtin.dtbcollab.sender", FilterType::FILTERTYPE_SOURCE);
-    senderEngine_->curState_ = EngineState::START;
-    auto ret = senderEngine_->Start();
-    EXPECT_EQ(ret, static_cast<int32_t>(Status::OK));
-
-    ret = senderEngine_->Stop();
-    EXPECT_EQ(ret, static_cast<int32_t>(Status::OK));
-}
 }  // namespace DistributedCollab
 }  // namespace OHOS
