@@ -13,15 +13,14 @@
  * limitations under the License.
  */
 
-#include "distributedintentservicestub_fuzzer.h"
+#include "distributedintentstub_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
 #include <fuzzer/FuzzedDataProvider.h>
 
-#include "distributed_intent_provider_impl.h"
-#include "distributed_intent_service.h"
-#include "distributed_intent_service_stub.h"
+#include "distributed_sched_service.h"
+#include "distributed_sched_stub.h"
 #include "distributedsched_ipc_interface_code.h"
 #include "mock_fuzz_util.h"
 #include "parcel_helper.h"
@@ -30,27 +29,11 @@
 namespace OHOS {
 namespace DistributedSchedule {
 
-namespace {
-constexpr uint32_t FUZZ_UNKNOWN_CODE = 9999;
-
-DmsIntentProviderImpl g_provider;
-
-void EnsureProviderInstalled()
-{
-    static bool installed = false;
-    if (!installed) {
-        DistributedIntentServiceStub::SetProvider(&g_provider);
-        installed = true;
-    }
-}
-}
-
 void FuzzStartRemoteIntentInner(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    EnsureProviderInstalled();
     FuzzUtil::MockPermission();
     FuzzedDataProvider fdp(data, size);
     int32_t callerUid = fdp.ConsumeIntegral<int32_t>();
@@ -59,8 +42,7 @@ void FuzzStartRemoteIntentInner(const uint8_t* data, size_t size)
     uint32_t specifyTokenId = fdp.ConsumeIntegral<uint32_t>();
 
     MessageParcel parcelData;
-
-    OHOS::AAFwk::Want want;
+    AAFwk::Want want;
     want.SetElementName("fuzz_device", "com.example.fuzz", "FuzzAbility");
     want.SetParam("fuzz_key", std::string("fuzz_value"));
     parcelData.WriteParcelable(&want);
@@ -75,8 +57,7 @@ void FuzzStartRemoteIntentInner(const uint8_t* data, size_t size)
     parcelData.WriteRemoteObject(callback);
 
     MessageParcel reply;
-    DistributedIntentService intentService;
-    intentService.StartRemoteIntentInner(parcelData, reply);
+    DistributedSchedService::GetInstance().StartRemoteIntentInner(parcelData, reply);
 }
 
 void FuzzSendIntentResultInner(const uint8_t* data, size_t size)
@@ -84,18 +65,16 @@ void FuzzSendIntentResultInner(const uint8_t* data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         return;
     }
-    EnsureProviderInstalled();
     FuzzUtil::MockPermission();
     FuzzedDataProvider fdp(data, size);
     int32_t callerUid = fdp.ConsumeIntegral<int32_t>();
     uint64_t requestCode = fdp.ConsumeIntegral<uint64_t>();
     uint32_t accessToken = fdp.ConsumeIntegral<uint32_t>();
     uint32_t specifyTokenId = fdp.ConsumeIntegral<uint32_t>();
-    std::string resultMsg = fdp.ConsumeRemainingBytesAsString();
+    std::string msg = fdp.ConsumeRemainingBytesAsString();
 
     MessageParcel parcelData;
-
-    OHOS::AAFwk::Want want;
+    AAFwk::Want want;
     want.SetElementName("fuzz_device", "com.example.fuzz", "FuzzAbility");
     parcelData.WriteParcelable(&want);
 
@@ -103,76 +82,32 @@ void FuzzSendIntentResultInner(const uint8_t* data, size_t size)
     parcelData.WriteUint64(requestCode);
     parcelData.WriteUint32(accessToken);
     parcelData.WriteUint32(specifyTokenId);
-    parcelData.WriteString(resultMsg);
+    parcelData.WriteString(msg);
 
     MessageParcel reply;
-    DistributedIntentService intentService;
-    intentService.SendIntentResultInner(parcelData, reply);
+    DistributedSchedService::GetInstance().SendIntentResultInner(parcelData, reply);
 }
 
-void FuzzWrongToken(const uint8_t* data, size_t size)
+void FuzzStartRemoteIntentNoWant(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size == 0) {
         return;
     }
-    MessageParcel parcelData;
-    parcelData.WriteInterfaceToken(u"ohos.distributedschedule.wrongToken");
-    MessageParcel reply;
-    MessageOption option;
-    DistributedIntentService intentService;
-    uint32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT);
-    intentService.OnRemoteRequest(code, parcelData, reply, option);
-    code = static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT);
-    intentService.OnRemoteRequest(code, parcelData, reply, option);
-}
-
-void FuzzUnknownCode(const uint8_t* data, size_t size)
-{
-    if (data == nullptr || size == 0) {
-        return;
-    }
-    MessageParcel parcelData;
-    parcelData.WriteInterfaceToken(u"ohos.distributedschedule.accessToken");
-    MessageParcel reply;
-    MessageOption option;
-    DistributedIntentService intentService;
-    intentService.OnRemoteRequest(FUZZ_UNKNOWN_CODE, parcelData, reply, option);
-}
-
-void FuzzTruncatedParcel(const uint8_t* data, size_t size)
-{
-    if (data == nullptr || size == 0) {
-        return;
-    }
-    EnsureProviderInstalled();
     FuzzUtil::MockPermission();
     MessageParcel parcelData;
     MessageParcel reply;
-    DistributedIntentService intentService;
-    intentService.StartRemoteIntentInner(parcelData, reply);
-    intentService.SendIntentResultInner(parcelData, reply);
+    DistributedSchedService::GetInstance().StartRemoteIntentInner(parcelData, reply);
 }
 
-void FuzzNoCallback(const uint8_t* data, size_t size)
+void FuzzSendIntentResultNoWant(const uint8_t* data, size_t size)
 {
-    if (data == nullptr || size < sizeof(int32_t)) {
+    if (data == nullptr || size == 0) {
         return;
     }
-    EnsureProviderInstalled();
     FuzzUtil::MockPermission();
-    FuzzedDataProvider fdp(data, size);
     MessageParcel parcelData;
-    OHOS::AAFwk::Want want;
-    want.SetElementName("fuzz_device", "com.example.fuzz", "FuzzAbility");
-    parcelData.WriteParcelable(&want);
-    parcelData.WriteString("fuzz_module");
-    parcelData.WriteInt32(fdp.ConsumeIntegral<int32_t>());
-    parcelData.WriteUint64(fdp.ConsumeIntegral<uint64_t>());
-    parcelData.WriteUint32(fdp.ConsumeIntegral<uint32_t>());
-    parcelData.WriteUint32(fdp.ConsumeIntegral<uint32_t>());
     MessageParcel reply;
-    DistributedIntentService intentService;
-    intentService.StartRemoteIntentInner(parcelData, reply);
+    DistributedSchedService::GetInstance().SendIntentResultInner(parcelData, reply);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
@@ -181,9 +116,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     OHOS::DistributedSchedule::FuzzStartRemoteIntentInner(data, size);
     OHOS::DistributedSchedule::FuzzSendIntentResultInner(data, size);
-    OHOS::DistributedSchedule::FuzzWrongToken(data, size);
-    OHOS::DistributedSchedule::FuzzUnknownCode(data, size);
-    OHOS::DistributedSchedule::FuzzTruncatedParcel(data, size);
-    OHOS::DistributedSchedule::FuzzNoCallback(data, size);
+    OHOS::DistributedSchedule::FuzzStartRemoteIntentNoWant(data, size);
+    OHOS::DistributedSchedule::FuzzSendIntentResultNoWant(data, size);
     return 0;
 }

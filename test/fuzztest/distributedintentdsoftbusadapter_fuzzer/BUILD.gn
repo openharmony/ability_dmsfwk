@@ -25,6 +25,7 @@ ohos_fuzztest("DistributedIntentDsoftbusAdapterFuzzTest") {
     "${dms_path}/services/dtbschedmgr/include/",
     "${dms_path}/services/dtbschedmgr/include/distributedIntent",
     "${dms_path}/services/dtbschedmgr/src/distributedIntent/include",
+    "${dms_path}/services/dtbschedmgr/test/unittest/distributed_intent",
     "${dms_path}/interfaces/innerkits/common/include/",
     "${dms_path}/common/include/",
     "${dms_path}/interfaces/kits/napi/include",
@@ -44,7 +45,10 @@ ohos_fuzztest("DistributedIntentDsoftbusAdapterFuzzTest") {
     "-Dprivate=public",
   ]
 
-  sources = [ "distributedintentdsoftbusadapter_fuzzer.cpp" ]
+  sources = [
+    "distributedintentdsoftbusadapter_fuzzer.cpp",
+    "softbus_stub.cpp",
+  ]
 
   deps = [
     "${dms_path}/services/dtbschedmgr:distributedschedsvr",

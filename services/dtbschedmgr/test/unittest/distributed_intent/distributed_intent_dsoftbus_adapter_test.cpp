@@ -638,11 +638,22 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, ProcessReceivedData_WithPayloadNo
 {
     auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
     uint32_t typeValue = static_cast<uint32_t>(IntentDataType::INTENT_DATA_TYPE_EXECUTE);
+    uint32_t totalLen = 100;
+    uint16_t seq = 0;
+    uint8_t flag = 0;
     std::string payload = "test_payload";
-    std::vector<uint8_t> frame(sizeof(uint32_t) + payload.size());
-    ASSERT_EQ(memcpy_s(frame.data(), sizeof(uint32_t), &typeValue, sizeof(uint32_t)), 0);
-    ASSERT_EQ(memcpy_s(frame.data() + sizeof(uint32_t), payload.size(),
-        payload.data(), payload.size()), 0);
+    size_t headerSize = sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint16_t) + sizeof(uint8_t);
+    std::vector<uint8_t> frame(headerSize + payload.size());
+    size_t off = 0;
+    memcpy_s(frame.data() + off, frame.size() - off, &typeValue, sizeof(uint32_t));
+    off += sizeof(uint32_t);
+    memcpy_s(frame.data() + off, frame.size() - off, &totalLen, sizeof(uint32_t));
+    off += sizeof(uint32_t);
+    memcpy_s(frame.data() + off, frame.size() - off, &seq, sizeof(uint16_t));
+    off += sizeof(uint16_t);
+    memcpy_s(frame.data() + off, frame.size() - off, &flag, sizeof(uint8_t));
+    off += sizeof(uint8_t);
+    memcpy_s(frame.data() + off, frame.size() - off, payload.data(), payload.size());
     EXPECT_NO_FATAL_FAILURE(a.ProcessReceivedData(VALID_FD, frame.data(), frame.size()));
 }
 
@@ -670,13 +681,50 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, ProcessReceivedData_WithSession_0
     auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
     InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
     uint32_t typeValue = static_cast<uint32_t>(IntentDataType::INTENT_DATA_TYPE_DMS_RESULT);
+    uint32_t totalLen = 100;
+    uint16_t seq = 0;
+    uint8_t flag = 0;
     std::string payload = "result_payload";
-    std::vector<uint8_t> frame(sizeof(uint32_t) + payload.size());
-    ASSERT_EQ(memcpy_s(frame.data(), sizeof(uint32_t), &typeValue, sizeof(uint32_t)), 0);
-    ASSERT_EQ(memcpy_s(frame.data() + sizeof(uint32_t), payload.size(),
-        payload.data(), payload.size()), 0);
+    size_t headerSize = sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint16_t) + sizeof(uint8_t);
+    std::vector<uint8_t> frame(headerSize + payload.size());
+    size_t off = 0;
+    memcpy_s(frame.data() + off, frame.size() - off, &typeValue, sizeof(uint32_t));
+    off += sizeof(uint32_t);
+    memcpy_s(frame.data() + off, frame.size() - off, &totalLen, sizeof(uint32_t));
+    off += sizeof(uint32_t);
+    memcpy_s(frame.data() + off, frame.size() - off, &seq, sizeof(uint16_t));
+    off += sizeof(uint16_t);
+    memcpy_s(frame.data() + off, frame.size() - off, &flag, sizeof(uint8_t));
+    off += sizeof(uint8_t);
+    memcpy_s(frame.data() + off, frame.size() - off, payload.data(), payload.size());
     EXPECT_NO_FATAL_FAILURE(a.ProcessReceivedData(VALID_FD, frame.data(), frame.size()));
     RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: ProcessReceivedData_InvalidTotalLen_006
+ * @tc.desc: ProcessReceivedData with invalid totalLen (exceeds MAX_SEND_BYTES_SIZE)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ProcessReceivedData_InvalidTotalLen_006, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    uint32_t typeValue = static_cast<uint32_t>(IntentDataType::INTENT_DATA_TYPE_EXECUTE);
+    uint32_t totalLen = MAX_SEND_BYTES_SIZE + 1;
+    uint16_t seq = 0;
+    uint8_t flag = 0;
+    size_t headerSize = sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint16_t) + sizeof(uint8_t);
+    std::vector<uint8_t> frame(headerSize);
+    size_t off = 0;
+    memcpy_s(frame.data() + off, frame.size() - off, &typeValue, sizeof(uint32_t));
+    off += sizeof(uint32_t);
+    memcpy_s(frame.data() + off, frame.size() - off, &totalLen, sizeof(uint32_t));
+    off += sizeof(uint32_t);
+    memcpy_s(frame.data() + off, frame.size() - off, &seq, sizeof(uint16_t));
+    off += sizeof(uint16_t);
+    memcpy_s(frame.data() + off, frame.size() - off, &flag, sizeof(uint8_t));
+    EXPECT_NO_FATAL_FAILURE(a.ProcessReceivedData(VALID_FD, frame.data(), frame.size()));
 }
 
 
