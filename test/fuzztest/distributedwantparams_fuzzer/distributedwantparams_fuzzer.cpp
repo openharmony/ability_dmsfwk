@@ -74,7 +74,6 @@ inline size_t CalculateMid(size_t size)
 }
 uint32_t GetU32Data(const char* ptr)
 {
-    // convert fuzz input data to an integer
     return (ptr[POS_0] << OFFSET_24) | (ptr[POS_1] << OFFSET_16) | (ptr[POS_2] << OFFSET_8) | ptr[POS_3];
 }
 
@@ -123,10 +122,10 @@ bool DoSomethingInterestingWithMyApiDistributedWantParams002(const uint8_t* data
     wantParams->WriteArrayToParcelLong(parcel, ao);
     wantParams->WriteArrayToParcelFloat(parcel, ao);
     wantParams->WriteArrayToParcelDouble(parcel, ao);
-    long longValue = static_cast<long>(GetU32Data(reinterpret_cast<const char*>(data)));
+    long longValue = static_cast<long>(fdp.ConsumeIntegral<uint32_t>());
     sptr<IInterface> longIt = Long::Box(longValue);
     wantParams->WriteToParcelLong(parcel, longIt);
-    float floatValue = static_cast<float>(GetU32Data(reinterpret_cast<const char*>(data)));
+    float floatValue = static_cast<float>(fdp.ConsumeIntegral<uint32_t>());
     sptr<IInterface> floatIt = Float::Box(floatValue);
     wantParams->WriteToParcelFloat(parcel, floatIt);
 
@@ -144,7 +143,7 @@ bool DoSomethingInterestingWithMyApiDistributedWantParams002(const uint8_t* data
     wantParams->ReadFromParcelLong(parcel, key);
     wantParams->ReadFromParcelFloat(parcel, key);
 
-    wantParams->ReadArrayToParcel(parcel, GetU32Data(reinterpret_cast<const char*>(data)) % OFFSET_16, array);
+    wantParams->ReadArrayToParcel(parcel, fdp.ConsumeIntegral<uint32_t>() % OFFSET_16, array);
     return true;
 }
 
@@ -159,30 +158,30 @@ bool DoSomethingInterestingWithMyApiDistributedWant003(const uint8_t* data, size
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
     Parcel parcel;
     std::string key = fdp.ConsumeRandomLengthString();
-    int8_t byteValue = static_cast<int8_t>(GetU32Data(reinterpret_cast<const char*>(data)));
+    int8_t byteValue = static_cast<int8_t>(fdp.ConsumeIntegral<uint32_t>());
     sptr<IInterface> byteIt = Byte::Box(byteValue);
     wantParams->WriteToParcelByte(parcel, byteIt);
     sptr<IInterface> stringIt = String::Box(key);
     wantParams->WriteToParcelString(parcel, stringIt);
-    bool boolValue = static_cast<bool>(GetU32Data(reinterpret_cast<const char*>(data)) > FOO_MAX_LEN);
+    bool boolValue = static_cast<bool>(fdp.ConsumeIntegral<uint32_t>() > FOO_MAX_LEN);
     sptr<IInterface> boolIt = Boolean::Box(boolValue);
     wantParams->WriteToParcelBool(parcel, boolIt);
-    char charValue = *data;
+    char charValue = static_cast<char>(fdp.ConsumeIntegral<uint8_t>());
     sptr<IInterface> charIt = Char::Box(charValue);
     wantParams->WriteToParcelChar(parcel, charIt);
-    short shortValue = static_cast<short>(GetU32Data(reinterpret_cast<const char*>(data)));
+    short shortValue = static_cast<short>(fdp.ConsumeIntegral<uint32_t>());
     sptr<IInterface> shortIt = Short::Box(shortValue);
     wantParams->WriteToParcelShort(parcel, shortIt);
-    double doubleValue = static_cast<double>(GetU32Data(reinterpret_cast<const char*>(data)));
+    double doubleValue = static_cast<double>(fdp.ConsumeIntegral<uint32_t>());
     sptr<IInterface> doubleIt = Double::Box(doubleValue);
     wantParams->WriteToParcelDouble(parcel, doubleIt);
-    int32_t intValue = static_cast<int32_t>(GetU32Data(reinterpret_cast<const char*>(data)));
+    int32_t intValue = static_cast<int32_t>(fdp.ConsumeIntegral<uint32_t>());
     sptr<IInterface> intIt = Integer::Box(intValue);
     wantParams->WriteToParcelInt(parcel, intIt);
     wantParams->WriteToParcelFD(parcel, wantOther);
     wantParams->WriteToParcelRemoteObject(parcel, wantOther);
 
-    int type = static_cast<int>(GetU32Data(reinterpret_cast<const char*>(data)));
+    int type = static_cast<int>(fdp.ConsumeIntegral<uint32_t>());
     wantParams->ReadFromParcelInt8(parcel, key);
     wantParams->ReadFromParcelString(parcel, key);
     wantParams->ReadFromParcelBool(parcel, key);
@@ -434,7 +433,6 @@ void RunDistributedWantParamsFuzzTest(uint32_t testCase, const uint8_t* data, si
 }
 }
 
-/* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     FuzzedDataProvider fdp(data, size);
