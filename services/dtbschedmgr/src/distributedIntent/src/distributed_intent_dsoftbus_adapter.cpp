@@ -76,6 +76,10 @@ bool ReadFragHeader(const uint8_t* buf, size_t bufLen, FragHeader& header)
         HILOGE("ReadFragHeader totalLen failed");
         return false;
     }
+    if (header.totalLen > MAX_SEND_BYTES_SIZE) {
+        HILOGE("ReadFragHeader totalLen invalid, totalLen=%{public}u", header.totalLen);
+        return false;
+    }
     off += INTENT_FRAG_TOTAL_LEN_SIZE;
     if (memcpy_s(&header.seq, INTENT_FRAG_SEQ_SIZE, buf + off, INTENT_FRAG_SEQ_SIZE) != EOK) {
         HILOGE("ReadFragHeader seq failed");

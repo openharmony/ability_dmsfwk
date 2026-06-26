@@ -47,6 +47,7 @@ config("test_config") {
     "${dms_path}/test/fuzztest/distributedschedstubnine_fuzzer",
     "${dms_path}/test/fuzztest/distributedschedstubten_fuzzer",
     "${dms_path}/test/fuzztest/distributedschedstubeleven_fuzzer",
+    "${dms_path}/test/fuzztest/distributedintentstub_fuzzer",
     "${dms_path}/test/fuzztest/distributedschedservice_fuzzer",
     "${dms_path}/test/fuzztest/distributedschedserviceone_fuzzer",
     "${dms_path}/test/fuzztest/distributedschedservicetwo_fuzzer",
@@ -57,6 +58,7 @@ config("test_config") {
     "${dms_path}/test/fuzztest/distributedschedserviceseven_fuzzer",
     "${dms_path}/test/fuzztest/distributedschedserviceeight_fuzzer",
     "${dms_path}/test/fuzztest/distributedschedservicenine_fuzzer",
+    "${dms_path}/test/fuzztest/distributedintentservice_fuzzer",
     "${dms_path}/test/fuzztest/util",
   ]
 }
@@ -542,6 +544,41 @@ ohos_fuzztest("DistributedSchedStubElevenFuzzTest") {
   }
 }
 
+ohos_fuzztest("DistributedIntentStubFuzzTest") {
+  module_out_path = module_output_path
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
+  ]
+  external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedintentstub_fuzzer"
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-Dprivate=public",
+  ]
+
+  sources = [
+    "${dms_path}/test/fuzztest/util/mock_fuzz_util.cpp",
+    "distributedintentstub_fuzzer/distributedintentstub_fuzzer.cpp",
+  ]
+
+  deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
+
+  defines = []
+  if (dmsfwk_mission_manager) {
+    defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
+  }
+  if (dmsfwk_standard_form_share) {
+    defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
+  }
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
+}
+
 ohos_fuzztest("DistributedSchedServiceFuzzTest") {
   module_out_path = module_output_path
   configs = [
@@ -862,6 +899,38 @@ ohos_fuzztest("DistributedSchedServiceNineFuzzTest") {
   }
 }
 
+ohos_fuzztest("DistributedIntentServiceFuzzTest") {
+  module_out_path = module_output_path
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
+  ]
+  external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedintentservice_fuzzer"
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-Dprivate=public",
+  ]
+
+  sources = [ "distributedintentservice_fuzzer/distributedintentservice_fuzzer.cpp" ]
+
+  deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
+
+  defines = []
+  if (dmsfwk_mission_manager) {
+    defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
+  }
+  if (dmsfwk_standard_form_share) {
+    defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
+  }
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
+}
+
 group("fuzztest") {
   testonly = true
   deps = []
@@ -899,6 +968,8 @@ group("fuzztest") {
         ":DistributedSchedStubNineFuzzTest",
         ":DistributedSchedStubTenFuzzTest",
         ":DistributedSchedStubElevenFuzzTest",
+        ":DistributedIntentStubFuzzTest",
+        ":DistributedIntentServiceFuzzTest",
         ":DistributedSchedServiceFuzzTest",
         ":DistributedSchedServiceOneFuzzTest",
         ":DistributedSchedServiceTwoFuzzTest",
