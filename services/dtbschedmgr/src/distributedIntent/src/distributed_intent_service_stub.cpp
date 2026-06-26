@@ -29,14 +29,17 @@ const std::u16string INTENT_SERVICE_INTERFACE_TOKEN = u"ohos.distributedschedule
 }
 
 IIntentProvider* DistributedIntentServiceStub::provider_ = nullptr;
+std::mutex DistributedIntentServiceStub::providerMutex_;
 
 void DistributedIntentServiceStub::SetProvider(IIntentProvider* provider)
 {
+    std::lock_guard<std::mutex> lock(providerMutex_);
     provider_ = provider;
 }
 
 IIntentProvider* DistributedIntentServiceStub::GetProvider()
 {
+    std::lock_guard<std::mutex> lock(providerMutex_);
     return provider_;
 }
 

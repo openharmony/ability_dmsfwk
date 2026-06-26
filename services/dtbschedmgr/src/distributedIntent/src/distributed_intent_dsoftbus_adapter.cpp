@@ -138,13 +138,15 @@ DistributedIntentDsoftbusAdapter::DistributedIntentDsoftbusAdapter()
 DistributedIntentDsoftbusAdapter::~DistributedIntentDsoftbusAdapter()
 {
     StopSessionCleanupThread();
-    std::lock_guard<std::mutex> lock(sessionMutex_);
+    std::lock_guard<std::mutex> lockSession(sessionMutex_);
     for (auto& iter : sessions_) {
         if (iter.second != nullptr && iter.second->socketFd > 0) {
             Shutdown(iter.second->socketFd);
         }
     }
     sessions_.clear();
+    std::lock_guard<std::mutex> lockFrag(fragMutex_);
+    fragBuffers_.clear();
 }
 
 void DistributedIntentDsoftbusAdapter::StopSessionCleanupThread()
@@ -359,9 +361,12 @@ void DistributedIntentDsoftbusAdapter::ShutdownDeviceSession(const std::string& 
     std::vector<int32_t> socketsToShutdown;
     {
         std::lock_guard<std::mutex> lock(sessionMutex_);
-        for (auto& [socketFd, session] : sessions_) {
-            if (session != nullptr && session->peerDeviceId == deviceId) {
-                socketsToShutdown.push_back(socketFd);
+        for (auto it = sessions_.begin(); it != sessions_.end();) {
+            if (it->second != nullptr && it->second->peerDeviceId == deviceId) {
+                socketsToShutdown.push_back(it->first);
+                it = sessions_.erase(it);
+            } else {
+                ++it;
             }
         }
     }
@@ -759,6 +764,11 @@ void DistributedIntentDsoftbusAdapter::ProcessFragFrame(int32_t socketFd, uint32
     }
 
     std::string fullPayload = AssembleFragPayload(socketFd, fragBuf);
+    if (fullPayload.size() != fragBuf->totalLen) {
+        HILOGE("Frag reassembly incomplete, socketFd=%{public}d, actualSize=%{public}zu, expectedSize=%{public}u",
+            socketFd, fullPayload.size(), fragBuf->totalLen);
+        return;
+    }
     IntentDataType intentDataType = static_cast<IntentDataType>(dataType);
     DeliverIntentData(socketFd, intentDataType, fullPayload);
 }

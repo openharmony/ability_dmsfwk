@@ -449,25 +449,7 @@ void RemoteIntentManager::HandleDisconnect(const std::string& srcDeviceId,
     if (provider != nullptr) {
         provider->ParseDisconnectData(data, resultCode, resultMsg);
     }
-    std::vector<std::pair<uint64_t, sptr<IRemoteObject>>> disconnectedCallbacks;
-    {
-        std::lock_guard<std::mutex> lock(connectMutex_);
-        for (auto it = requestCodeCallbackMap_.begin(); it != requestCodeCallbackMap_.end();) {
-            if (it->second.deviceId == srcDeviceId) {
-                disconnectedCallbacks.emplace_back(it->first, it->second.callback);
-                it = requestCodeCallbackMap_.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
-    for (auto& [requestCode, callback] : disconnectedCallbacks) {
-        if (callback != nullptr) {
-            std::string msg = resultMsg;
-            NotifyIntentResult(callback, requestCode, resultCode, msg);
-        }
-    }
-    HILOGI("HandleDisconnect notified=%{public}zu callbacks", disconnectedCallbacks.size());
+    NotifyLinkDisconnected(srcDeviceId, resultCode);
     CleanupSocketMapping(srcDeviceId, socketFd);
     DistributedIntentDsoftbusAdapter::GetInstance().ShutdownDeviceSession(srcDeviceId);
     HILOGI("HandleDisconnect done, srcDeviceId=%{public}s", GetAnonymStr(srcDeviceId).c_str());

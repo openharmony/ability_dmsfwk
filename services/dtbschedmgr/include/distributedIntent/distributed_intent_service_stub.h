@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <map>
+#include <mutex>
 #include "distributed_intent_provider.h"
 #include "distributed_intent_service_interface.h"
 #include "iremote_object.h"
@@ -48,6 +49,7 @@ private:
     int32_t SendIntentResultInner(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, RequestHandler> requestHandlers_;
     static IIntentProvider* provider_;
+    static std::mutex providerMutex_;
 };
 
 } // namespace DistributedSchedule

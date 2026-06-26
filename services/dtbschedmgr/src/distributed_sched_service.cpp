@@ -86,8 +86,8 @@
 #include "mission/wifi_state_listener.h"
 #include "mission/bluetooth_state_listener.h"
 #endif
-#include "distributed_intent_plugin.h"
 #include "distributed_intent_error_code.h"
+#include "distributed_intent_plugin.h"
 #include "distributedIntent/distributed_intent_provider_impl.h"
 #include "dsched_transport_softbus_adapter.h"
 #include "caller_info.h"

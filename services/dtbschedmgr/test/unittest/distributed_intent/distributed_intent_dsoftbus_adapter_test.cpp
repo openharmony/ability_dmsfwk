@@ -1307,9 +1307,8 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, ShutdownDeviceSession_MixedDevice
     InsertSession(ANOTHER_FD, DEVICE_ID_2, true, false, 1);
     EXPECT_CALL(*softbusMock_, Shutdown(VALID_FD)).Times(1);
     a.ShutdownDeviceSession(DEVICE_ID_1);
-    EXPECT_NE(a.sessions_.find(VALID_FD), a.sessions_.end());
+    EXPECT_EQ(a.sessions_.find(VALID_FD), a.sessions_.end());
     EXPECT_NE(a.sessions_.find(ANOTHER_FD), a.sessions_.end());
-    RemoveSession(VALID_FD, DEVICE_ID_1);
     RemoveSession(ANOTHER_FD, DEVICE_ID_2);
 }
 
@@ -1382,9 +1381,8 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, ShutdownDeviceSession_NullSession
     InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
     EXPECT_CALL(*softbusMock_, Shutdown(VALID_FD)).Times(1);
     a.ShutdownDeviceSession(DEVICE_ID_1);
-    EXPECT_NE(a.sessions_.find(VALID_FD), a.sessions_.end());
+    EXPECT_EQ(a.sessions_.find(VALID_FD), a.sessions_.end());
     a.sessions_.erase(ANOTHER_FD);
-    RemoveSession(VALID_FD, DEVICE_ID_1);
 }
 
 /**
