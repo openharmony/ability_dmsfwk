@@ -94,6 +94,7 @@ taihe_shared_library("continueManager_ani") {
     "image_framework:image",
     "image_framework:image_taihe",
     "ipc:ipc_core",
+    "media_foundation:media_foundation",
     "samgr:samgr_proxy",
     "eventhandler:libeventhandler",
   ]
