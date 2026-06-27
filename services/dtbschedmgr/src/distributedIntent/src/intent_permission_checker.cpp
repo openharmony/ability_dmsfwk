@@ -76,6 +76,10 @@ IntentPermissionChecker::IntentPermissionChecker()
 int32_t IntentPermissionChecker::GetCallerInfo(const std::string& localDeviceId, int32_t callerUid,
     uint32_t accessToken, CallerInfo& callerInfo)
 {
+    if (provider_ == nullptr) {
+        HILOGE("provider_ is null");
+        return INVALID_PARAMETERS_ERR;
+    }
     callerInfo.sourceDeviceId = localDeviceId;
     callerInfo.uid = callerUid;
     callerInfo.accessToken = accessToken;
@@ -302,7 +306,7 @@ int32_t IntentPermissionChecker::CheckStartPermission(const std::string& localDe
         int32_t accountId = provider_->GetActiveAccountId();
         if (provider_->IsMDMControlWithExemption(bundleName, COLLABORATION_SERVICE, accountId)) {
             HILOGE("Current user is under MDM control and not exempted.");
-            return ERR_CAPABILITY_NOT_SUPPORT;
+            return ERR_DI_CAPABILITY_NOT_SUPPORT;
         }
     }
 #endif

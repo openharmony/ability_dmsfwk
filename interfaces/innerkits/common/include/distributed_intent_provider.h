@@ -15,9 +15,9 @@
 #ifndef OHOS_DISTRIBUTED_INTENT_PROVIDER_H
 #define OHOS_DISTRIBUTED_INTENT_PROVIDER_H
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 #include "want.h"
 #include "ability_info.h"
 #include "caller_info.h"

@@ -189,7 +189,7 @@ int32_t DmsIntentProviderImpl::DeserializeIntentData(const std::string& data,
     AAFwk::Want& want, IntentContext& ctx, std::string& resultMsg)
 {
     nlohmann::json root = nlohmann::json::parse(data, nullptr, false);
-    if (!root.is_object()) {
+    if (root.is_discarded() || !root.is_object()) {
         return ERR_DI_INVALID_PARAMETER;
     }
     if (!root.contains("requestCode") || !root["requestCode"].is_number()) {
@@ -242,7 +242,7 @@ void DmsIntentProviderImpl::ParseDisconnectData(const std::string& data,
     int32_t& resultCode, std::string& resultMsg)
 {
     nlohmann::json root = nlohmann::json::parse(data, nullptr, false);
-    if (!root.is_object()) {
+    if (root.is_discarded() || !root.is_object()) {
         return;
     }
     resultCode = root.value("result", resultCode);
@@ -253,7 +253,7 @@ bool DmsIntentProviderImpl::ParseResultData(const std::string& data,
     uint64_t& requestCode, int32_t& resultCode, std::string& resultMsg)
 {
     nlohmann::json root = nlohmann::json::parse(data, nullptr, false);
-    if (!root.is_object()) {
+    if (root.is_discarded() || !root.is_object()) {
         return false;
     }
     requestCode = root.value("requestCode", (uint64_t)0);
