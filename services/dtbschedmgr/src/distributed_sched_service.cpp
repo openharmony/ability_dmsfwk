@@ -180,6 +180,8 @@ const int32_t CONNECT_WAIT_TIME_S = 11; /* 11 second */
 constexpr int32_t MEMRE_CLEAN_DELAY = 100000; /* 100s */
 std::mutex getDistibutedProxyLock_;
 std::condition_variable getDistibutedProxyCondition_;
+constexpr int32_t MAX_RETRY_COUNT = 3;
+constexpr int32_t RETRY_REGISTER_INTERVAL = 500; // 500ms
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedService);
@@ -868,10 +870,20 @@ void DistributedSchedService::OnAddSystemAbility(int32_t systemAbilityId, const 
         missionFocusedListener_ = sptr<DistributedMissionFocusedListener>(new DistributedMissionFocusedListener());
         missionFocusedListener_->Init();
     }
-    int32_t ret = DistributedSchedAdapter::GetInstance().RegisterMissionListener(missionFocusedListener_);
-    if (ret != ERR_OK) {
-        HILOGE("get RegisterMissionListener failed, ret: %{public}d", ret);
+    int32_t ret = ERR_OK;
+    for (int32_t retryCount = 0; retryCount < MAX_RETRY_COUNT; retryCount++) {
+        ret = DistributedSchedAdapter::GetInstance().RegisterMissionListener(missionFocusedListener_);
+        if (ret == ERR_OK) {
+            HILOGI("RegisterMissionListener success.");
+            return;
+        }
+        if (retryCount < MAX_RETRY_COUNT - 1) {
+            HILOGW("RegisterMissionListener failed, will retry, count:%{public}d, ret:%{public}d", retryCount + 1, ret);
+            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_REGISTER_INTERVAL));
+        }
     }
+    HILOGE("RegisterMissionListener failed after %{public}d attempts, ret:%{public}d, systemAbilityId:%{public}d",
+        MAX_RETRY_COUNT, ret, systemAbilityId);
 }
 
 void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
