@@ -632,6 +632,46 @@ int32_t DSchedCollabManager::CancleReleaseAbilityLink(const std::string &bundleN
     return ERR_OK;
 }
 
+void DSchedCollabManager::DisconnectAllSessionsForUser(int32_t userId)
+{
+    HILOGI("DisconnectAllSessionsForUser called, userId: %{public}d", userId);
+    if (userId < 0) {
+        HILOGW("invalid userId");
+        return;
+    }
+
+    std::vector<std::string> tokensToClean;
+    {
+        std::lock_guard<std::mutex> lock(collabMutex_);
+        for (const auto& iter : collabs_) {
+            if (iter.second == nullptr) {
+                continue;
+            }
+            const auto& collabInfo = iter.second->collabInfo_;
+            bool isTargetUser = false;
+            if (collabInfo.direction_ == COLLAB_SOURCE) {
+                isTargetUser = (collabInfo.srcAccountInfo_.userId == userId);
+            } else {
+                isTargetUser = (collabInfo.sinkUserId_ == userId);
+            }
+            if (isTargetUser) {
+                tokensToClean.push_back(iter.first);
+                HILOGI("found collab to clean, token: %{public}s, srcBundle: %{public}s, sinkBundle: %{public}s",
+                    GetAnonymStr(iter.first).c_str(),
+                    collabInfo.srcInfo_.bundleName_.c_str(),
+                    collabInfo.sinkInfo_.bundleName_.c_str());
+            }
+        }
+    }
+
+    for (const auto& token : tokensToClean) {
+        CleanUpSession(token);
+        HILOGI("cleaned up collab session, token: %{public}s", GetAnonymStr(token).c_str());
+    }
+
+    HILOGI("DisconnectAllSessionsForUser end, triggered cleanup for %{public}zu sessions", tokensToClean.size());
+}
+
 void DSchedCollabManager::NotifyWifiOpen()
 {
     HILOGI("called");

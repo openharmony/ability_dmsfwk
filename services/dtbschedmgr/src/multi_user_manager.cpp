@@ -19,6 +19,7 @@
 #include "dsched_continue_manager.h"
 #include "distributed_sched_service.h"
 #include "distributed_sched_utils.h"
+#include "dsched_collab_manager.h"
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_sched_mission_manager.h"
 #include "mission/dms_continue_condition_manager.h"
@@ -41,7 +42,7 @@ MultiUserManager& MultiUserManager::GetInstance()
 MultiUserManager::MultiUserManager()
 {
     HILOGI("Start.");
-    currentUserId_ = GetForegroundUser();
+    currentUserId_.store(GetForegroundUser());
 }
 
 // LCOV_EXCL_START
@@ -130,8 +131,28 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
         return;
     }
     oldSendMgr->OnUserSwitched();
-    currentUserId_ = accountId;
 
+    int32_t oldUserId = currentUserId_.load();
+    if (oldUserId >= 0 && oldUserId != accountId) {
+        if (!IsUserForeground(oldUserId)) {
+            HILOGI("Disconnect sessions for old user: %{public}d", oldUserId);
+            DSchedCollabManager::GetInstance().DisconnectAllSessionsForUser(oldUserId);
+        } else {
+            HILOGI("Old user %{public}d still in foreground, skip disconnect", oldUserId);
+        }
+    }
+
+    currentUserId_.store(accountId);
+    InitNewUser(accountId);
+    HILOGI("UserSwitched end");
+}
+
+void MultiUserManager::InitNewUser(int32_t accountId)
+{
+    if (accountId < 0) {
+        HILOGE("invalid accountId: %{public}d", accountId);
+        return;
+    }
     DataShareManager::GetInstance().SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance()
         .IsContinueSwitchOn());
     DistributedSchedService::GetInstance()
@@ -160,7 +181,6 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
     UserSwitchedOnRegisterListenerCache();
     DmsContinueConditionMgr::GetInstance().OnUserSwitched(accountId);
     DataShareManager::GetInstance().CheckAndHandleContinueSwitch();
-    HILOGI("UserSwitched end");
 }
 
 // LCOV_EXCL_START
@@ -170,13 +190,13 @@ void MultiUserManager::UserSwitchedOnRegisterListenerCache()
     {
         std::lock_guard<std::mutex> lock(listenerMutex_);
         if (!listenerCache_.empty()) {
-            HILOGI("Cache invoke register listener. userId: %{public}d.", currentUserId_);
+            HILOGI("Cache invoke register listener. userId: %{public}d.", currentUserId_.load());
             auto recvMgr = GetCurrentRecvMgr();
             if (recvMgr == nullptr) {
                 HILOGI("GetRecvMgr failed.");
                 return;
             }
-            auto it = listenerCache_.find(currentUserId_);
+            auto it = listenerCache_.find(currentUserId_.load());
             if (it != listenerCache_.end() && !it->second.empty()) {
                 for (auto param = it->second.begin(); param != it->second.end(); param ++) {
                     std::string type = param->first;
@@ -184,7 +204,7 @@ void MultiUserManager::UserSwitchedOnRegisterListenerCache()
                     recvMgr->RegisterOnListener(type, obj);
                 }
                 listenerCache_.erase(it);
-                HILOGI("Cache remove. userId: %{public}d.", currentUserId_);
+                HILOGI("Cache remove. userId: %{public}d.", currentUserId_.load());
             }
         }
     }
@@ -220,30 +240,30 @@ void MultiUserManager::OnUserRemoved(int32_t accountId)
 // LCOV_EXCL_START
 int32_t MultiUserManager::CreateNewSendMgrLocked()
 {
-    HILOGI("CreateNewSendMgr begin. accountId: %{public}d.", currentUserId_);
+    HILOGI("CreateNewSendMgr begin. userId: %{public}d.", currentUserId_.load());
     auto sendMgr = std::make_shared<DMSContinueSendMgr>();
-    sendMgr->Init(currentUserId_);
-    sendMgrMap_.emplace(currentUserId_, sendMgr);
+    sendMgr->Init(currentUserId_.load());
+    sendMgrMap_.emplace(currentUserId_.load(), sendMgr);
     HILOGI("CreateNewSendMgr end.");
     return ERR_OK;
 }
 
 int32_t MultiUserManager::CreateNewRecvMgrLocked()
 {
-    HILOGI("CreateNewRecvMgr begin. accountId: %{public}d.", currentUserId_);
+    HILOGI("CreateNewRecvMgr begin. userId: %{public}d.", currentUserId_.load());
     auto recvMgr = std::make_shared<DMSContinueRecvMgr>();
-    recvMgr->Init(currentUserId_);
-    recvMgrMap_.emplace(currentUserId_, recvMgr);
+    recvMgr->Init(currentUserId_.load());
+    recvMgrMap_.emplace(currentUserId_.load(), recvMgr);
     HILOGI("CreateNewRecvMgr end.");
     return ERR_OK;
 }
 
 int32_t MultiUserManager::CreateNewRecomMgrLocked()
 {
-    HILOGI("CreateNewRecomMgr begin. accountId: %{public}d.", currentUserId_);
+    HILOGI("CreateNewRecomMgr begin. userId: %{public}d.", currentUserId_.load());
     auto recomMgr = std::make_shared<DMSContinueRecomMgr>();
-    recomMgr->Init(currentUserId_);
-    recomMgrMap_.emplace(currentUserId_, recomMgr);
+    recomMgr->Init(currentUserId_.load());
+    recomMgrMap_.emplace(currentUserId_.load(), recomMgr);
     HILOGI("CreateNewRecomMgr end.");
     return ERR_OK;
 }
@@ -282,38 +302,38 @@ int32_t MultiUserManager::CreateNewRecomMgrLocked(int32_t accountId)
 // LCOV_EXCL_START
 std::shared_ptr<DMSContinueSendMgr> MultiUserManager::GetCurrentSendMgr()
 {
-    HILOGI("accountId: %{public}d.", currentUserId_);
+    HILOGI("userId: %{public}d.", currentUserId_.load());
     std::lock_guard<std::mutex> lock(sendMutex_);
-    if (sendMgrMap_.empty() || sendMgrMap_.find(currentUserId_) == sendMgrMap_.end()) {
+    if (sendMgrMap_.empty() || sendMgrMap_.find(currentUserId_.load()) == sendMgrMap_.end()) {
         HILOGI("sendMgr need to create.");
         CreateNewSendMgrLocked();
     }
-    auto cur = sendMgrMap_.find(currentUserId_);
+    auto cur = sendMgrMap_.find(currentUserId_.load());
     return cur->second;
 }
 
 std::shared_ptr<DMSContinueRecvMgr> MultiUserManager::GetCurrentRecvMgr()
 {
-    HILOGI("GetCurrentRecvMgr. accountId: %{public}d.", currentUserId_);
+    HILOGI("GetCurrentRecvMgr. userId: %{public}d.", currentUserId_.load());
     std::lock_guard<std::mutex> lock(recvMutex_);
-    if (recvMgrMap_.empty() || recvMgrMap_.find(currentUserId_) == recvMgrMap_.end()) {
+    if (recvMgrMap_.empty() || recvMgrMap_.find(currentUserId_.load()) == recvMgrMap_.end()) {
         HILOGI("recvMgr need to create.");
         CreateNewRecvMgrLocked();
     }
-    auto cur = recvMgrMap_.find(currentUserId_);
+    auto cur = recvMgrMap_.find(currentUserId_.load());
     return cur->second;
 }
 // LCOV_EXCL_STOP
 
 std::shared_ptr<DMSContinueRecomMgr> MultiUserManager::GetCurrentRecomMgr()
 {
-    HILOGI("accountId: %{public}d.", currentUserId_);
+    HILOGI("userId: %{public}d.", currentUserId_.load());
     std::lock_guard<std::mutex> lock(recomMutex_);
-    if (recomMgrMap_.empty() || recomMgrMap_.find(currentUserId_) == recomMgrMap_.end()) {
+    if (recomMgrMap_.empty() || recomMgrMap_.find(currentUserId_.load()) == recomMgrMap_.end()) {
         HILOGI("recomMgr need to create.");
         CreateNewRecomMgrLocked();
     }
-    auto cur = recomMgrMap_.find(currentUserId_);
+    auto cur = recomMgrMap_.find(currentUserId_.load());
     return cur->second;
 }
 
@@ -367,9 +387,9 @@ int32_t MultiUserManager::OnRegisterOnListener(const std::string& type,
     HILOGI("OnRegisterOnListener. accountId: %{public}d , callingUid: %{public}d.", accountId, callingUid);
     {
         std::lock_guard<std::mutex> lock(listenerMutex_);
-        if (accountId != 0 && (!IsUserForeground(accountId) || accountId != currentUserId_)) {
-            HILOGW("The current user is not foreground. accountId: %{public}d , currentUserId_: %{public}d.",
-                accountId, currentUserId_);
+        if (accountId != 0 && (!IsUserForeground(accountId) || accountId != currentUserId_.load())) {
+            HILOGW("The current user is not foreground. accountId: %{public}d , currentUserId_.load(): %{public}d.",
+                accountId, currentUserId_.load());
             std::map<std::string, sptr<IRemoteObject>> param;
             param.emplace(type, obj);
             listenerCache_.emplace(accountId, param);
@@ -390,9 +410,9 @@ int32_t MultiUserManager::OnRegisterOffListener(const std::string& type,
     int32_t accountId = -1;
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, accountId);
     HILOGI("OnRegisterOffListener. accountId: %{public}d , callingUid: %{public}d.", accountId, callingUid);
-    if (!IsUserForeground(accountId) || accountId != currentUserId_) {
-        HILOGW("The current user is not foreground. accountId: %{public}d , currentUserId_: %{public}d.",
-            accountId, currentUserId_);
+    if (!IsUserForeground(accountId) || accountId != currentUserId_.load()) {
+        HILOGW("The current user is not foreground. accountId: %{public}d , currentUserId_.load(): %{public}d.",
+            accountId, currentUserId_.load());
         return DMS_NOT_FOREGROUND_USER;
     }
     auto recvMgr = GetCurrentRecvMgr();
@@ -417,18 +437,20 @@ int32_t MultiUserManager::GetForegroundUser()
 
 bool MultiUserManager::IsUserForeground(int32_t accountId)
 {
-    bool isForeground = false;
     std::vector<AccountSA::ForegroundOsAccount> accounts;
     ErrCode err = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccounts(accounts);
     if (err != ERR_OK) {
         HILOGE("GetForegroundOsAccounts passing param inval id or return error!, err : %{public}d", err);
+        return false;
     }
-    if (!accounts.empty() && accounts[0].localId == accountId) {
-        isForeground = true;
-        HILOGD("Current account. accounts[0].localId: %{public}d.", accounts[0].localId);
+    for (const auto& account : accounts) {
+        if (account.localId == accountId) {
+            HILOGD("Account %{public}d is in foreground accounts", accountId);
+            return true;
+        }
     }
-    HILOGD("Current account. accountId: %{public}d.", accountId);
-    return isForeground;
+    HILOGW("Account %{public}d is not in foreground accounts", accountId);
+    return false;
 }
 
 bool MultiUserManager::IsCallerForeground(int32_t callingUid)
@@ -442,7 +464,7 @@ bool MultiUserManager::IsCallerForeground(int32_t callingUid)
 void MultiUserManager::RegisterSoftbusListener()
 {
 #ifdef DMS_RECEIVE_BROADCAST
-    HILOGI("Register softbusListener start. accountId: %{public}d.", currentUserId_);
+    HILOGI("Register softbusListener start. userId: %{public}d.", currentUserId_.load());
     std::shared_ptr<SoftbusAdapterListener> missionBroadcastListener =
         std::make_shared<DistributedMissionBroadcastListener>();
     int32_t ret = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(missionBroadcastListener);
@@ -452,7 +474,7 @@ void MultiUserManager::RegisterSoftbusListener()
     hasRegSoftbusEventListener_ = true;
     HILOGI("Register softbusListener end.");
 #else
-    HILOGW("Register softbusListener Disabled! accountId: %{public}d.", currentUserId_);
+    HILOGW("Register softbusListener Disabled! userId: %{public}d.", currentUserId_.load());
 #endif
 }
 // LCOV_EXCL_STOP

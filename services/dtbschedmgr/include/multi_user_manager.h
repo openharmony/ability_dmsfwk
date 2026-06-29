@@ -16,6 +16,7 @@
 #ifndef OHOS_MULTI_USER_MANAGER_H
 #define OHOS_MULTI_USER_MANAGER_H
 
+#include <atomic>
 #include <map>
 
 #include "mission/notification/dms_continue_recommend_manager.h"
@@ -64,9 +65,10 @@ public:
 
 private:
     void UserSwitchedOnRegisterListenerCache();
+    void InitNewUser(int32_t accountId);
 
 private:
-    int32_t currentUserId_;
+    std::atomic<int32_t> currentUserId_;
     std::map<int32_t, std::shared_ptr<DMSContinueSendMgr>> sendMgrMap_;
     std::map<int32_t, std::shared_ptr<DMSContinueRecvMgr>> recvMgrMap_;
     std::map<int32_t, std::shared_ptr<DMSContinueRecomMgr>> recomMgrMap_;
