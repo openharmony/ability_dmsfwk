@@ -41,6 +41,7 @@ declare_args() {
   dmsfwk_check_screenlock = false
   dmsfwk_feature_dams_enable = true
   dmsfwk_continuation_recommend_installation = false
+  dmsfwk_enable_enterprise_device_management = false
   dmsfwk_check_screenlock = false
   dmsfwk_vpe_enable = false
   if (defined(global_parts_info)) {

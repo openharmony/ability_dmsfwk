@@ -305,13 +305,6 @@ bool DmsKvSyncE2E::IsMDMControlWithExemption(const std::string &bundleName, int3
         GetAnonymStr(appId).c_str(), GetAnonymStr(appIdentifier).c_str(), GetAnonymStr(bundleName).c_str());
 
     std::vector<std::string> allowedList = GetAllowedDistributeAbilityConnBundlesStub(serviceType, accountId);
-    if (!appId.empty()) {
-        auto it = std::find(allowedList.begin(), allowedList.end(), appId);
-        if (it != allowedList.end()) {
-            HILOGI("AppId %{public}s is in exemption list, allow access", GetAnonymStr(appId).c_str());
-            return false;
-        }
-    }
     if (!appIdentifier.empty()) {
         auto idIt = std::find(allowedList.begin(), allowedList.end(), appIdentifier);
         if (idIt != allowedList.end()) {
