@@ -54,5 +54,15 @@ ErrCode AbilityManagerClient::GetMissionInfos(const std::string& deviceId, int32
 {
     return IAbilityManagerClient::clientMock->GetMissionInfos(deviceId, numMax, missionInfos);
 }
+
+ErrCode AbilityManagerClient::RegisterMissionListener(sptr<IMissionListener> listener)
+{
+    return IAbilityManagerClient::clientMock->RegisterMissionListener(listener);
+}
+
+ErrCode AbilityManagerClient::UnRegisterMissionListener(sptr<IMissionListener> listener)
+{
+    return IAbilityManagerClient::clientMock->UnRegisterMissionListener(listener);
+}
 }
 }

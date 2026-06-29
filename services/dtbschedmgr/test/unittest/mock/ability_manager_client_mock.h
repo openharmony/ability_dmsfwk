@@ -18,6 +18,7 @@
 #include <gmock/gmock.h>
 
 #include "ability_manager_client.h"
+#include "mission_listener_interface.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -36,6 +37,8 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE, uint64_t specifiedFullTokenId = 0) = 0;
     virtual ErrCode GetMissionInfos(const std::string& deviceId, int32_t numMax,
         std::vector<MissionInfo> &missionInfos) = 0;
+    virtual ErrCode RegisterMissionListener(sptr<IMissionListener> listener) = 0;
+    virtual ErrCode UnRegisterMissionListener(sptr<IMissionListener> listener) = 0;
 public:
     static inline std::shared_ptr<IAbilityManagerClient> clientMock = nullptr;
 };
@@ -53,6 +56,8 @@ public:
         uint64_t specifiedFullTokenId));
     MOCK_METHOD3(GetMissionInfos, ErrCode(const std::string& deviceId, int32_t numMax,
         std::vector<MissionInfo> &missionInfos));
+    MOCK_METHOD1(RegisterMissionListener, ErrCode(sptr<IMissionListener> listener));
+    MOCK_METHOD1(UnRegisterMissionListener, ErrCode(sptr<IMissionListener> listener));
 };
 }
 }

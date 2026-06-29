@@ -77,6 +77,7 @@ namespace {
     const string DMS_VERSION_ID = "dmsVersion";
     constexpr int32_t SLEEP_TIME = 1000;
     constexpr int32_t WEARLINK_UID = 7259;
+    constexpr int32_t TEST_WINDOW_MANAGER_SERVICE_ID = 4606;
 }
 
 void SetNativeToken()
@@ -1913,6 +1914,70 @@ HWTEST_F(DistributedSchedServiceFirstTest, OnIdleTest_001, TestSize.Level1)
         Return(1)));
     ret = DistributedSchedService::GetInstance().OnIdle(idleReason);
     EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name  : OnAddSystemAbility_RegisterMissionListenerSuccess
+ * @tc.number: OnAddSystemAbility_001
+ * @tc.desc  : Test OnAddSystemAbility when RegisterMissionListener succeeds on first attempt.
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, OnAddSystemAbility_RegisterMissionListenerSuccess, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceFirstTest "
+              << "OnAddSystemAbility_RegisterMissionListenerSuccess begin" << std::endl;
+    int32_t systemAbilityId = TEST_WINDOW_MANAGER_SERVICE_ID;
+    std::string deviceId = "testDeviceId";
+
+    EXPECT_CALL(*clientMock_, Connect()).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*clientMock_, RegisterMissionListener(_)).WillOnce(Return(ERR_OK));
+
+    DistributedSchedService::GetInstance().OnAddSystemAbility(systemAbilityId, deviceId);
+    DTEST_LOG << "DistributedSchedServiceFirstTest "
+              << "OnAddSystemAbility_RegisterMissionListenerSuccess end" << std::endl;
+}
+
+/**
+ * @tc.name  : OnAddSystemAbility_RegisterMissionListenerRetrySuccess
+ * @tc.number: OnAddSystemAbility_002
+ * @tc.desc  : Test OnAddSystemAbility when RegisterMissionListener succeeds after retry.
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, OnAddSystemAbility_RegisterMissionListenerRetrySuccess, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceFirstTest "
+              << "OnAddSystemAbility_RegisterMissionListenerRetrySuccess begin" << std::endl;
+    int32_t systemAbilityId = TEST_WINDOW_MANAGER_SERVICE_ID;
+    std::string deviceId = "testDeviceId";
+
+    EXPECT_CALL(*clientMock_, Connect()).WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*clientMock_, RegisterMissionListener(_))
+        .WillOnce(Return(ERR_INVALID_OPERATION))
+        .WillOnce(Return(ERR_OK));
+
+    DistributedSchedService::GetInstance().OnAddSystemAbility(systemAbilityId, deviceId);
+    DTEST_LOG << "DistributedSchedServiceFirstTest "
+              << "OnAddSystemAbility_RegisterMissionListenerRetrySuccess end" << std::endl;
+}
+
+/**
+ * @tc.name  : OnAddSystemAbility_RegisterMissionListenerRetryFailed
+ * @tc.number: OnAddSystemAbility_003
+ * @tc.desc  : Test OnAddSystemAbility when RegisterMissionListener fails after all retries.
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, OnAddSystemAbility_RegisterMissionListenerRetryFailed, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceFirstTest "
+              << "OnAddSystemAbility_RegisterMissionListenerRetryFailed begin" << std::endl;
+    int32_t systemAbilityId = TEST_WINDOW_MANAGER_SERVICE_ID;
+    std::string deviceId = "testDeviceId";
+
+    EXPECT_CALL(*clientMock_, Connect()).WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*clientMock_, RegisterMissionListener(_))
+        .Times(3)
+        .WillRepeatedly(Return(ERR_INVALID_OPERATION));
+
+    DistributedSchedService::GetInstance().OnAddSystemAbility(systemAbilityId, deviceId);
+    DTEST_LOG << "DistributedSchedServiceFirstTest "
+              << "OnAddSystemAbility_RegisterMissionListenerRetryFailed end" << std::endl;
 }
 }
 }
