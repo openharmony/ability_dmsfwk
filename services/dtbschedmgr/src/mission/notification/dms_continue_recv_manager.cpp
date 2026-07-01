@@ -136,10 +136,10 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
         HILOGE("obj is null, type: %{public}s", type.c_str());
         return INVALID_PARAMETERS_ERR;
     }
-     if (type.size() > MAX_TYPE_SIZE) {
-         HILOGE("invalid type, type: %{public}s", type.c_str());
-         return INVALID_PARAMETERS_ERR;
-     }
+    if (type.size() > MAX_TYPE_SIZE) {
+     HILOGE("invalid type, type: %{public}s", type.c_str());
+     return INVALID_PARAMETERS_ERR;
+    }
     onType_ = type;
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(type);
