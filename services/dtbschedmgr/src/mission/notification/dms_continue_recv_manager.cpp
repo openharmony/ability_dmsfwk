@@ -46,6 +46,7 @@ constexpr int32_t INDEX_3 = 3;
 constexpr int32_t DBMS_RETRY_MAX_TIME = 5;
 constexpr int32_t DBMS_RETRY_DELAY = 2000;
 constexpr int32_t REGIST_MAX_SIZE = 1000;
+constexpr int32_t MAX_TYPE_SIZE = 50;
 const std::string TAG = "DMSContinueRecvMgr";
 const std::string DBMS_RETRY_TASK = "retry_on_boradcast_task";
 const std::u16string DESCRIPTOR = u"ohos.aafwk.RemoteOnListener";
@@ -135,21 +136,20 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
         HILOGE("obj is null, type: %{public}s", type.c_str());
         return INVALID_PARAMETERS_ERR;
     }
+     if (type.size() > MAX_TYPE_SIZE) {
+         HILOGE("invalid type, type: %{public}s", type.c_str());
+         return INVALID_PARAMETERS_ERR;
+     }
     onType_ = type;
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(type);
     if (iterItem == registerOnListener_.end()) {
-        if (registerOnListener_.size() < REGIST_MAX_SIZE) {
-            HILOGD("The itemItem does not exist in the registerOnListener_, adding, type: %{public}s", type.c_str());
-            std::vector<sptr<IRemoteObject>> objs;
-            obj->AddDeathRecipient(missionDiedListener_);
-            objs.emplace_back(obj);
-            registerOnListener_[type] = objs;
-            HILOGI("RegisterOnListener end");
-            return ERR_OK;
+        if (registerOnListener_.size() >= REGIST_MAX_SIZE) {
+            HILOGE("registerOnListener_ is full, type: %{public}s", type.c_str());
+            return INVALID_PARAMETERS_ERR;
         }
-        HILOGE("registerOnListener_ is full, type: %{public}s", type.c_str());
-        return INVALID_PARAMETERS_ERR;
+        std::vector<sptr<IRemoteObject>> objs;
+        registerOnListener_[type] = objs;
     }
     for (auto iter : iterItem->second) {
         if (iter == obj) {
@@ -164,7 +164,7 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
         return INVALID_PARAMETERS_ERR;
     }
     validatedObj->AddDeathRecipient(missionDiedListener_);
-    iterItem->second.emplace_back(validatedObj);
+    registerOnListener_[type].emplace_back(validatedObj);
     HILOGI("RegisterOnListener end");
     return ERR_OK;
 }
