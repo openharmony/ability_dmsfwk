@@ -342,6 +342,7 @@ ohos_shared_library("distributedschedsvr") {
       "bluetooth:btframework",
       "config_policy:configpolicy_util",
       "napi:ace_napi",
+      "node:node_header_notice",
     ]
     if (dmsfwk_check_edm) {
       external_deps += [ "enterprise_device_management:edmservice_kits" ]

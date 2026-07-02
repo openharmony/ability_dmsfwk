@@ -162,7 +162,10 @@ namespace DistributedCollab {
                 codecAdapter_->SetEncoderAdapterCallback(encoderAdapterCallback);
             } else {
                 HILOGI("Init mediaCodec fail");
-                eventReceiver_->OnEvent({ "surface_encoder_filter", EventType::EVENT_ERROR, Status::ERROR_UNKNOWN });
+                if (eventReceiver_ != nullptr) {
+                    eventReceiver_->OnEvent({ "surface_encoder_filter",
+                        EventType::EVENT_ERROR, Status::ERROR_UNKNOWN });
+                }
             }
             isUpdateCodecNeeded_ = false;
         }
@@ -200,6 +203,10 @@ namespace DistributedCollab {
     Status SurfaceEncoderFilter::DoPrepare()
     {
         HILOGI("Prepare");
+        if (filterCallback_ == nullptr) {
+            HILOGI("filterCallback null.");
+            return Status::ERROR_NULL_POINTER;
+        }
         filterCallback_->OnCallback(shared_from_this(), FilterCallBackCommand::NEXT_FILTER_NEEDED,
             StreamType::STREAMTYPE_ENCODED_VIDEO);
         return Status::OK;
