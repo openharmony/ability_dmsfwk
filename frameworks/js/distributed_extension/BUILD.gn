@@ -30,7 +30,11 @@ ohos_static_library("distributedextensionability_napi_fwk") {
 
   sources = [ "distributed_extension_module.cpp" ]
 
-  external_deps = [ "napi:ace_napi" ]
+  external_deps = [
+    "libuv:uv",
+    "napi:ace_napi",
+    "node:node_header_notice",
+  ]
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
