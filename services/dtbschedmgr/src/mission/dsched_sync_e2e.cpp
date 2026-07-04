@@ -107,7 +107,7 @@ bool DmsKvSyncE2E::CheckDeviceCfg()
 bool DmsKvSyncE2E::CheckMDMCtrlRule(const std::string &bundleName)
 {
     HILOGD("called.");
-    return false;
+    return isMDMControl_.load();
 }
 
 bool DmsKvSyncE2E::CheckCtrlRule()
