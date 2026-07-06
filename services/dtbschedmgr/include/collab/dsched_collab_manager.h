@@ -60,6 +60,7 @@ public:
     int32_t CheckCollabRelation(const CollabInfo *sourceInfo, const CollabInfo *sinkInfo);
     int32_t ReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
     int32_t CancleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
+    void DisconnectAllSessionsForUser(int32_t userId);
     void NotifyWifiOpen();
     bool GetWifiStatus();
 

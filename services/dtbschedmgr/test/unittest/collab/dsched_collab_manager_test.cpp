@@ -874,5 +874,37 @@ HWTEST_F(DSchedCollabManagerTest, HandleCloseSessions_002, TestSize.Level3)
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedCollabManagerTest HandleCloseSessions_002 end" << std::endl;
 }
+
+/**
+ * @tc.name: DisconnectAllSessionsForUser_001
+ * @tc.desc: test DisconnectAllSessionsForUser with empty sessions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, DisconnectAllSessionsForUser_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest DisconnectAllSessionsForUser_001 begin" << std::endl;
+    DSchedCollabManager::GetInstance().collabs_.clear();
+    DSchedCollabManager::GetInstance().DisconnectAllSessionsForUser(0);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().collabs_.size(), static_cast<size_t>(0));
+    DTEST_LOG << "DSchedCollabManagerTest DisconnectAllSessionsForUser_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAllSessionsForUser_002
+ * @tc.desc: test DisconnectAllSessionsForUser with invalid userId
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, DisconnectAllSessionsForUser_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest DisconnectAllSessionsForUser_002 begin" << std::endl;
+    DSchedCollabManager::GetInstance().collabs_.clear();
+    std::string collabToken = "collabToken";
+    DSchedCollabInfo info;
+    std::shared_ptr<DSchedCollab> ptr = std::make_shared<DSchedCollab>(collabToken, info);
+    DSchedCollabManager::GetInstance().collabs_["collabToken"] = ptr;
+    DSchedCollabManager::GetInstance().DisconnectAllSessionsForUser(-1);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().collabs_.size(), static_cast<size_t>(1));
+    DTEST_LOG << "DSchedCollabManagerTest DisconnectAllSessionsForUser_002 end" << std::endl;
+}
 }
 }
