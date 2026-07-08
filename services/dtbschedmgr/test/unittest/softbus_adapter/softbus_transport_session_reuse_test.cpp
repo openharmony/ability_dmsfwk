@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <securec.h>
+
 #include "softbus_transport_test.h"
 #include "softbus_adapter/mock_softbus_adapter.h"
 #include "dsched_transport_softbus_adapter.h"
