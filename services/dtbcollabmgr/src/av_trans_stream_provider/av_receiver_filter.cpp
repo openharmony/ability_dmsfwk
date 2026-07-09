@@ -441,6 +441,11 @@ int32_t AVReceiverFilter::RequestAndPushData(const std::shared_ptr<AVTransStream
         outputBuffer->GetUniqueId(), outputBuffer->GetConfig().size);
     auto& memory = outputBuffer->memory_;
     memory->SetSize(avBufferConfig.size);
+    if (static_cast<size_t>(memory->GetSize()) < data->StreamData()->Size()) {
+        HILOGE("memory size is not enough");
+        bufferQProxy_->CancelBuffer(outputBuffer);
+        return static_cast<int32_t>(Media::Status::ERROR_WRONG_STATE);
+    }
     int32_t writeRet = memcpy_s(memory->GetAddr(), memory->GetSize(),
         data->StreamData()->Data(), data->StreamData()->Size());
     if (writeRet != ERR_OK) {

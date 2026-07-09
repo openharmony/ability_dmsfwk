@@ -1072,6 +1072,10 @@ int32_t DSchedCollab::SendCommand(std::shared_ptr<BaseCmd> cmd)
         return ret;
     }
     auto buffer = std::make_shared<DSchedDataBuffer>(jsonStr.length() + 1);
+    if (jsonStr.length() > buffer->Capacity()) {
+        HILOGE("buffer size not enough.");
+        return INVALID_PARAMETERS_ERR;
+    }
     ret = memcpy_s(buffer->Data(), buffer->Capacity(), jsonStr.c_str(), jsonStr.length());
     if (ret != ERR_OK) {
         HILOGE("memcpy_s failed, cmd %{public}s, ret %{public}d", CMDDATA[cmd->command_].c_str(), ret);
