@@ -1164,6 +1164,7 @@ HWTEST_F(DmsKvSyncE2ETest, CheckMDMCtrlRuleTest_001, TestSize.Level1)
     auto dmsKvSyncE2E = GetDmsKvSyncE2E();
     EXPECT_NE(dmsKvSyncE2E, nullptr);
     if (dmsKvSyncE2E != nullptr) {
+        dmsKvSyncE2E_->GetInstance()->isMDMControl_ = false;
         bool ret = dmsKvSyncE2E_->GetInstance()->CheckMDMCtrlRule("com.example.test");
         EXPECT_FALSE(ret);
 
