@@ -206,7 +206,7 @@ int32_t DistributedIntentDsoftbusAdapter::CreateIntentSocket(const std::string& 
     int32_t socketFd = Socket(info);
     if (socketFd <= 0) {
         HILOGE("Create socket failed, ret=%{public}d", socketFd);
-        return ERR_DI_SOCKET_CREATE_FAILED;
+        return INVALID_SOCKET_FD;
     }
 
     HILOGI("Create socket success, socketFd=%{public}d", socketFd);

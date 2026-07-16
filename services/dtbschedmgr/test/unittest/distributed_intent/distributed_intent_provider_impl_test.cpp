@@ -205,10 +205,12 @@ HWTEST_F(DistributedIntentProviderImplTest, SerializeResultData_Success, TestSiz
  */
 HWTEST_F(DistributedIntentProviderImplTest, ParseDisconnectData_InvalidJson, TestSize.Level3)
 {
+    uint64_t requestCode = 99;
     int32_t resultCode = 42;
     std::string resultMsg = "original";
 
-    EXPECT_NO_FATAL_FAILURE(provider_->ParseDisconnectData("not_json", resultCode, resultMsg));
+    EXPECT_NO_FATAL_FAILURE(provider_->ParseDisconnectData("not_json", requestCode, resultCode, resultMsg));
+    EXPECT_EQ(requestCode, 99);
     EXPECT_EQ(resultCode, 42);
     EXPECT_EQ(resultMsg, "original");
 }
@@ -221,11 +223,13 @@ HWTEST_F(DistributedIntentProviderImplTest, ParseDisconnectData_InvalidJson, Tes
  */
 HWTEST_F(DistributedIntentProviderImplTest, ParseDisconnectData_Success, TestSize.Level3)
 {
+    uint64_t requestCode = 0;
     int32_t resultCode = 0;
     std::string resultMsg;
-    std::string data = R"({"result":123,"resultMsg":"disconnect_msg"})";
+    std::string data = R"({"requestCode":456,"result":123,"resultMsg":"disconnect_msg"})";
 
-    provider_->ParseDisconnectData(data, resultCode, resultMsg);
+    provider_->ParseDisconnectData(data, requestCode, resultCode, resultMsg);
+    EXPECT_EQ(requestCode, 456u);
     EXPECT_EQ(resultCode, 123);
     EXPECT_EQ(resultMsg, "disconnect_msg");
 }

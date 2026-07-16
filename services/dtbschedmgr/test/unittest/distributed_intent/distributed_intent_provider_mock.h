@@ -50,8 +50,8 @@ public:
         AAFwk::Want& want, IntentContext& ctx, std::string& resultMsg));
     MOCK_METHOD4(SerializeResultData, int32_t(int32_t resultCode,
         const std::string& resultMsg, uint64_t requestCode, std::string& data));
-    MOCK_METHOD3(ParseDisconnectData, void(const std::string& data,
-        int32_t& resultCode, std::string& resultMsg));
+    MOCK_METHOD4(ParseDisconnectData, void(const std::string& data,
+        uint64_t& requestCode, int32_t& resultCode, std::string& resultMsg));
     MOCK_METHOD4(ParseResultData, bool(const std::string& data,
         uint64_t& requestCode, int32_t& resultCode, std::string& resultMsg));
     MOCK_METHOD3(ParseIntentVersionProfile, bool(const std::string& profileData,

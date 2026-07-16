@@ -42,6 +42,8 @@ public:
         const IntentCallerInfo& callerInfo, const std::string& resultMsg) = 0;
 
     virtual void OnDeviceOffline(const std::string& networkId) = 0;
+
+    virtual void DisconnectAllSessionsForDistributedAccount(const std::string& distributedAccountId) = 0;
 };
 
 } // namespace DistributedSchedule

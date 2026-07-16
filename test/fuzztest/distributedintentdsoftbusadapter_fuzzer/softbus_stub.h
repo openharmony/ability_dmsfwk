@@ -23,6 +23,8 @@ namespace DistributedSchedule {
 void SetSoftbusMockEnabled(bool enabled);
 void SetSoftbusMockSocketFd(int32_t fd);
 void SetSoftbusMockMaxSendSize(uint32_t size);
+void SetSoftbusMockSocketFail(bool fail);
+void SetSoftbusMockSendBytesFail(bool fail);
 }
 }
 

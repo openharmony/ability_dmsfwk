@@ -107,7 +107,8 @@ int32_t RemoteIntentManager::SendIntentToRemote(const std::string& dstDeviceId,
 }
 
 void RemoteIntentManager::RegisterResultCallback(uint64_t requestCode,
-    const std::string& deviceId, const sptr<IRemoteObject>& callback)
+    const std::string& deviceId, const sptr<IRemoteObject>& callback,
+    const std::string& distributedAccountId, int32_t socketFd)
 {
     if (callback == nullptr) {
         return;
@@ -118,6 +119,8 @@ void RemoteIntentManager::RegisterResultCallback(uint64_t requestCode,
     entry.callback = callback;
     entry.timestamp = std::chrono::steady_clock::now();
     entry.deviceId = deviceId;
+    entry.socketFd = socketFd;
+    entry.distributedAccountId = distributedAccountId;
     requestCodeCallbackMap_[requestCode] = entry;
 }
 
@@ -164,7 +167,8 @@ int32_t RemoteIntentManager::StartRemoteIntent(const OHOS::AAFwk::Want& want,
     if (ret != ERR_DI_OK) {
         return ret;
     }
-    RegisterResultCallback(intentCallerInfo.requestCode, dstDeviceId, resultCallback);
+    RegisterResultCallback(intentCallerInfo.requestCode, dstDeviceId,
+        resultCallback, ctx.accountInfo.activeAccountId, socketFd);
     HILOGI("StartRemoteIntent success, socketFd=%{public}d, requestCode=%{public}" PRIu64,
         socketFd, intentCallerInfo.requestCode);
     return ERR_DI_OK;
@@ -301,14 +305,7 @@ int32_t RemoteIntentManager::HandleIntentExecute(const std::string& srcDeviceId,
             IntentDataType::INTENT_DATA_TYPE_DMS_RESULT);
         return ERR_DI_SERIALIZE_FAILED;
     }
-    auto socketKey = std::make_pair(srcDeviceId, ctx.requestCode);
-    {
-        std::lock_guard<std::mutex> lock(requestSocketMutex_);
-        requestSocketMap_[socketKey] = socketFd;
-        HILOGI("Record socket mapping: device=%{public}s, requestCode=%{public}" PRIu64
-            ", socket=%{public}d", GetAnonymStr(srcDeviceId).c_str(), ctx.requestCode, socketFd);
-    }
-
+    RecordSinkSocketMapping(srcDeviceId, ctx.requestCode, socketFd);
     std::string localDeviceId;
     auto* provider = IntentPermissionChecker::GetInstance().GetProvider();
     if (provider == nullptr || !provider->GetLocalDeviceId(localDeviceId)) {
@@ -332,8 +329,38 @@ int32_t RemoteIntentManager::HandleIntentExecute(const std::string& srcDeviceId,
         RemoveSocketMapping(srcDeviceId, ctx.requestCode);
         return ret;
     }
+    StoreSinkSessionDistributedAccount(srcDeviceId, ctx.requestCode);
     HILOGI("HandleIntentExecute success, requestCode=%{public}" PRIu64, ctx.requestCode);
     return ERR_DI_OK;
+}
+
+void RemoteIntentManager::RecordSinkSocketMapping(const std::string& srcDeviceId,
+    uint64_t requestCode, int32_t socketFd)
+{
+    auto socketKey = std::make_pair(srcDeviceId, requestCode);
+    std::lock_guard<std::mutex> lock(requestSocketMutex_);
+    SinkSessionEntry entry;
+    entry.socketFd = socketFd;
+    requestSocketMap_[socketKey] = entry;
+    HILOGI("Record socket mapping: device=%{public}s, requestCode=%{public}" PRIu64
+        ", socket=%{public}d", GetAnonymStr(srcDeviceId).c_str(), requestCode, socketFd);
+}
+
+void RemoteIntentManager::StoreSinkSessionDistributedAccount(const std::string& srcDeviceId,
+    uint64_t requestCode)
+{
+    IDistributedSched::AccountInfo localAccountInfo;
+    if (!IntentPermissionChecker::GetInstance().GetOsAccountData(localAccountInfo)) {
+        HILOGW("GetOsAccountData failed, distributedAccountId not set, requestCode=%{public}" PRIu64,
+            requestCode);
+        return;
+    }
+    auto socketKey = std::make_pair(srcDeviceId, requestCode);
+    std::lock_guard<std::mutex> lock(requestSocketMutex_);
+    auto it = requestSocketMap_.find(socketKey);
+    if (it != requestSocketMap_.end()) {
+        it->second.distributedAccountId = localAccountInfo.activeAccountId;
+    }
 }
 
 int32_t RemoteIntentManager::CheckAndExecuteIntent(AAFwk::Want& want,
@@ -443,12 +470,42 @@ void RemoteIntentManager::HandleDisconnect(const std::string& srcDeviceId,
 {
     HILOGI("HandleDisconnect: srcDeviceId=%{public}s, socket=%{public}d",
         GetAnonymStr(srcDeviceId).c_str(), socketFd);
+    uint64_t requestCode = 0;
     int32_t resultCode = INTENT_LINK_DISCONNECT_REASON_PEER_DISCONNECT;
     std::string resultMsg;
     auto* provider = IntentPermissionChecker::GetInstance().GetProvider();
     if (provider != nullptr) {
-        provider->ParseDisconnectData(data, resultCode, resultMsg);
+        provider->ParseDisconnectData(data, requestCode, resultCode, resultMsg);
     }
+
+    if (resultCode == INTENT_LINK_DISCONNECT_REASON_USER_SWITCH
+        || resultCode == INTENT_LINK_DISCONNECT_REASON_ACCOUNT_LOGOUT) {
+        HILOGI("Per-requestCode disconnect: device=%{public}s, requestCode=%{public}" PRIu64,
+            GetAnonymStr(srcDeviceId).c_str(), requestCode);
+        sptr<IRemoteObject> callback;
+        {
+            std::lock_guard<std::mutex> lock(connectMutex_);
+            auto it = requestCodeCallbackMap_.find(requestCode);
+            if (it != requestCodeCallbackMap_.end() && it->second.deviceId == srcDeviceId) {
+                callback = it->second.callback;
+                requestCodeCallbackMap_.erase(it);
+            }
+        }
+        if (callback != nullptr) {
+            MessageParcel parcel;
+            if (parcel.WriteInterfaceToken(INTENT_RESULT_CALLBACK_TOKEN)
+                && parcel.WriteUint64(requestCode) && parcel.WriteInt32(resultCode)) {
+                MessageParcel reply;
+                MessageOption option;
+                callback->SendRequest(ON_LINK_DISCONNECTED, parcel, reply, option);
+            }
+        }
+        RemoveSocketMapping(srcDeviceId, requestCode);
+        DistributedIntentDsoftbusAdapter::GetInstance().UnbindIntentSession(socketFd);
+        HILOGI("HandleDisconnect per-requestCode done, requestCode=%{public}" PRIu64, requestCode);
+        return;
+    }
+
     NotifyLinkDisconnected(srcDeviceId, resultCode);
     CleanupSocketMapping(srcDeviceId, socketFd);
     DistributedIntentDsoftbusAdapter::GetInstance().ShutdownDeviceSession(srcDeviceId);
@@ -533,7 +590,7 @@ void RemoteIntentManager::CleanupSocketMapping(const std::string& deviceId, int3
     for (auto it = requestSocketMap_.begin(); it != requestSocketMap_.end();) {
         if (it->first.first == deviceId) {
             HILOGW("Cleanup mapping: device=%{public}s, requestCode=%{public}" PRIu64
-                ", socket=%{public}d", GetAnonymStr(deviceId).c_str(), it->first.second, it->second);
+                ", socket=%{public}d", GetAnonymStr(deviceId).c_str(), it->first.second, it->second.socketFd);
             it = requestSocketMap_.erase(it);
         } else {
             ++it;
@@ -617,7 +674,7 @@ int32_t RemoteIntentManager::HandleSendIntentResult(const OHOS::AAFwk::Want& wan
                 GetAnonymStr(srcDeviceId).c_str());
             return ERR_DI_SYSTEM_WORK_ABNORMALLY;
         }
-        socketFd = it->second;
+        socketFd = it->second.socketFd;
         requestSocketMap_.erase(it);
         HILOGI("Found socket=%{public}d and cleaned mapping", socketFd);
     }
@@ -670,7 +727,7 @@ void RemoteIntentManager::CleanupExpiredCallbacks()
             auto key = std::make_pair(deviceId, requestCode);
             auto it = requestSocketMap_.find(key);
             if (it != requestSocketMap_.end()) {
-                socketFd = it->second;
+                socketFd = it->second.socketFd;
                 requestSocketMap_.erase(it);
             }
         }
@@ -714,6 +771,87 @@ void RemoteIntentManager::NotifyAllCallbacksDisconnected(const std::string& devi
     }
     HILOGI("NotifyAllCallbacksDisconnected done, notified=%{public}zu callbacks",
         disconnectedCallbacks.size());
+}
+
+void RemoteIntentManager::DisconnectAllSessionsForDistributedAccount(const std::string& distributedAccountId)
+{
+    HILOGI("DisconnectAllSessionsForDistributedAccount called, distributedAccountId=%{public}s",
+        GetAnonymStr(distributedAccountId).c_str());
+    if (distributedAccountId.empty()) {
+        HILOGW("invalid distributedAccountId");
+        return;
+    }
+    size_t sinkCount = CollectAndNotifySinkSessions(distributedAccountId);
+    size_t callerCount = CollectAndCleanupCallerSessions(distributedAccountId);
+    HILOGI("DisconnectAllSessionsForDistributedAccount end, sink=%{public}zu, caller=%{public}zu",
+        sinkCount, callerCount);
+}
+
+size_t RemoteIntentManager::CollectAndNotifySinkSessions(const std::string& distributedAccountId)
+{
+    struct SinkItem {
+        std::string deviceId;
+        uint64_t requestCode;
+        int32_t socketFd;
+    };
+    std::vector<SinkItem> items;
+    {
+        std::lock_guard<std::mutex> lock(requestSocketMutex_);
+        for (auto it = requestSocketMap_.begin(); it != requestSocketMap_.end();) {
+            if (it->second.distributedAccountId == distributedAccountId) {
+                items.push_back({it->first.first, it->first.second, it->second.socketFd});
+                it = requestSocketMap_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+    for (const auto& item : items) {
+        SendDisconnectToRemote(item.socketFd, item.requestCode,
+            INTENT_LINK_DISCONNECT_REASON_ACCOUNT_LOGOUT, "distributed account logout");
+        HILOGI("sink session notified, device=%{public}s, requestCode=%{public}" PRIu64,
+            GetAnonymStr(item.deviceId).c_str(), item.requestCode);
+    }
+    return items.size();
+}
+
+size_t RemoteIntentManager::CollectAndCleanupCallerSessions(const std::string& distributedAccountId)
+{
+    struct CallerItem {
+        uint64_t requestCode;
+        std::string deviceId;
+        int32_t socketFd;
+        sptr<IRemoteObject> callback;
+    };
+    std::vector<CallerItem> items;
+    {
+        std::lock_guard<std::mutex> lock(connectMutex_);
+        for (auto it = requestCodeCallbackMap_.begin(); it != requestCodeCallbackMap_.end();) {
+            if (it->second.distributedAccountId == distributedAccountId) {
+                items.push_back({it->first, it->second.deviceId,
+                    it->second.socketFd, it->second.callback});
+                it = requestCodeCallbackMap_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+    for (const auto& item : items) {
+        if (item.callback != nullptr) {
+            MessageParcel data;
+            if (data.WriteInterfaceToken(INTENT_RESULT_CALLBACK_TOKEN)
+                && data.WriteUint64(item.requestCode)
+                && data.WriteInt32(INTENT_LINK_DISCONNECT_REASON_ACCOUNT_LOGOUT)) {
+                MessageParcel reply;
+                MessageOption option;
+                item.callback->SendRequest(ON_LINK_DISCONNECTED, data, reply, option);
+            }
+        }
+        DistributedIntentDsoftbusAdapter::GetInstance().UnbindIntentSession(item.socketFd);
+        HILOGI("caller session cleaned, device=%{public}s, requestCode=%{public}" PRIu64,
+            GetAnonymStr(item.deviceId).c_str(), item.requestCode);
+    }
+    return items.size();
 }
 
 } // namespace DistributedSchedule

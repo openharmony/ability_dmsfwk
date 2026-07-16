@@ -448,9 +448,9 @@ HWTEST_F(RemoteIntentManagerTest, HandleBusinessResult_DeserializeFail_013, Test
 HWTEST_F(RemoteIntentManagerTest, CleanupSocketMapping_Success_016, TestSize.Level3)
 {
     RemoteIntentManager::GetInstance().requestSocketMap_.clear();
-    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = TEST_SOCKET_FD;
-    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE + 1}] = TEST_SOCKET_FD + 1;
-    RemoteIntentManager::GetInstance().requestSocketMap_[{"other_device", TEST_REQUEST_CODE}] = TEST_SOCKET_FD + 2;
+    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD};
+    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE + 1}] = {TEST_SOCKET_FD + 1};
+    RemoteIntentManager::GetInstance().requestSocketMap_[{"other_device", TEST_REQUEST_CODE}] = {TEST_SOCKET_FD + 2};
 
     RemoteIntentManager::GetInstance().CleanupSocketMapping(SRC_DEVICE_ID, TEST_SOCKET_FD);
 
@@ -565,7 +565,8 @@ HWTEST_F(RemoteIntentManagerTest, RegisterResultCallback_NullCallback_027, TestS
 {
     RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
     
-    RemoteIntentManager::GetInstance().RegisterResultCallback(TEST_REQUEST_CODE, DST_DEVICE_ID, nullptr);
+    RemoteIntentManager::GetInstance().RegisterResultCallback(
+        TEST_REQUEST_CODE, DST_DEVICE_ID, nullptr, "", TEST_SOCKET_FD);
     
     EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
 }
@@ -580,11 +581,13 @@ HWTEST_F(RemoteIntentManagerTest, RegisterResultCallback_Success_028, TestSize.L
 {
     RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
     
-    RemoteIntentManager::GetInstance().RegisterResultCallback(TEST_REQUEST_CODE, DST_DEVICE_ID, callback_);
+    RemoteIntentManager::GetInstance().RegisterResultCallback(
+        TEST_REQUEST_CODE, DST_DEVICE_ID, callback_, "account_A", TEST_SOCKET_FD);
     
     EXPECT_EQ(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.size(), 1u);
-    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.find(TEST_REQUEST_CODE)
-        != RemoteIntentManager::GetInstance().requestCodeCallbackMap_.end());
+    auto it = RemoteIntentManager::GetInstance().requestCodeCallbackMap_.find(TEST_REQUEST_CODE);
+    ASSERT_TRUE(it != RemoteIntentManager::GetInstance().requestCodeCallbackMap_.end());
+    EXPECT_EQ(it->second.distributedAccountId, "account_A");
 }
 
 /**
@@ -645,7 +648,7 @@ HWTEST_F(RemoteIntentManagerTest, CleanupExpiredCallbacks_ExpiredCallback_034, T
         .deviceId = DST_DEVICE_ID,
     };
     RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry;
-    RemoteIntentManager::GetInstance().requestSocketMap_[{DST_DEVICE_ID, TEST_REQUEST_CODE}] = TEST_SOCKET_FD;
+    RemoteIntentManager::GetInstance().requestSocketMap_[{DST_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD};
     
     EXPECT_CALL(*mocks_.adapterMock, UnbindIntentSession(_)).Times(1);
     RemoteIntentManager::GetInstance().CleanupExpiredCallbacks();
@@ -776,7 +779,7 @@ HWTEST_F(RemoteIntentManagerTest, NotifyLinkDisconnected_DifferentDevice_043, Te
 HWTEST_F(RemoteIntentManagerTest, HandleSendIntentResult_GetLocalDeviceIdFail_044, TestSize.Level3)
 {
     RemoteIntentManager::GetInstance().requestSocketMap_.clear();
-    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = TEST_SOCKET_FD;
+    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD};
 
     EXPECT_CALL(*mocks_.providerMock, GetLocalDeviceId(_))
         .WillRepeatedly(Return(false));
@@ -829,9 +832,9 @@ HWTEST_F(RemoteIntentManagerTest, HandleDisconnect_Success, TestSize.Level3)
         .deviceId = SRC_DEVICE_ID,
     };
     RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry;
-    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = TEST_SOCKET_FD;
+    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD};
 
-    EXPECT_CALL(*mocks_.providerMock, ParseDisconnectData(_, _, _)).Times(1);
+    EXPECT_CALL(*mocks_.providerMock, ParseDisconnectData(_, _, _, _)).Times(1);
     EXPECT_CALL(*mocks_.adapterMock, ShutdownDeviceSession(SRC_DEVICE_ID)).Times(1);
 
     RemoteIntentManager::GetInstance().HandleDisconnect(SRC_DEVICE_ID, "test_data", TEST_SOCKET_FD);
@@ -1328,5 +1331,711 @@ HWTEST_F(RemoteIntentManagerTest, HandleIntentExecute_ProviderNull, TestSize.Lev
         ERR_DI_SERIALIZE_FAILED);
     IntentPermissionChecker::GetInstance().SetProvider(mocks_.providerMock.get());
 }
+
+/**
+ * @tc.name: HandleDisconnect_UserSwitch_005
+ * @tc.desc: Test HandleDisconnect with USER_SWITCH reason does per-requestCode cleanup
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleDisconnect_UserSwitch, TestSize.Level3)
+{
+    DTEST_LOG << "HandleDisconnect_UserSwitch begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    CallbackEntry entry1 = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = SRC_DEVICE_ID,
+        .socketFd = TEST_SOCKET_FD,
+    };
+    CallbackEntry entry2 = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = SRC_DEVICE_ID,
+        .socketFd = TEST_SOCKET_FD + 1,
+    };
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry1;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE + 1] = entry2;
+    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD};
+
+    EXPECT_CALL(*mocks_.providerMock, ParseDisconnectData(_, _, _, _))
+        .WillOnce(DoAll(SetArgReferee<1>(TEST_REQUEST_CODE),
+            SetArgReferee<2>(static_cast<int32_t>(INTENT_LINK_DISCONNECT_REASON_USER_SWITCH))));
+    EXPECT_CALL(*mocks_.adapterMock, UnbindIntentSession(TEST_SOCKET_FD)).Times(1);
+    EXPECT_CALL(*mocks_.adapterMock, ShutdownDeviceSession(_)).Times(0);
+
+    RemoteIntentManager::GetInstance().HandleDisconnect(SRC_DEVICE_ID, "test_data", TEST_SOCKET_FD);
+    EXPECT_EQ(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.size(), 1u);
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestSocketMap_.empty());
+    DTEST_LOG << "HandleDisconnect_UserSwitch end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleDisconnect_AccountLogout_008
+ * @tc.desc: Test HandleDisconnect with ACCOUNT_LOGOUT reason does per-requestCode cleanup
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleDisconnect_AccountLogout, TestSize.Level3)
+{
+    DTEST_LOG << "HandleDisconnect_AccountLogout begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    CallbackEntry entry1 = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = SRC_DEVICE_ID,
+        .socketFd = TEST_SOCKET_FD,
+    };
+    CallbackEntry entry2 = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = SRC_DEVICE_ID,
+        .socketFd = TEST_SOCKET_FD + 1,
+    };
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry1;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE + 1] = entry2;
+    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD};
+
+    EXPECT_CALL(*mocks_.providerMock, ParseDisconnectData(_, _, _, _))
+        .WillOnce(DoAll(SetArgReferee<1>(TEST_REQUEST_CODE),
+            SetArgReferee<2>(static_cast<int32_t>(INTENT_LINK_DISCONNECT_REASON_ACCOUNT_LOGOUT))));
+    EXPECT_CALL(*mocks_.adapterMock, UnbindIntentSession(TEST_SOCKET_FD)).Times(1);
+    EXPECT_CALL(*mocks_.adapterMock, ShutdownDeviceSession(_)).Times(0);
+
+    RemoteIntentManager::GetInstance().HandleDisconnect(SRC_DEVICE_ID, "test_data", TEST_SOCKET_FD);
+    EXPECT_EQ(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.size(), 1u);
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestSocketMap_.empty());
+    DTEST_LOG << "HandleDisconnect_AccountLogout end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleDisconnect_UserSwitch_DeviceMismatch
+ * @tc.desc: Test HandleDisconnect with USER_SWITCH but deviceId mismatch does not erase callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleDisconnect_UserSwitch_DeviceMismatch, TestSize.Level3)
+{
+    DTEST_LOG << "HandleDisconnect_UserSwitch_DeviceMismatch begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    CallbackEntry entry = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = DST_DEVICE_ID,
+        .socketFd = TEST_SOCKET_FD,
+    };
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry;
+
+    EXPECT_CALL(*mocks_.providerMock, ParseDisconnectData(_, _, _, _))
+        .WillOnce(DoAll(SetArgReferee<1>(TEST_REQUEST_CODE),
+            SetArgReferee<2>(static_cast<int32_t>(INTENT_LINK_DISCONNECT_REASON_USER_SWITCH))));
+    EXPECT_CALL(*mocks_.adapterMock, UnbindIntentSession(_)).Times(1);
+    EXPECT_CALL(*mocks_.adapterMock, ShutdownDeviceSession(_)).Times(0);
+
+    RemoteIntentManager::GetInstance().HandleDisconnect(SRC_DEVICE_ID, "test_data", TEST_SOCKET_FD);
+    EXPECT_EQ(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.size(), 1u);
+    DTEST_LOG << "HandleDisconnect_UserSwitch_DeviceMismatch end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleDisconnect_UserSwitch_NotFound_007
+ * @tc.desc: Test HandleDisconnect with USER_SWITCH when requestCode not in callback map
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleDisconnect_UserSwitch_NotFound, TestSize.Level3)
+{
+    DTEST_LOG << "HandleDisconnect_UserSwitch_NotFound begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+
+    EXPECT_CALL(*mocks_.providerMock, ParseDisconnectData(_, _, _, _))
+        .WillOnce(DoAll(SetArgReferee<1>(TEST_REQUEST_CODE),
+            SetArgReferee<2>(static_cast<int32_t>(INTENT_LINK_DISCONNECT_REASON_USER_SWITCH))));
+    EXPECT_CALL(*mocks_.adapterMock, UnbindIntentSession(TEST_SOCKET_FD)).Times(1);
+    EXPECT_CALL(*mocks_.adapterMock, ShutdownDeviceSession(_)).Times(0);
+
+    EXPECT_NO_FATAL_FAILURE(RemoteIntentManager::GetInstance().HandleDisconnect(
+        SRC_DEVICE_ID, "test_data", TEST_SOCKET_FD));
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
+    DTEST_LOG << "HandleDisconnect_UserSwitch_NotFound end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAllSessionsForDistributedAccount_InvalidAccountId_001
+ * @tc.desc: Test DisconnectAllSessionsForDistributedAccount with empty distributedAccountId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, DisconnectAllSessionsForDistributedAccount_InvalidAccountId, TestSize.Level3)
+{
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_InvalidAccountId begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    EXPECT_NO_FATAL_FAILURE(RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount(""));
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestSocketMap_.empty());
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_InvalidAccountId end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAllSessionsForDistributedAccount_EmptyMaps_002
+ * @tc.desc: Test DisconnectAllSessionsForDistributedAccount with empty maps
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, DisconnectAllSessionsForDistributedAccount_EmptyMaps, TestSize.Level3)
+{
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_EmptyMaps begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    EXPECT_NO_FATAL_FAILURE(RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount("account_A"));
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestSocketMap_.empty());
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_EmptyMaps end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAllSessionsForDistributedAccount_SinkSide_003
+ * @tc.desc: Test DisconnectAllSessionsForDistributedAccount cleans sink sessions for matching account only
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, DisconnectAllSessionsForDistributedAccount_SinkSide, TestSize.Level3)
+{
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_SinkSide begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    auto& socketMap = RemoteIntentManager::GetInstance().requestSocketMap_;
+    socketMap.clear();
+    socketMap[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD, "account_A"};
+    socketMap[{DST_DEVICE_ID, TEST_REQUEST_CODE + 1}] = {TEST_SOCKET_FD + 1, "account_B"};
+
+    EXPECT_CALL(*mocks_.adapterMock, SendIntentDataBySession(TEST_SOCKET_FD, _, _))
+        .WillOnce(Return(ERR_DI_OK));
+
+    RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount("account_A");
+    EXPECT_EQ(RemoteIntentManager::GetInstance().requestSocketMap_.size(), 1u);
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestSocketMap_.find({DST_DEVICE_ID, TEST_REQUEST_CODE + 1})
+        != RemoteIntentManager::GetInstance().requestSocketMap_.end());
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_SinkSide end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAllSessionsForDistributedAccount_CallerSide_004
+ * @tc.desc: Test DisconnectAllSessionsForDistributedAccount cleans caller callbacks for matching account only
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, DisconnectAllSessionsForDistributedAccount_CallerSide, TestSize.Level3)
+{
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_CallerSide begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    CallbackEntry entry1 = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = DST_DEVICE_ID,
+        .socketFd = TEST_SOCKET_FD,
+        .distributedAccountId = "account_A",
+    };
+    CallbackEntry entry2 = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = SRC_DEVICE_ID,
+        .socketFd = TEST_SOCKET_FD + 1,
+        .distributedAccountId = "account_B",
+    };
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry1;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE + 1] = entry2;
+
+    EXPECT_CALL(*mocks_.adapterMock, UnbindIntentSession(TEST_SOCKET_FD)).Times(1);
+
+    RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount("account_A");
+    EXPECT_EQ(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.size(), 1u);
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.find(TEST_REQUEST_CODE + 1)
+        != RemoteIntentManager::GetInstance().requestCodeCallbackMap_.end());
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_CallerSide end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAllSessionsForDistributedAccount_CallerSide_NullCallback_005
+ * @tc.desc: Test caller cleanup with null callback still unbinds and skips SendRequest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, DisconnectAllSessionsForDistributedAccount_CallerSide_NullCallback, TestSize.Level3)
+{
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_CallerSide_NullCallback begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    CallbackEntry entry;
+    entry.callback = sptr<IRemoteObject>();
+    entry.timestamp = std::chrono::steady_clock::now();
+    entry.deviceId = DST_DEVICE_ID;
+    entry.socketFd = TEST_SOCKET_FD;
+    entry.distributedAccountId = "account_A";
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry;
+
+    EXPECT_CALL(*mocks_.adapterMock, UnbindIntentSession(TEST_SOCKET_FD)).Times(1);
+
+    RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount("account_A");
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_CallerSide_NullCallback end" << std::endl;
+}
+
+/**
+ * @tc.name: StoreSinkSessionDistributedAccount_Success_006
+ * @tc.desc: Test StoreSinkSessionDistributedAccount stores activeAccountId into entry on success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, StoreSinkSessionDistributedAccount_Success, TestSize.Level3)
+{
+    DTEST_LOG << "StoreSinkSessionDistributedAccount_Success begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD};
+
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.activeAccountId = "dist_acct_001";
+    EXPECT_CALL(*mocks_.permCheckerMock, GetOsAccountData(_))
+        .WillOnce(DoAll(SetArgReferee<0>(accountInfo), Return(true)));
+
+    RemoteIntentManager::GetInstance().StoreSinkSessionDistributedAccount(SRC_DEVICE_ID, TEST_REQUEST_CODE);
+    auto it = RemoteIntentManager::GetInstance().requestSocketMap_.find({SRC_DEVICE_ID, TEST_REQUEST_CODE});
+    ASSERT_TRUE(it != RemoteIntentManager::GetInstance().requestSocketMap_.end());
+    EXPECT_EQ(it->second.distributedAccountId, "dist_acct_001");
+    DTEST_LOG << "StoreSinkSessionDistributedAccount_Success end" << std::endl;
+}
+
+/**
+ * @tc.name: StoreSinkSessionDistributedAccount_GetOsAccountDataFail_007
+ * @tc.desc: Test StoreSinkSessionDistributedAccount leaves distributedAccountId empty when GetOsAccountData fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, StoreSinkSessionDistributedAccount_GetOsAccountDataFail, TestSize.Level3)
+{
+    DTEST_LOG << "StoreSinkSessionDistributedAccount_GetOsAccountDataFail begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD};
+
+    EXPECT_CALL(*mocks_.permCheckerMock, GetOsAccountData(_)).WillOnce(Return(false));
+
+    RemoteIntentManager::GetInstance().StoreSinkSessionDistributedAccount(SRC_DEVICE_ID, TEST_REQUEST_CODE);
+    auto it = RemoteIntentManager::GetInstance().requestSocketMap_.find({SRC_DEVICE_ID, TEST_REQUEST_CODE});
+    ASSERT_TRUE(it != RemoteIntentManager::GetInstance().requestSocketMap_.end());
+    EXPECT_TRUE(it->second.distributedAccountId.empty());
+    DTEST_LOG << "StoreSinkSessionDistributedAccount_GetOsAccountDataFail end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleIntentResult_NullCallback_009
+ * @tc.desc: HandleIntentResult when callback exists but is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleIntentResult_NullCallback_009, TestSize.Level3)
+{
+    DTEST_LOG << "HandleIntentResult_NullCallback begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    CallbackEntry entry;
+    entry.callback = sptr<IRemoteObject>();
+    entry.timestamp = std::chrono::steady_clock::now();
+    entry.deviceId = SRC_DEVICE_ID;
+    entry.socketFd = TEST_SOCKET_FD;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry;
+
+    EXPECT_CALL(*mocks_.providerMock, ParseResultData(_, _, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(TEST_REQUEST_CODE), SetArgReferee<2>(0),
+            SetArgReferee<3>(RESULT_MSG), Return(true)));
+
+    EXPECT_EQ(RemoteIntentManager::GetInstance().HandleIntentResult(SRC_DEVICE_ID, "data", TEST_SOCKET_FD),
+        ERR_DI_SYSTEM_WORK_ABNORMALLY);
+    EXPECT_FALSE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
+    DTEST_LOG << "HandleIntentResult_NullCallback end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleIntentResult_Success_011
+ * @tc.desc: HandleIntentResult success path erases callback and unbinds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleIntentResult_Success_011, TestSize.Level3)
+{
+    DTEST_LOG << "HandleIntentResult_Success begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    CallbackEntry entry = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = SRC_DEVICE_ID,
+        .socketFd = TEST_SOCKET_FD,
+    };
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry;
+
+    EXPECT_CALL(*mocks_.providerMock, ParseResultData(_, _, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(TEST_REQUEST_CODE), SetArgReferee<2>(0),
+            SetArgReferee<3>(RESULT_MSG), Return(true)));
+    EXPECT_CALL(*mocks_.adapterMock, UnbindIntentSession(TEST_SOCKET_FD)).Times(1);
+
+    EXPECT_EQ(RemoteIntentManager::GetInstance().HandleIntentResult(SRC_DEVICE_ID, "data", TEST_SOCKET_FD),
+        ERR_DI_OK);
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
+    DTEST_LOG << "HandleIntentResult_Success end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleBusinessResult_NullCallback_014
+ * @tc.desc: HandleBusinessResult when callback found but null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleBusinessResult_NullCallback_014, TestSize.Level3)
+{
+    DTEST_LOG << "HandleBusinessResult_NullCallback begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    CallbackEntry entry;
+    entry.callback = sptr<IRemoteObject>();
+    entry.timestamp = std::chrono::steady_clock::now();
+    entry.deviceId = SRC_DEVICE_ID;
+    entry.socketFd = TEST_SOCKET_FD;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry;
+    IntentContext ctx;
+    ctx.callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+    ctx.requestCode = TEST_REQUEST_CODE;
+
+    EXPECT_CALL(*mocks_.providerMock, DeserializeIntentData(_, _, _, _))
+        .WillOnce(DoAll(SetArgReferee<2>(ctx), Return(ERR_DI_OK)));
+
+    EXPECT_EQ(RemoteIntentManager::GetInstance().HandleBusinessResult(SRC_DEVICE_ID, "data", TEST_SOCKET_FD),
+        ERR_DI_SYSTEM_WORK_ABNORMALLY);
+    EXPECT_FALSE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
+    DTEST_LOG << "HandleBusinessResult_NullCallback end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleBusinessResult_DeviceMismatch_015
+ * @tc.desc: HandleBusinessResult rejects mismatched srcDeviceId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleBusinessResult_DeviceMismatch_015, TestSize.Level3)
+{
+    DTEST_LOG << "HandleBusinessResult_DeviceMismatch begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    CallbackEntry entry = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = DST_DEVICE_ID,
+        .socketFd = TEST_SOCKET_FD,
+    };
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry;
+    IntentContext ctx;
+    ctx.callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+    ctx.requestCode = TEST_REQUEST_CODE;
+
+    EXPECT_CALL(*mocks_.providerMock, DeserializeIntentData(_, _, _, _))
+        .WillOnce(DoAll(SetArgReferee<2>(ctx), Return(ERR_DI_OK)));
+
+    EXPECT_EQ(RemoteIntentManager::GetInstance().HandleBusinessResult(SRC_DEVICE_ID, "data", TEST_SOCKET_FD),
+        ERR_DI_PERMISSION_DENIED);
+    EXPECT_FALSE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
+    DTEST_LOG << "HandleBusinessResult_DeviceMismatch end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleBusinessResult_PermissionFail_020
+ * @tc.desc: HandleBusinessResult notifies and unbinds when CheckBusinessResultPermission fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleBusinessResult_PermissionFail_020, TestSize.Level3)
+{
+    DTEST_LOG << "HandleBusinessResult_PermissionFail begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    CallbackEntry entry = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = SRC_DEVICE_ID,
+        .socketFd = TEST_SOCKET_FD,
+    };
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry;
+    IntentContext ctx;
+    ctx.callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+    ctx.requestCode = TEST_REQUEST_CODE;
+
+    EXPECT_CALL(*mocks_.providerMock, DeserializeIntentData(_, _, _, _))
+        .WillOnce(DoAll(SetArgReferee<2>(ctx), Return(ERR_DI_OK)));
+    EXPECT_CALL(*mocks_.permCheckerMock, CheckBusinessResultPermission(_, _, _))
+        .WillOnce(Return(ERR_DI_PERMISSION_DENIED));
+    EXPECT_CALL(*mocks_.adapterMock, UnbindIntentSession(TEST_SOCKET_FD)).Times(1);
+
+    EXPECT_EQ(RemoteIntentManager::GetInstance().HandleBusinessResult(SRC_DEVICE_ID, "data", TEST_SOCKET_FD),
+        ERR_DI_PERMISSION_DENIED);
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
+    DTEST_LOG << "HandleBusinessResult_PermissionFail end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleBusinessResult_Success_024
+ * @tc.desc: HandleBusinessResult success path notifies callback and unbinds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleBusinessResult_Success_024, TestSize.Level3)
+{
+    DTEST_LOG << "HandleBusinessResult_Success begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    CallbackEntry entry = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = SRC_DEVICE_ID,
+        .socketFd = TEST_SOCKET_FD,
+    };
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry;
+    IntentContext ctx;
+    ctx.callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+    ctx.requestCode = TEST_REQUEST_CODE;
+
+    EXPECT_CALL(*mocks_.providerMock, DeserializeIntentData(_, _, _, _))
+        .WillOnce(DoAll(SetArgReferee<2>(ctx), Return(ERR_DI_OK)));
+    EXPECT_CALL(*mocks_.permCheckerMock, CheckBusinessResultPermission(_, _, _))
+        .WillOnce(Return(ERR_DI_OK));
+    EXPECT_CALL(*mocks_.adapterMock, UnbindIntentSession(TEST_SOCKET_FD)).Times(1);
+
+    EXPECT_EQ(RemoteIntentManager::GetInstance().HandleBusinessResult(SRC_DEVICE_ID, "data", TEST_SOCKET_FD),
+        ERR_DI_OK);
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
+    DTEST_LOG << "HandleBusinessResult_Success end" << std::endl;
+}
+
+/**
+ * @tc.name: SendResultToRemote_InvalidSocketFd_025
+ * @tc.desc: SendResultToRemote rejects negative socketFd
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, SendResultToRemote_InvalidSocketFd_025, TestSize.Level3)
+{
+    DTEST_LOG << "SendResultToRemote_InvalidSocketFd begin" << std::endl;
+    Want want;
+    IntentContext ctx;
+    EXPECT_EQ(RemoteIntentManager::GetInstance().SendResultToRemote(-1, want, ctx, RESULT_MSG),
+        ERR_DI_SOFTBUS_COMMUNICATION_FAILED);
+    DTEST_LOG << "SendResultToRemote_InvalidSocketFd end" << std::endl;
+}
+
+/**
+ * @tc.name: SendResultToRemote_SendFail_026
+ * @tc.desc: SendResultToRemote fails when SendIntentDataBySession fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, SendResultToRemote_SendFail_026, TestSize.Level3)
+{
+    DTEST_LOG << "SendResultToRemote_SendFail begin" << std::endl;
+    Want want;
+    IntentContext ctx;
+    EXPECT_CALL(*mocks_.adapterMock, SendIntentDataBySession(TEST_SOCKET_FD, _, _))
+        .WillOnce(Return(ERR_DI_DATA_SEND_FAILED));
+    EXPECT_EQ(RemoteIntentManager::GetInstance().SendResultToRemote(TEST_SOCKET_FD, want, ctx, RESULT_MSG),
+        ERR_DI_SOFTBUS_COMMUNICATION_FAILED);
+    DTEST_LOG << "SendResultToRemote_SendFail end" << std::endl;
+}
+
+/**
+ * @tc.name: SendInnerResultBack_SerializeFail_032
+ * @tc.desc: SendInnerResultBack fails when SerializeResultData fails (provider null)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, SendInnerResultBack_SerializeFail_032, TestSize.Level3)
+{
+    DTEST_LOG << "SendInnerResultBack_SerializeFail begin" << std::endl;
+    IntentPermissionChecker::GetInstance().SetProvider(nullptr);
+    EXPECT_EQ(RemoteIntentManager::GetInstance().SendInnerResultBack(TEST_SOCKET_FD, TEST_REQUEST_CODE,
+        ERR_DI_OK, IntentDataType::INTENT_DATA_TYPE_DMS_RESULT), ERR_DI_SERIALIZE_FAILED);
+    DTEST_LOG << "SendInnerResultBack_SerializeFail end" << std::endl;
+}
+
+/**
+ * @tc.name: SendInnerResultBack_Success_033
+ * @tc.desc: SendInnerResultBack success path sends data by session
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, SendInnerResultBack_Success_033, TestSize.Level3)
+{
+    DTEST_LOG << "SendInnerResultBack_Success begin" << std::endl;
+    EXPECT_CALL(*mocks_.adapterMock, SendIntentDataBySession(TEST_SOCKET_FD, _, _))
+        .WillOnce(Return(ERR_DI_OK));
+    EXPECT_EQ(RemoteIntentManager::GetInstance().SendInnerResultBack(TEST_SOCKET_FD, TEST_REQUEST_CODE,
+        ERR_DI_OK, IntentDataType::INTENT_DATA_TYPE_DMS_RESULT), ERR_DI_OK);
+    DTEST_LOG << "SendInnerResultBack_Success end" << std::endl;
+}
+
+/**
+ * @tc.name: OnIntentDataReceived_Execute_040
+ * @tc.desc: OnIntentDataReceived routes EXECUTE to HandleIntentExecute
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, OnIntentDataReceived_Execute_040, TestSize.Level3)
+{
+    DTEST_LOG << "OnIntentDataReceived_Execute begin" << std::endl;
+    EXPECT_CALL(*mocks_.adapterMock, SendIntentDataBySession(_, _, _)).WillRepeatedly(Return(ERR_DI_OK));
+    EXPECT_NO_FATAL_FAILURE(RemoteIntentManager::GetInstance().OnIntentDataReceived(SRC_DEVICE_ID,
+        IntentDataType::INTENT_DATA_TYPE_EXECUTE, "data", TEST_SOCKET_FD));
+    DTEST_LOG << "OnIntentDataReceived_Execute end" << std::endl;
+}
+
+/**
+ * @tc.name: OnIntentDataReceived_DmsResult_041
+ * @tc.desc: OnIntentDataReceived routes DMS_RESULT to HandleIntentResult
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, OnIntentDataReceived_DmsResult_041, TestSize.Level3)
+{
+    DTEST_LOG << "OnIntentDataReceived_DmsResult begin" << std::endl;
+    EXPECT_NO_FATAL_FAILURE(RemoteIntentManager::GetInstance().OnIntentDataReceived(SRC_DEVICE_ID,
+        IntentDataType::INTENT_DATA_TYPE_DMS_RESULT, "data", TEST_SOCKET_FD));
+    DTEST_LOG << "OnIntentDataReceived_DmsResult end" << std::endl;
+}
+
+/**
+ * @tc.name: OnIntentDataReceived_ExecuteResult_046
+ * @tc.desc: OnIntentDataReceived routes EXECUTE_RESULT to HandleBusinessResult
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, OnIntentDataReceived_ExecuteResult_046, TestSize.Level3)
+{
+    DTEST_LOG << "OnIntentDataReceived_ExecuteResult begin" << std::endl;
+    EXPECT_NO_FATAL_FAILURE(RemoteIntentManager::GetInstance().OnIntentDataReceived(SRC_DEVICE_ID,
+        IntentDataType::INTENT_DATA_TYPE_EXECUTE_RESULT, "data", TEST_SOCKET_FD));
+    DTEST_LOG << "OnIntentDataReceived_ExecuteResult end" << std::endl;
+}
+
+/**
+ * @tc.name: OnIntentDataReceived_UnknownType_047
+ * @tc.desc: OnIntentDataReceived default branch logs unknown dataType
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, OnIntentDataReceived_UnknownType_047, TestSize.Level3)
+{
+    DTEST_LOG << "OnIntentDataReceived_UnknownType begin" << std::endl;
+    EXPECT_NO_FATAL_FAILURE(RemoteIntentManager::GetInstance().OnIntentDataReceived(SRC_DEVICE_ID,
+        static_cast<IntentDataType>(999), "data", TEST_SOCKET_FD));
+    DTEST_LOG << "OnIntentDataReceived_UnknownType end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleSendIntentResult_PrepareResultContextFail_048
+ * @tc.desc: HandleSendIntentResult returns error when PrepareResultContext fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleSendIntentResult_PrepareResultContextFail_048, TestSize.Level3)
+{
+    DTEST_LOG << "HandleSendIntentResult_PrepareResultContextFail begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD};
+    EXPECT_CALL(*mocks_.providerMock, GetLocalDeviceId(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(std::string("local_dev")), Return(true)));
+    EXPECT_CALL(*mocks_.permCheckerMock, GetCallerInfo(_, _, _, _))
+        .WillRepeatedly(Return(ERR_DI_SYSTEM_WORK_ABNORMALLY));
+    Want want;
+    want.SetElementName(SRC_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentCallerInfo callerInfo;
+    callerInfo.requestCode = TEST_REQUEST_CODE;
+    callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    EXPECT_EQ(RemoteIntentManager::GetInstance().HandleSendIntentResult(want, callerInfo, RESULT_MSG),
+        ERR_DI_SYSTEM_WORK_ABNORMALLY);
+    DTEST_LOG << "HandleSendIntentResult_PrepareResultContextFail end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleSendIntentResult_SendResultToRemoteFail_049
+ * @tc.desc: HandleSendIntentResult returns error when SendResultToRemote fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleSendIntentResult_SendResultToRemoteFail_049, TestSize.Level3)
+{
+    DTEST_LOG << "HandleSendIntentResult_SendResultToRemoteFail begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD};
+    EXPECT_CALL(*mocks_.providerMock, GetLocalDeviceId(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(std::string("local_dev")), Return(true)));
+    EXPECT_CALL(*mocks_.permCheckerMock, GetCallerInfo(_, _, _, _)).WillRepeatedly(Return(ERR_DI_OK));
+    EXPECT_CALL(*mocks_.permCheckerMock, GetAccountInfo(_, _, _)).WillRepeatedly(Return(ERR_DI_OK));
+    EXPECT_CALL(*mocks_.adapterMock, SendIntentDataBySession(TEST_SOCKET_FD, _, _))
+        .WillOnce(Return(ERR_DI_DATA_SEND_FAILED));
+    Want want;
+    want.SetElementName(SRC_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentCallerInfo callerInfo;
+    callerInfo.requestCode = TEST_REQUEST_CODE;
+    callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    EXPECT_EQ(RemoteIntentManager::GetInstance().HandleSendIntentResult(want, callerInfo, RESULT_MSG),
+        ERR_DI_SOFTBUS_COMMUNICATION_FAILED);
+    DTEST_LOG << "HandleSendIntentResult_SendResultToRemoteFail end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleSendIntentResult_Success_050
+ * @tc.desc: HandleSendIntentResult success path sends result and clears socket mapping
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleSendIntentResult_Success_050, TestSize.Level3)
+{
+    DTEST_LOG << "HandleSendIntentResult_Success begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD};
+    EXPECT_CALL(*mocks_.providerMock, GetLocalDeviceId(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(std::string("local_dev")), Return(true)));
+    EXPECT_CALL(*mocks_.permCheckerMock, GetCallerInfo(_, _, _, _)).WillRepeatedly(Return(ERR_DI_OK));
+    EXPECT_CALL(*mocks_.permCheckerMock, GetAccountInfo(_, _, _)).WillRepeatedly(Return(ERR_DI_OK));
+    EXPECT_CALL(*mocks_.adapterMock, SendIntentDataBySession(TEST_SOCKET_FD, _, _))
+        .WillOnce(Return(ERR_DI_OK));
+    Want want;
+    want.SetElementName(SRC_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentCallerInfo callerInfo;
+    callerInfo.requestCode = TEST_REQUEST_CODE;
+    callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    EXPECT_EQ(RemoteIntentManager::GetInstance().HandleSendIntentResult(want, callerInfo, RESULT_MSG), ERR_DI_OK);
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestSocketMap_.empty());
+    DTEST_LOG << "HandleSendIntentResult_Success end" << std::endl;
+}
+
+/**
+ * @tc.name: RecordSinkSocketMapping_001
+ * @tc.desc: RecordSinkSocketMapping creates a sink entry with the given socketFd
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, RecordSinkSocketMapping_001, TestSize.Level3)
+{
+    DTEST_LOG << "RecordSinkSocketMapping begin" << std::endl;
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    RemoteIntentManager::GetInstance().RecordSinkSocketMapping(SRC_DEVICE_ID, TEST_REQUEST_CODE, TEST_SOCKET_FD);
+    auto it = RemoteIntentManager::GetInstance().requestSocketMap_.find({SRC_DEVICE_ID, TEST_REQUEST_CODE});
+    ASSERT_TRUE(it != RemoteIntentManager::GetInstance().requestSocketMap_.end());
+    EXPECT_EQ(it->second.socketFd, TEST_SOCKET_FD);
+    EXPECT_TRUE(it->second.distributedAccountId.empty());
+    DTEST_LOG << "RecordSinkSocketMapping end" << std::endl;
+}
+
 }
 }

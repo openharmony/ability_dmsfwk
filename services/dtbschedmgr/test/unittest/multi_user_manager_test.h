@@ -17,10 +17,14 @@
 #define MULTI_USER_MANAGER_TEST_H
 
 #include "gtest/gtest.h"
+#include <memory>
 
 #include "remote_on_listener_stub.h"
 
 namespace OHOS {
+namespace AccountSA {
+class OhosAccountKitsMock;
+}
 namespace DistributedSchedule {
 class MultiUserManagerTest : public testing::Test {
 public:
@@ -28,6 +32,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    std::shared_ptr<AccountSA::OhosAccountKitsMock> ohosAccountMock_;
 };
 
 class RemoteOnListenerStubTest : public AAFwk::RemoteOnListenerStub {

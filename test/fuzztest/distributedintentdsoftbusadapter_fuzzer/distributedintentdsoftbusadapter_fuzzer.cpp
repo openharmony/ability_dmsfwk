@@ -37,6 +37,10 @@ constexpr size_t FUZZ_PAYLOAD_MID_LEN = 128;
 constexpr int32_t FUZZ_FAKE_SOCKET_FD = 10001;
 constexpr uint32_t FUZZ_MOCK_MAX_SEND_SIZE = 256;
 constexpr uint8_t FUZZ_FRAG_SCENARIO_COUNT = 3;
+constexpr size_t FUZZ_FRAG_MULTI_PAYLOAD_LEN = 512;
+constexpr int64_t FUZZ_IDLE_BACKDATE_MS = SESSION_IDLE_TIMEOUT_MS + 5000;
+constexpr int32_t FUZZ_SERVER_SESSION_FD_OFFSET = 1;
+constexpr int32_t FUZZ_NULL_SESSION_FD_OFFSET = 2;
 
 std::vector<uint8_t> BuildFragFrame(uint32_t typeValue, uint32_t totalLen,
     uint16_t seq, uint8_t flag, const std::string& payload)
@@ -234,6 +238,316 @@ void FuzzShutdownAndCleanup(const uint8_t* data, size_t size)
     adapter.ForceCleanupDeviceSessions(deviceId, closedSockets);
     adapter.OnIntentShutdown(socket);
 }
+
+void FuzzSendFragMulti(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < sizeof(uint32_t)) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.SetStopped(false);
+
+    int32_t socket = fdp.ConsumeIntegral<int32_t>();
+    std::string deviceId = fdp.ConsumeRandomLengthString(FUZZ_DEVICE_ID_MAX_LEN);
+    if (deviceId.empty()) {
+        deviceId = "fuzz_frag_send_device";
+    }
+    adapter.OnIntentBind(socket, deviceId);
+
+    uint32_t typeValue = fdp.ConsumeIntegral<uint32_t>();
+    IntentDataType dataType = static_cast<IntentDataType>(typeValue);
+    std::string payload = fdp.ConsumeRandomLengthString(FUZZ_FRAG_MULTI_PAYLOAD_LEN);
+    if (payload.size() < FUZZ_MOCK_MAX_SEND_SIZE + 1) {
+        payload.append(FUZZ_MOCK_MAX_SEND_SIZE + 1 - payload.size(), 'X');
+    }
+    adapter.SendIntentDataBySession(socket, dataType, payload);
+    adapter.OnIntentShutdown(socket);
+}
+
+void FuzzFragReassemblyComplete(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < sizeof(int32_t) + sizeof(uint32_t)) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.SetStopped(false);
+
+    int32_t socket = fdp.ConsumeIntegral<int32_t>();
+    std::string deviceId = fdp.ConsumeRandomLengthString(FUZZ_DEVICE_ID_MAX_LEN);
+    if (deviceId.empty()) {
+        deviceId = "fuzz_reassemble_device";
+    }
+    adapter.OnIntentBind(socket, deviceId);
+
+    uint32_t typeValue = fdp.ConsumeIntegral<uint32_t>();
+    std::string p1 = fdp.ConsumeRandomLengthString(FUZZ_PAYLOAD_MID_LEN);
+    std::string p2 = fdp.ConsumeRandomLengthString(FUZZ_PAYLOAD_MID_LEN);
+    std::string p3 = fdp.ConsumeRemainingBytesAsString();
+    if (p3.empty()) {
+        p3 = "z";
+    }
+    uint32_t totalLen = static_cast<uint32_t>(p1.size() + p2.size() + p3.size());
+
+    auto frame1 = BuildFragFrame(typeValue, totalLen, 0, FRAG_START, p1);
+    adapter.OnIntentBytes(socket, frame1.data(), frame1.size());
+
+    auto frame2 = BuildFragFrame(typeValue, totalLen, 1, FRAG_MID, p2);
+    adapter.OnIntentBytes(socket, frame2.data(), frame2.size());
+
+    auto frame3 = BuildFragFrame(typeValue, totalLen, 2, FRAG_END, p3);
+    adapter.OnIntentBytes(socket, frame3.data(), frame3.size());
+
+    adapter.OnIntentShutdown(socket);
+}
+
+void FuzzFragErrorPaths(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < sizeof(uint32_t)) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.SetStopped(false);
+
+    int32_t socket = fdp.ConsumeIntegral<int32_t>();
+    std::string deviceId = fdp.ConsumeRandomLengthString(FUZZ_DEVICE_ID_MAX_LEN);
+    if (deviceId.empty()) {
+        deviceId = "fuzz_frag_err_device";
+    }
+    adapter.OnIntentBind(socket, deviceId);
+
+    uint32_t typeValue = fdp.ConsumeIntegral<uint32_t>();
+    uint32_t totalLen = fdp.ConsumeIntegral<uint32_t>();
+    std::string payload = fdp.ConsumeRandomLengthString(FUZZ_PAYLOAD_MAX_LEN);
+
+    auto frameMid = BuildFragFrame(typeValue, totalLen, 0, FRAG_MID, payload);
+    adapter.OnIntentBytes(socket, frameMid.data(), frameMid.size());
+
+    auto frameEnd = BuildFragFrame(typeValue, totalLen, 0, FRAG_END, payload);
+    adapter.OnIntentBytes(socket, frameEnd.data(), frameEnd.size());
+
+    auto frameStart = BuildFragFrame(typeValue, totalLen, 0, FRAG_START, payload);
+    adapter.OnIntentBytes(socket, frameStart.data(), frameStart.size());
+    auto frameWrongSeq = BuildFragFrame(typeValue, totalLen, 5, FRAG_END, payload);
+    adapter.OnIntentBytes(socket, frameWrongSeq.data(), frameWrongSeq.size());
+
+    uint32_t mismatchLen = 999;
+    auto frameStart2 = BuildFragFrame(typeValue, mismatchLen, 0, FRAG_START, payload);
+    adapter.OnIntentBytes(socket, frameStart2.data(), frameStart2.size());
+    auto frameEnd2 = BuildFragFrame(typeValue, mismatchLen, 1, FRAG_END, payload);
+    adapter.OnIntentBytes(socket, frameEnd2.data(), frameEnd2.size());
+
+    adapter.OnIntentShutdown(socket);
+}
+
+void FuzzCleanupIdleSessions(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.SetStopped(false);
+
+    int32_t socket = fdp.ConsumeIntegral<int32_t>();
+    std::string deviceId = fdp.ConsumeRandomLengthString(FUZZ_DEVICE_ID_MAX_LEN);
+    if (deviceId.empty()) {
+        deviceId = "fuzz_idle_device";
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(adapter.sessionMutex_);
+        auto idleSession = std::make_shared<IntentSocketSession>();
+        idleSession->peerDeviceId = deviceId;
+        idleSession->socketFd = socket;
+        idleSession->isConnected = true;
+        idleSession->isServer = false;
+        idleSession->refCount = 1;
+        idleSession->lastActivityTime = std::chrono::steady_clock::now()
+            - std::chrono::milliseconds(FUZZ_IDLE_BACKDATE_MS);
+        adapter.sessions_[socket] = idleSession;
+
+        auto serverSession = std::make_shared<IntentSocketSession>();
+        serverSession->peerDeviceId = deviceId;
+        serverSession->socketFd = socket + FUZZ_SERVER_SESSION_FD_OFFSET;
+        serverSession->isConnected = true;
+        serverSession->isServer = true;
+        serverSession->refCount = 0;
+        serverSession->lastActivityTime = std::chrono::steady_clock::now()
+            - std::chrono::milliseconds(FUZZ_IDLE_BACKDATE_MS);
+        adapter.sessions_[socket + FUZZ_SERVER_SESSION_FD_OFFSET] = serverSession;
+
+        adapter.sessions_[socket + FUZZ_NULL_SESSION_FD_OFFSET] = nullptr;
+    }
+
+    adapter.sessionCleanupRunning_.store(true);
+    adapter.CleanupIdleSessions();
+}
+
+void FuzzCleanupIdleSessionsAllClosed(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.SetStopped(false);
+
+    int32_t socket = fdp.ConsumeIntegral<int32_t>();
+    std::string deviceId = fdp.ConsumeRandomLengthString(FUZZ_DEVICE_ID_MAX_LEN);
+    if (deviceId.empty()) {
+        deviceId = "fuzz_idle_only_device";
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(adapter.sessionMutex_);
+        adapter.sessions_.clear();
+        auto idleSession = std::make_shared<IntentSocketSession>();
+        idleSession->peerDeviceId = deviceId;
+        idleSession->socketFd = socket;
+        idleSession->isConnected = true;
+        idleSession->isServer = false;
+        idleSession->refCount = 1;
+        idleSession->lastActivityTime = std::chrono::steady_clock::now()
+            - std::chrono::milliseconds(FUZZ_IDLE_BACKDATE_MS);
+        adapter.sessions_[socket] = idleSession;
+    }
+
+    adapter.sessionCleanupRunning_.store(true);
+    adapter.CleanupIdleSessions();
+}
+
+void FuzzSendBytesFail(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < sizeof(int32_t) + sizeof(uint32_t)) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.SetStopped(false);
+
+    int32_t socket = fdp.ConsumeIntegral<int32_t>();
+    std::string deviceId = fdp.ConsumeRandomLengthString(FUZZ_DEVICE_ID_MAX_LEN);
+    if (deviceId.empty()) {
+        deviceId = "fuzz_send_fail_device";
+    }
+    adapter.OnIntentBind(socket, deviceId);
+
+    uint32_t typeValue = fdp.ConsumeIntegral<uint32_t>();
+    IntentDataType dataType = static_cast<IntentDataType>(typeValue);
+    std::string payload = fdp.ConsumeRemainingBytesAsString();
+
+    SetSoftbusMockSendBytesFail(true);
+    adapter.SendIntentDataBySession(socket, dataType, payload);
+    SetSoftbusMockSendBytesFail(false);
+    adapter.OnIntentShutdown(socket);
+}
+
+void FuzzSocketFail(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.SetStopped(false);
+
+    std::string deviceId = fdp.ConsumeRandomLengthString(FUZZ_DEVICE_ID_MAX_LEN);
+    if (deviceId.empty()) {
+        deviceId = "fuzz_socket_fail_device";
+    }
+
+    SetSoftbusMockSocketFail(true);
+    int32_t socketFd = 0;
+    adapter.BindIntentSession(deviceId, socketFd);
+    if (socketFd > 0) {
+        adapter.UnbindIntentSession(socketFd);
+    }
+    SetSoftbusMockSocketFail(false);
+}
+
+void FuzzStoppedCallbacks(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.SetStopped(true);
+    int32_t socket = fdp.ConsumeIntegral<int32_t>();
+    std::string deviceId = fdp.ConsumeRandomLengthString(FUZZ_DEVICE_ID_MAX_LEN);
+    adapter.OnIntentBind(socket, deviceId);
+    adapter.OnIntentShutdown(socket);
+    const void* nullData = nullptr;
+    adapter.OnIntentBytes(socket, nullData, 0);
+    adapter.SetStopped(false);
+}
+
+void FuzzUnbindServerSession(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.SetStopped(false);
+    int32_t socket = fdp.ConsumeIntegral<int32_t>();
+    std::string deviceId = fdp.ConsumeRandomLengthString(FUZZ_DEVICE_ID_MAX_LEN);
+    if (deviceId.empty()) {
+        deviceId = "fuzz_unbind_server_device";
+    }
+    adapter.OnIntentBind(socket, deviceId);
+    adapter.UnbindIntentSession(socket);
+    adapter.OnIntentShutdown(socket);
+}
+
+void FuzzUnbindRefCountPositive(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.SetStopped(false);
+    std::string deviceId = fdp.ConsumeRandomLengthString(FUZZ_DEVICE_ID_MAX_LEN);
+    if (deviceId.empty()) {
+        deviceId = "fuzz_refcount_device";
+    }
+    int32_t fd1 = 0;
+    int32_t fd2 = 0;
+    adapter.BindIntentSession(deviceId, fd1);
+    adapter.BindIntentSession(deviceId, fd2);
+    if (fd1 > 0) {
+        adapter.UnbindIntentSession(fd1);
+    }
+    if (fd1 > 0) {
+        adapter.UnbindIntentSession(fd1);
+    }
+}
+
+void FuzzShutdownDeviceNoMatch(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < sizeof(int32_t)) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.SetStopped(false);
+    int32_t socket = fdp.ConsumeIntegral<int32_t>();
+    std::string bindDevice = fdp.ConsumeRandomLengthString(FUZZ_DEVICE_ID_MAX_LEN);
+    if (bindDevice.empty()) {
+        bindDevice = "fuzz_shutdown_match_device";
+    }
+    std::string otherDevice = fdp.ConsumeRandomLengthString(FUZZ_DEVICE_ID_MAX_LEN);
+    if (otherDevice.empty() || otherDevice == bindDevice) {
+        otherDevice = "fuzz_shutdown_other_device";
+    }
+    adapter.OnIntentBind(socket, bindDevice);
+    adapter.ShutdownDeviceSession(otherDevice);
+    adapter.OnIntentShutdown(socket);
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
 
@@ -259,5 +573,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DistributedSchedule::FuzzOnIntentBind(data, size);
     OHOS::DistributedSchedule::FuzzOnIntentShutdown(data, size);
     OHOS::DistributedSchedule::FuzzOnIntentBytes(data, size);
+    OHOS::DistributedSchedule::FuzzSendFragMulti(data, size);
+    OHOS::DistributedSchedule::FuzzFragReassemblyComplete(data, size);
+    OHOS::DistributedSchedule::FuzzFragErrorPaths(data, size);
+    OHOS::DistributedSchedule::FuzzCleanupIdleSessions(data, size);
+    OHOS::DistributedSchedule::FuzzCleanupIdleSessionsAllClosed(data, size);
+    OHOS::DistributedSchedule::FuzzSendBytesFail(data, size);
+    OHOS::DistributedSchedule::FuzzSocketFail(data, size);
+    OHOS::DistributedSchedule::FuzzStoppedCallbacks(data, size);
+    OHOS::DistributedSchedule::FuzzUnbindServerSession(data, size);
+    OHOS::DistributedSchedule::FuzzUnbindRefCountPositive(data, size);
+    OHOS::DistributedSchedule::FuzzShutdownDeviceNoMatch(data, size);
     return 0;
 }

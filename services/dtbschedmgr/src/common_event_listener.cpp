@@ -40,6 +40,8 @@ const uint8_t PACKAGE_CHANGED = 6;
 const uint8_t PACKAGE_REMOVED = 7;
 const uint8_t USER_REMOVED = 8;
 const uint8_t BATTERY_CHARGING = 9;
+const uint8_t DISTRIBUTED_ACCOUNT_LOGIN = 10;
+const uint8_t DISTRIBUTED_ACCOUNT_LOGOUT = 11;
 constexpr static int32_t INVALID_ID = 0;
 constexpr int64_t MIN_TIME_INTERVAL = 60 * 1000; // 1min
 std::atomic<int64_t> g_lastExecuteTime(0);
@@ -54,6 +56,8 @@ std::map<std::string, uint8_t> receiveEvent = {
     {EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED, PACKAGE_REMOVED},
     {EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED, USER_REMOVED},
     {EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING, BATTERY_CHARGING},
+    {EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN, DISTRIBUTED_ACCOUNT_LOGIN},
+    {EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT, DISTRIBUTED_ACCOUNT_LOGOUT},
 };
 }
 
@@ -93,6 +97,12 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
             break;
         case BATTERY_CHARGING :
             HandleBatteryCharging();
+            break;
+        case DISTRIBUTED_ACCOUNT_LOGIN :
+            HandleDistributedAccountLogin(accountId);
+            break;
+        case DISTRIBUTED_ACCOUNT_LOGOUT :
+            HandleDistributedAccountLogout(accountId);
             break;
         default:
             HILOGW("OnReceiveEvent undefined action");
@@ -217,6 +227,18 @@ void CommonEventListener::HandleBatteryCharging()
     HILOGI("start Reclaim.");
     DistributedSchedMemoryUtils::GetInstance().ReclaimNow();
     HILOGI("end.");
+}
+
+void CommonEventListener::HandleDistributedAccountLogin(int32_t localId)
+{
+    HILOGI("DISTRIBUTED_ACCOUNT_LOGIN: localId=%{public}d", localId);
+    MultiUserManager::GetInstance().HandleDistributedAccountLogin(localId);
+}
+
+void CommonEventListener::HandleDistributedAccountLogout(int32_t localId)
+{
+    HILOGI("DISTRIBUTED_ACCOUNT_LOGOUT: localId=%{public}d", localId);
+    MultiUserManager::GetInstance().HandleDistributedAccountLogout(localId);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

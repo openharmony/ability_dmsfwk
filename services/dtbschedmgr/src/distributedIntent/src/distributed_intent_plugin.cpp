@@ -102,6 +102,13 @@ public:
             GetAnonymStr(networkId).c_str(), closedSockets.size());
     }
 
+    void DisconnectAllSessionsForDistributedAccount(const std::string& distributedAccountId) override
+    {
+        HILOGI("DisconnectAllSessionsForDistributedAccount: distributedAccountId=%{public}s",
+            GetAnonymStr(distributedAccountId).c_str());
+        RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount(distributedAccountId);
+    }
+
 private:
     IIntentProvider* provider_ = nullptr;
     std::shared_ptr<DistributedIntentService> intentService_;
