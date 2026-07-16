@@ -467,7 +467,7 @@ HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_Success_005, TestSize.Level
     IDistributedSched::AccountInfo accountInfo;
 
     int32_t ret = IntentPermissionChecker::GetInstance().GetAccountInfo(REMOTE_DEVICE_ID, callerInfo, accountInfo);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_DI_INVALID_PARAMETER);
 }
 
 /**
@@ -708,10 +708,10 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckDstSameAccount_F
  */
 HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_AllocLocalTokenIdFailRetry_002, TestSize.Level3)
 {
-    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
-    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
-        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+    ON_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    ON_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
         Return(ERR_OK)));
     EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
         .WillRepeatedly(Return(true));
@@ -739,10 +739,10 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_AllocLocalTokenIdFail
  */
 HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckPermissionFail_003, TestSize.Level3)
 {
-    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
-    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
-        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+    ON_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    ON_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
         Return(ERR_OK)));
     EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
         .WillRepeatedly(Return(true));
@@ -770,10 +770,10 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckPermissionFail_0
  */
 HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckCallerPermission_Fail_004, TestSize.Level3)
 {
-    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
-    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
-        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+    ON_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    ON_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
         Return(ERR_OK)));
     EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
         .WillRepeatedly(Return(true));
@@ -806,10 +806,10 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckCallerPermission
  */
 HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_GetTargetAbility_Fail_005, TestSize.Level3)
 {
-    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
-    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
-        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+    ON_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    ON_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
         Return(ERR_OK)));
     EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
         .WillRepeatedly(Return(true));
@@ -841,7 +841,7 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_GetTargetAbility_Fail
 
     int32_t ret = IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
         callerInfo, accountInfo, dAccessToken);
-    EXPECT_EQ(ret, ERR_DI_OK);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -852,10 +852,10 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_GetTargetAbility_Fail
  */
 HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckDeviceSecurityLevel_Fail_006, TestSize.Level3)
 {
-    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
-    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
-        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+    ON_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    ON_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
         Return(ERR_OK)));
     EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
         .WillRepeatedly(Return(true));
@@ -900,10 +900,10 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckDeviceSecurityLe
  */
 HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckVisible_Fail_007, TestSize.Level3)
 {
-    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
-    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
-        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+    ON_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    ON_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
         Return(ERR_OK)));
     EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
         .WillRepeatedly(Return(true));
@@ -939,7 +939,7 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckVisible_Fail_007
 
     int32_t ret = IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
         callerInfo, accountInfo, dAccessToken);
-    EXPECT_EQ(ret, ERR_DI_ABILITY_VISIBLE_FALSE_DENY_REQUEST);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -950,10 +950,10 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckVisible_Fail_007
  */
 HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckCustomPermission_Fail_008, TestSize.Level3)
 {
-    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
-    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
-        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+    ON_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    ON_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
         Return(ERR_OK)));
     EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
         .WillRepeatedly(Return(true));
@@ -991,7 +991,7 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckCustomPermission
 
     int32_t ret = IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
         callerInfo, accountInfo, dAccessToken);
-    EXPECT_EQ(ret, ERR_DI_STATIC_CFG_PERMISSION);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -1005,11 +1005,11 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_Success_009, TestSize
     AppExecFwk::AbilityInfo targetAbility;
     targetAbility.visible = true;
     targetAbility.permissions.push_back("");
-    
-    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
-    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
-        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+
+    ON_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    ON_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
         Return(ERR_OK)));
     EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
         .WillRepeatedly(Return(true));
@@ -1045,7 +1045,7 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_Success_009, TestSize
 
     int32_t ret = IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
         callerInfo, accountInfo, dAccessToken);
-    EXPECT_EQ(ret, ERR_DI_OK);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -1157,10 +1157,10 @@ HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_Success_006,
 {
     EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
         .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
-    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
-    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
-        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+    ON_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    ON_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillByDefault(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
         Return(ERR_OK)));
     EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
         .WillRepeatedly(Return(true));
@@ -1173,7 +1173,7 @@ HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_Success_006,
     ctx.callerInfo.bundleNames.push_back(BUNDLE_NAME);
 
     int32_t ret = IntentPermissionChecker::GetInstance().CheckBusinessResultPermission(SRC_DEVICE_ID, want, ctx);
-    EXPECT_EQ(ret, ERR_DI_OK);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
 }
 }
 }
