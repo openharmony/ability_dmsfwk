@@ -61,17 +61,19 @@ struct KeyInfo {
 
 void DistributedDataChangeListener::OnChange(const ChangeNotification &changeNotification)
 {
+    auto channel = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel();
+    if (channel == nullptr) {
+        HILOGE("OnChange mainServiceChannel is nullptr");
+        return;
+    }
     const vector<Entry>& inserts = changeNotification.GetInsertEntries();
     for (const auto& entry : inserts) {
         unique_ptr<KeyInfo> keyInfo = KeyInfo::ParseInfo(entry.key.ToString());
         if (keyInfo != nullptr) {
             string keyStr = GetAnonymStr(keyInfo->uuid) + "_" + to_string(keyInfo->missionId);
             HILOGI("insertEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(),
-                   DistributedSchedMissionManager::GetInstance().GetMainServiceChannel()->GetAnonymStr(
-                       entry.value.ToString()).c_str());
-            string networkId =
-                    DistributedSchedMissionManager::GetInstance().GetMainServiceChannel()->GetNetworkIdByUuid(
-                        keyInfo->uuid);
+                channel->GetAnonymStr(entry.value.ToString()).c_str());
+            string networkId = channel->GetNetworkIdByUuid(keyInfo->uuid);
             if (networkId.empty()) {
                 HILOGI("networkId is empty!");
                 return;
@@ -86,8 +88,7 @@ void DistributedDataChangeListener::OnChange(const ChangeNotification &changeNot
         if (keyInfo != nullptr) {
             string keyStr = GetAnonymStr(keyInfo->uuid) + "_" + to_string(keyInfo->missionId);
             HILOGI("deleteEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(),
-                   DistributedSchedMissionManager::GetInstance().GetMainServiceChannel()->GetAnonymStr(
-                       entry.value.ToString()).c_str());
+                channel->GetAnonymStr(entry.value.ToString()).c_str());
             (void)DistributedSchedMissionManager::GetInstance().DequeueCachedSnapshotInfo(keyInfo->uuid,
                 keyInfo->missionId);
         }
@@ -100,9 +101,7 @@ void DistributedDataChangeListener::OnChange(const ChangeNotification &changeNot
             string keyStr = GetAnonymStr(keyInfo->uuid) + "_" + to_string(keyInfo->missionId);
             HILOGI("updateEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(),
                 GetAnonymStr(entry.value.ToString()).c_str());
-            string networkId =
-                    DistributedSchedMissionManager::GetInstance().GetMainServiceChannel()->GetNetworkIdByUuid(
-                        keyInfo->uuid);
+            string networkId = channel->GetNetworkIdByUuid(keyInfo->uuid);
             if (networkId.empty()) {
                 HILOGI("networkId is empty!");
                 return;
