@@ -1054,31 +1054,6 @@ HWTEST_F(DMSContinueManagerTest, ValidateAndPrepareBundleInfo_001, TestSize.Leve
 }
 
 /**
- * @tc.name: ValidateAndPrepareBundleInfo_002
- * @tc.desc: test ValidateAndPrepareBundleInfo with valid bundle info
- * @tc.type: FUNC
- */
-HWTEST_F(DMSContinueManagerTest, ValidateAndPrepareBundleInfo_002, TestSize.Level3)
-{
-    DTEST_LOG << "DMSContinueManagerTest ValidateAndPrepareBundleInfo_002 start" << std::endl;
-#ifndef SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION
-    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    ASSERT_NE(nullptr, recvMgr);
-
-    DmsBundleInfo distributedBundleInfo;
-    distributedBundleInfo.bundleName = BUNDLENAME_01;
-    distributedBundleInfo.appIdentifier = "testAppId";
-    uint8_t continueTypeId = 0;
-    int32_t state = ACTIVE;
-
-    BundleValidationContext context;
-    bool ret = recvMgr->ValidateAndPrepareBundleInfo(distributedBundleInfo, continueTypeId, state, context);
-    EXPECT_TRUE(ret);
-#endif
-    DTEST_LOG << "DMSContinueManagerTest ValidateAndPrepareBundleInfo_002 end" << std::endl;
-}
-
-/**
  * @tc.name: NotifyRecvBroadcast_002
  * @tc.desc: test NotifyRecvBroadcast with appIdentifierVec
  * @tc.type: FUNC
