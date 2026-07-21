@@ -636,6 +636,8 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     {
         std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
+        SoftbusAdapter::GetInstance().dmsAdapetr_ = {};
+        dmsAdapetr_ = {};
         dlclose(dllHandle_);
         dllHandle_ = nullptr;
     };
@@ -1112,6 +1114,8 @@ int32_t DistributedSchedService::GetDmsInteractiveAdapterProxy()
 
     if (ret != ERR_OK) {
         HILOGE("Get remote dms interactive adapter proxy fail, dlclose handle.");
+        SoftbusAdapter::GetInstance().dmsAdapetr_ = {};
+        dmsAdapetr_ = {};
         dlclose(dllHandle_);
         dllHandle_ = nullptr;
     }
