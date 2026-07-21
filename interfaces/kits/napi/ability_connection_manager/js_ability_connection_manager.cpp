@@ -545,7 +545,10 @@ int32_t JsAbilityConnectionManager::JSToConnectOption(const napi_env &env, const
     // check start option/options
     napi_value startOptionsVal;
     if (napi_get_named_property(env, jsValue, "startOptions", &startOptionsVal) == napi_ok) {
-        UnwrapStartOptions(env, startOptionsVal, option);
+        if (!UnwrapStartOptions(env, startOptionsVal, option)) {
+            HILOGE("Failed to unwrap startOptions.");
+            return ERR_INVALID_PARAMETERS;
+        }
     }
     napi_value optionsVal;
     if (napi_get_named_property(env, jsValue, "options", &optionsVal) == napi_ok) {
