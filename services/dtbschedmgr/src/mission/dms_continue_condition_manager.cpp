@@ -804,6 +804,7 @@ std::string DmsContinueConditionMgr::TypeEnumToString(MissionEventType type)
 
 MissionStatus DmsContinueConditionMgr::GetLastContinuableMissionStatus()
 {
+    std::lock_guard<std::mutex> missionlock(missionMutex_);
     return lastContinuableMissionStatus_;
 }
 } // namespace DistributedSchedule

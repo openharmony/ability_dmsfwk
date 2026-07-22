@@ -543,11 +543,14 @@ int32_t JsAbilityConnectionManager::JSToConnectOption(const napi_env &env, const
         HILOGW("Failed to unwrap needSendStream.");
     }
     // check start option/options
-    napi_value startOptionsVal;
-    if (napi_get_named_property(env, jsValue, "startOptions", &startOptionsVal) == napi_ok) {
-        if (!UnwrapStartOptions(env, startOptionsVal, option)) {
-            HILOGE("Failed to unwrap startOptions.");
-            return ERR_INVALID_PARAMETERS;
+    bool hasStartOptions = false;
+    if (napi_has_named_property(env, jsValue, "startOptions", &hasStartOptions) == napi_ok && hasStartOptions) {
+        napi_value startOptionsVal;
+        if (napi_get_named_property(env, jsValue, "startOptions", &startOptionsVal) == napi_ok) {
+            if (!UnwrapStartOptions(env, startOptionsVal, option)) {
+                HILOGE("Failed to unwrap startOptions.");
+                return ERR_INVALID_PARAMETERS;
+            }
         }
     }
     napi_value optionsVal;
@@ -1774,19 +1777,21 @@ bool JsAbilityConnectionManager::JsToSurfaceParam(const napi_env &env, const nap
         HILOGE("Parameter verification failed.");
         return false;
     }
-
     if (!JsObjectToInt(env, jsValue, "width", surfaceParam.width)) {
         HILOGE("Unable to get width parameter.");
         return false;
     }
-
     if (!JsObjectToInt(env, jsValue, "height", surfaceParam.height)) {
         HILOGE("Unable to get height parameter.");
         return false;
     }
-
-    int32_t format = -1;
-    if (JsObjectToInt(env, jsValue, "format", format)) {
+    bool hasFormat = false;
+    if (napi_has_named_property(env, jsValue, "format", &hasFormat) == napi_ok && hasFormat) {
+        int32_t format = -1;
+        if (!JsObjectToInt(env, jsValue, "format", format)) {
+            HILOGE("format verification failed.");
+            return false;
+        }
         if (format < static_cast<int32_t>(VideoPixelFormat::UNKNOWN) ||
             format > static_cast<int32_t>(VideoPixelFormat::NV21)) {
             HILOGE("Invalid format value: %{public}d", format);
@@ -1794,7 +1799,6 @@ bool JsAbilityConnectionManager::JsToSurfaceParam(const napi_env &env, const nap
         }
         surfaceParam.format = static_cast<VideoPixelFormat>(format);
     }
-
     int32_t flip = -1;
     if (JsObjectToInt(env, jsValue, "flip", flip)) {
         if (flip < static_cast<int32_t>(FlipOptions::HORIZONTAL) ||
@@ -1804,11 +1808,13 @@ bool JsAbilityConnectionManager::JsToSurfaceParam(const napi_env &env, const nap
         }
         surfaceParam.flip = static_cast<FlipOptions>(flip);
     }
-
-    if (!JsObjectToInt(env, jsValue, "rotation", surfaceParam.rotation)) {
-        HILOGW("Unable to get rotation parameter.");
+    bool hasRotation = false;
+    if (napi_has_named_property(env, jsValue, "rotation", &hasRotation) == napi_ok && hasRotation) {
+        if (!JsObjectToInt(env, jsValue, "rotation", surfaceParam.rotation)) {
+            HILOGE("rotation verification failed.");
+            return false;
+        }
     }
-    
     return true;
 }
 
