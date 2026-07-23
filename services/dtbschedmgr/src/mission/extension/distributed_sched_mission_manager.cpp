@@ -66,7 +66,7 @@ void DistributedSchedMissionManager::Init()
     missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     auto updateRunner = AppExecFwk::EventRunner::Create("UpdateHandler");
     updateHandler_ = std::make_shared<AppExecFwk::EventHandler>(updateRunner);
-    missonChangeListener_ = new DistributedMissionChangeListener();
+    missionChangeListener_ = new DistributedMissionChangeListener();
     auto missionChangeRunner = AppExecFwk::EventRunner::Create("DistributedMissionChange");
     missionChangeHandler_ = std::make_shared<AppExecFwk::EventHandler>(missionChangeRunner);
 }
@@ -592,7 +592,7 @@ int32_t DistributedSchedMissionManager::StartSyncMissionsFromRemote(const Caller
     auto func = [this, missionInfoSet]() {
         HILOGD("RegisterMissionListener called.");
         if (!isRegMissionChange_) {
-            int32_t ret = mainServiceChannel_->RegisterMissionListener(missonChangeListener_);
+            int32_t ret = mainServiceChannel_->RegisterMissionListener(missionChangeListener_);
             if (ret == ERR_OK) {
                 isRegMissionChange_ = true;
             }
@@ -650,7 +650,7 @@ void DistributedSchedMissionManager::StopSyncMissionsFromRemote(const std::strin
         remoteSyncDeviceSet_.erase(networkId);
         if (remoteSyncDeviceSet_.empty()) {
             auto func = [this]() {
-                int32_t ret = mainServiceChannel_->UnRegisterMissionListener(missonChangeListener_);
+                int32_t ret = mainServiceChannel_->UnRegisterMissionListener(missionChangeListener_);
                 if (ret == ERR_OK) {
                     isRegMissionChange_ = false;
                 }
@@ -1168,7 +1168,7 @@ void DistributedSchedMissionManager::RetryRegisterMissionChange(int32_t retryTim
         if (!isRegMissionChange_) {
             return;
         }
-        int32_t ret = mainServiceChannel_->RegisterMissionListener(missonChangeListener_);
+        int32_t ret = mainServiceChannel_->RegisterMissionListener(missionChangeListener_);
         if (ret == ERR_NULL_OBJECT) {
             RetryRegisterMissionChange(retryTimes + 1);
             HILOGI("RetryRegisterMissionChange dmsproxy null, retry!");
@@ -1257,7 +1257,7 @@ void DistributedSchedMissionManager::OnDnetDied()
             return;
         }
         remoteSyncDeviceSet_.clear();
-        mainServiceChannel_->UnRegisterMissionListener(missonChangeListener_);
+        mainServiceChannel_->UnRegisterMissionListener(missionChangeListener_);
         isRegMissionChange_ = false;
     };
     if (missionHandler_ != nullptr) {

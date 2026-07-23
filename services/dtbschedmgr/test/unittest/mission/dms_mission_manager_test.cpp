@@ -2506,7 +2506,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncMissionsFromRemote002, TestSize.Lev
     CallerInfo callerInfo;
     auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
     DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    DistributedSchedMissionManager::GetInstance().missonChangeListener_ = new DistributedMissionChangeListener();
+    DistributedSchedMissionManager::GetInstance().missionChangeListener_ = new DistributedMissionChangeListener();
     DistributedSchedMissionManager::GetInstance().GenerateCallerInfo(callerInfo);
     DistributedSchedMissionManager::GetInstance().isRegMissionChange_ = true;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncMissionsFromRemote(callerInfo, missionInfos);
@@ -2539,7 +2539,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncMissionsFromRemote003, TestSize.Lev
     CallerInfo callerInfo;
     auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
     DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    DistributedSchedMissionManager::GetInstance().missonChangeListener_ = nullptr;
+    DistributedSchedMissionManager::GetInstance().missionChangeListener_ = nullptr;
     DistributedSchedMissionManager::GetInstance().GenerateCallerInfo(callerInfo);
     DistributedSchedMissionManager::GetInstance().isRegMissionChange_ = false;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncMissionsFromRemote(callerInfo, missionInfos);

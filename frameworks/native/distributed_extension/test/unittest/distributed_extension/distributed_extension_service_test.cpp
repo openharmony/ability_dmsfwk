@@ -150,5 +150,108 @@ HWTEST_F(DistributedExtensionServiceTest, TriggerOnCollaborate_002, TestSize.Lev
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     DTEST_LOG << "DistributedExtensionServiceTest TriggerOnCollaborate_002 end" << std::endl;
 }
+
+/**
+ * @tc.name:Clear_001
+ * @tc.desc: Clear function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedExtensionServiceTest, Clear_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedExtensionServiceTest Clear_001 start" << std::endl;
+    ASSERT_NE(nullptr, DistributedExtensionService_);
+    EXPECT_NO_FATAL_FAILURE(DistributedExtensionService_->Clear());
+    DTEST_LOG << "DistributedExtensionServiceTest Clear_001 end" << std::endl;
 }
+
+/**
+ * @tc.name:TriggerOnCreate_003
+ * @tc.desc: TriggerOnCreate with empty want
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedExtensionServiceTest, TriggerOnCreate_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedExtensionServiceTest TriggerOnCreate_003 start" << std::endl;
+    ASSERT_NE(nullptr, DistributedExtensionService_);
+    
+    DistributedExtensionService_->distributedExtension_ = std::make_shared<DistributedExtension>();
+    AAFwk::Want want;
+    want.SetElementName("device", "bundle", "ability");
+    
+    int32_t result = DistributedExtensionService_->TriggerOnCreate(want);
+    EXPECT_EQ(result, ERR_OK);
+    DTEST_LOG << "DistributedExtensionServiceTest TriggerOnCreate_003 end" << std::endl;
 }
+/**
+ * @tc.name:TriggerOnDestroy_003
+ * @tc.desc: TriggerOnDestroy multiple times
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedExtensionServiceTest, TriggerOnDestroy_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedExtensionServiceTest TriggerOnDestroy_003 start" << std::endl;
+    ASSERT_NE(nullptr, DistributedExtensionService_);
+    
+    DistributedExtensionService_->distributedExtension_ = std::make_shared<DistributedExtension>();
+    int32_t result1 = DistributedExtensionService_->TriggerOnDestroy();
+    EXPECT_EQ(result1, ERR_OK);
+    
+    int32_t result2 = DistributedExtensionService_->TriggerOnDestroy();
+    EXPECT_EQ(result2, ERR_OK);
+    DTEST_LOG << "DistributedExtensionServiceTest TriggerOnDestroy_003 end" << std::endl;
+}
+
+/**
+ * @tc.name:TriggerOnCollaborate_003
+ * @tc.desc: TriggerOnCollaborate with valid wantParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedExtensionServiceTest, TriggerOnCollaborate_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedExtensionServiceTest TriggerOnCollaborate_003 start" << std::endl;
+    ASSERT_NE(nullptr, DistributedExtensionService_);
+    
+    DistributedExtensionService_->distributedExtension_ = std::make_shared<DistributedExtension>();
+    AAFwk::WantParams wantParam;
+    
+    int32_t result = DistributedExtensionService_->TriggerOnCollaborate(wantParam);
+    EXPECT_EQ(result, ERR_OK);
+    DTEST_LOG << "DistributedExtensionServiceTest TriggerOnCollaborate_003 end" << std::endl;
+}
+
+/**
+ * @tc.name:Constructor_001
+ * @tc.desc: Constructor with nullptr extension
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedExtensionServiceTest, Constructor_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedExtensionServiceTest Constructor_001 start" << std::endl;
+    std::string bundleName = "testBundle";
+    auto service = std::make_shared<DistributedExtensionService>(nullptr, bundleName);
+    ASSERT_NE(nullptr, service);
+    
+    AAFwk::Want want;
+    int32_t result = service->TriggerOnCreate(want);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    DTEST_LOG << "DistributedExtensionServiceTest Constructor_001 end" << std::endl;
+}
+
+/**
+ * @tc.name:Constructor_002
+ * @tc.desc: Constructor with empty bundle name
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedExtensionServiceTest, Constructor_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedExtensionServiceTest Constructor_002 start" << std::endl;
+    std::shared_ptr<DistributedExtension> dExtension = std::make_shared<DistributedExtension>();
+    auto service = std::make_shared<DistributedExtensionService>(dExtension, "");
+    ASSERT_NE(nullptr, service);
+    
+    int32_t result = service->TriggerOnDestroy();
+    EXPECT_EQ(result, ERR_OK);
+    DTEST_LOG << "DistributedExtensionServiceTest Constructor_002 end" << std::endl;
+}
+}
+}
