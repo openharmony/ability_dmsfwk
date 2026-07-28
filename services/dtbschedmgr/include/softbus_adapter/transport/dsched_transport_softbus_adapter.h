@@ -95,6 +95,7 @@ private:
     std::map<int32_t, std::vector<std::shared_ptr<IDataListener>>> listeners_;
 
     std::mutex sessionMutex_;
+    std::mutex connectMutex_;
     std::mutex listenerMutex_;
     int32_t serverSocket_ = 0;
     int32_t intentServerSocket_ = 0;
