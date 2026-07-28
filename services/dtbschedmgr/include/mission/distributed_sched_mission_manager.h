@@ -168,7 +168,7 @@ private:
     std::set<int32_t> allowMissionUids_;
     std::mutex allowMissionUidsLock_;
     std::atomic<bool> isRegMissionChange_ = false;
-    sptr<DistributedMissionChangeListener> missonChangeListener_;
+    sptr<DistributedMissionChangeListener> missionChangeListener_;
     std::shared_ptr<AppExecFwk::EventHandler> missionChangeHandler_;
 
     class RemoteDmsDeathRecipient : public IRemoteObject::DeathRecipient {

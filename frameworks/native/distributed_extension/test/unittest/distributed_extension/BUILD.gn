@@ -215,6 +215,72 @@ ohos_unittest("distributed_extension_context_js_test") {
   use_exceptions = true
 }
 
+ohos_unittest("distributed_extension_error_utils_test") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_error_utils.cpp",
+    "distributed_extension_error_utils_test.cpp",
+  ]
+
+  include_dirs = [
+    "${dms_path}/frameworks/native/distributed_extension/include",
+    "${dms_path}/common/include/",
+  ]
+
+  deps = []
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "hilog:libhilog",
+  ]
+
+  cflags = [ "--coverage" ]
+  ldflags = [ "--coverage" ]
+  cflags_cc = [ "--coverage" ]
+
+  use_exceptions = true
+}
+
+ohos_unittest("distributed_extension_context_test") {
+  module_out_path = module_output_path
+  sources = [
+    "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_context.cpp",
+    "distributed_extension_context_test.cpp",
+  ]
+  include_dirs = [
+    "${dms_path}/frameworks/native/distributed_extension/include",
+    "${dms_path}/common/include/",
+  ]
+  deps = [ "${dms_path}/common:distributed_sched_utils" ]
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_context",
+    "ability_runtime:extensionkit_native",
+    "ability_runtime:napi_common",
+    "ability_runtime:runtime",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "napi:ace_napi",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+  cflags = [ "--coverage" ]
+  ldflags = [ "--coverage" ]
+  cflags_cc = [ "--coverage" ]
+  use_exceptions = true
+}
+
 ohos_unittest("distributed_extension_base_test") {
   module_out_path = module_output_path
 
@@ -385,6 +451,8 @@ group("distributed_extension_ability_test") {
     deps = [
       ":distributed_extension_base_test",
       ":distributed_extension_context_js_test",
+      ":distributed_extension_context_test",
+      ":distributed_extension_error_utils_test",
       ":distributed_extension_js_test",
       ":distributed_extension_proxy_test",
       ":distributed_extension_stub_test",
