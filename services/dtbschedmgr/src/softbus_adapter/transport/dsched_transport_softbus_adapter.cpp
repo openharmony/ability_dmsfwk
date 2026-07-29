@@ -374,6 +374,7 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
     const std::string &peerDeviceId)
 {
     HILOGI("begin");
+    std::lock_guard<std::mutex> connectLock(connectMutex_);
     int32_t ret = ERR_OK;
     int retryCount = 0;
     do {
