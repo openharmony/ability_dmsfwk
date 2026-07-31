@@ -38,6 +38,13 @@ struct CallbackEntry {
     sptr<IRemoteObject> callback;
     std::chrono::steady_clock::time_point timestamp;
     std::string deviceId;
+    int32_t socketFd = INVALID_SOCKET_FD;
+    std::string distributedAccountId;
+};
+
+struct SinkSessionEntry {
+    int32_t socketFd = INVALID_SOCKET_FD;
+    std::string distributedAccountId;
 };
 
 struct IntentContext {
@@ -80,6 +87,8 @@ public:
     void NotifyLinkDisconnected(const std::string& deviceId, int32_t reason);
     void NotifyAllCallbacksDisconnected(const std::string& deviceId, int32_t reason);
 
+    void DisconnectAllSessionsForDistributedAccount(const std::string& distributedAccountId);
+
     void CleanupSocketMapping(const std::string& deviceId, int32_t socketFd);
     int32_t SendDisconnectToRemote(int32_t socketFd,
         uint64_t requestCode = 0, int32_t resultCode = 0, const std::string& resultMsg = "");
@@ -91,7 +100,11 @@ private:
     int32_t SendIntentToRemote(const std::string& dstDeviceId, const OHOS::AAFwk::Want& want,
         const IntentContext& ctx, int32_t& socketFd);
     void RegisterResultCallback(uint64_t requestCode, const std::string& deviceId,
-        const sptr<IRemoteObject>& callback);
+        const sptr<IRemoteObject>& callback, const std::string& distributedAccountId, int32_t socketFd);
+    void RecordSinkSocketMapping(const std::string& srcDeviceId, uint64_t requestCode, int32_t socketFd);
+    void StoreSinkSessionDistributedAccount(const std::string& srcDeviceId, uint64_t requestCode);
+    size_t CollectAndNotifySinkSessions(const std::string& distributedAccountId);
+    size_t CollectAndCleanupCallerSessions(const std::string& distributedAccountId);
 
     int32_t ValidateExecuteRequest(const std::string& srcDeviceId, const AAFwk::Want& want,
         const IntentContext& ctx, const std::string& localDeviceId);
@@ -112,7 +125,7 @@ private:
     RemoteIntentManager();
     ~RemoteIntentManager();
     std::map<uint64_t, CallbackEntry> requestCodeCallbackMap_;
-    std::map<std::pair<std::string, uint64_t>, int32_t> requestSocketMap_;
+    std::map<std::pair<std::string, uint64_t>, SinkSessionEntry> requestSocketMap_;
     std::mutex connectMutex_;
     std::mutex requestSocketMutex_;
 };

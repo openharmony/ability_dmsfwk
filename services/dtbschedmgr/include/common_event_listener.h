@@ -43,6 +43,8 @@ private:
     void HandlePackageRemoved(const std::string& bundleName);
     void HandleUserRemoved(int32_t accountId);
     void HandleBatteryCharging();
+    void HandleDistributedAccountLogin(int32_t localId);
+    void HandleDistributedAccountLogout(int32_t localId);
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

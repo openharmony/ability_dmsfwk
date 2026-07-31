@@ -239,12 +239,13 @@ int32_t DmsIntentProviderImpl::SerializeResultData(int32_t resultCode,
 }
 
 void DmsIntentProviderImpl::ParseDisconnectData(const std::string& data,
-    int32_t& resultCode, std::string& resultMsg)
+    uint64_t& requestCode, int32_t& resultCode, std::string& resultMsg)
 {
     nlohmann::json root = nlohmann::json::parse(data, nullptr, false);
     if (root.is_discarded() || !root.is_object()) {
         return;
     }
+    requestCode = root.value("requestCode", (uint64_t)0);
     resultCode = root.value("result", resultCode);
     resultMsg = root.value("resultMsg", "");
 }

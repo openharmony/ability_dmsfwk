@@ -25,6 +25,7 @@
 #include "mission/dms_continue_condition_manager.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include "os_account_manager.h"
+#include "ohos_account_kits.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -482,6 +483,71 @@ void MultiUserManager::RegisterSoftbusListener()
 bool MultiUserManager::CheckRegSoftbusListener()
 {
     return hasRegSoftbusEventListener_;
+}
+
+std::string MultiUserManager::GetDistributedAccountIdByLocalId(int32_t localId)
+{
+    if (localId < 0) {
+        HILOGW("invalid localId: %{public}d", localId);
+        return "";
+    }
+    AccountSA::OhosAccountInfo accountInfo;
+    ErrCode ret = AccountSA::OhosAccountKits::GetInstance().GetOsAccountDistributedInfo(localId, accountInfo);
+    if (ret != ERR_OK) {
+        HILOGW("GetOsAccountDistributedInfo failed, localId=%{public}d, ret=%{public}d", localId, ret);
+        return "";
+    }
+    if (accountInfo.uid_.empty()) {
+        HILOGW("distributedAccountId is empty, localId=%{public}d", localId);
+        return "";
+    }
+    HILOGI("GetDistributedAccountIdByLocalId ok, localId=%{public}d, distributedAccountId=%{public}s",
+        localId, GetAnonymStr(accountInfo.uid_).c_str());
+    return accountInfo.uid_;
+}
+
+void MultiUserManager::HandleDistributedAccountLogin(int32_t localId)
+{
+    HILOGI("HandleDistributedAccountLogin: localId=%{public}d", localId);
+    std::string distributedAccountId = GetDistributedAccountIdByLocalId(localId);
+    if (distributedAccountId.empty()) {
+        HILOGW("HandleDistributedAccountLogin resolve failed, localId=%{public}d", localId);
+        return;
+    }
+    std::lock_guard<std::mutex> lock(distributedAccountMutex_);
+    localIdToDistributedAccountMap_[localId] = distributedAccountId;
+    HILOGI("HandleDistributedAccountLogin cached, localId=%{public}d, distributedAccountId=%{public}s",
+        localId, GetAnonymStr(distributedAccountId).c_str());
+}
+
+void MultiUserManager::HandleDistributedAccountLogout(int32_t localId)
+{
+    HILOGI("HandleDistributedAccountLogout: localId=%{public}d", localId);
+    std::string distributedAccountId;
+    {
+        std::lock_guard<std::mutex> lock(distributedAccountMutex_);
+        auto it = localIdToDistributedAccountMap_.find(localId);
+        if (it != localIdToDistributedAccountMap_.end()) {
+            distributedAccountId = it->second;
+            localIdToDistributedAccountMap_.erase(it);
+        }
+    }
+    if (distributedAccountId.empty()) {
+        distributedAccountId = GetDistributedAccountIdByLocalId(localId);
+    }
+    if (distributedAccountId.empty()) {
+        HILOGW("HandleDistributedAccountLogout no distributedAccountId, localId=%{public}d, skip intent cleanup",
+            localId);
+        return;
+    }
+    auto plugin = DistributedSchedService::GetInstance().GetIntentPlugin();
+    if (plugin == nullptr) {
+        HILOGW("intent plugin not loaded, skip intent cleanup, localId=%{public}d", localId);
+        return;
+    }
+    plugin->DisconnectAllSessionsForDistributedAccount(distributedAccountId);
+    HILOGI("HandleDistributedAccountLogout done, localId=%{public}d, distributedAccountId=%{public}s",
+        localId, GetAnonymStr(distributedAccountId).c_str());
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

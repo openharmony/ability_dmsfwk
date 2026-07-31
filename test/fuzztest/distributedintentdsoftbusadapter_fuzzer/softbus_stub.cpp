@@ -23,6 +23,8 @@ namespace DistributedSchedule {
 static bool g_softbusMockEnabled = false;
 static int32_t g_mockSocketFd = 10001;
 static uint32_t g_mockMaxSendSize = 256;
+static bool g_mockSocketFail = false;
+static bool g_mockSendBytesFail = false;
 
 void SetSoftbusMockEnabled(bool enabled)
 {
@@ -38,6 +40,16 @@ void SetSoftbusMockMaxSendSize(uint32_t size)
 {
     g_mockMaxSendSize = size;
 }
+
+void SetSoftbusMockSocketFail(bool fail)
+{
+    g_mockSocketFail = fail;
+}
+
+void SetSoftbusMockSendBytesFail(bool fail)
+{
+    g_mockSendBytesFail = fail;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
 
@@ -45,8 +57,10 @@ extern "C" {
 int32_t Socket(SocketInfo info)
 {
     (void)info;
-    return OHOS::DistributedSchedule::g_softbusMockEnabled ?
-        OHOS::DistributedSchedule::g_mockSocketFd : -1;
+    if (!OHOS::DistributedSchedule::g_softbusMockEnabled) {
+        return -1;
+    }
+    return OHOS::DistributedSchedule::g_mockSocketFail ? -1 : OHOS::DistributedSchedule::g_mockSocketFd;
 }
 
 int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount,
@@ -55,8 +69,19 @@ int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount,
     (void)socket;
     (void)qos;
     (void)qosCount;
-    (void)listener;
-    return OHOS::DistributedSchedule::g_softbusMockEnabled ? 0 : -1;
+    if (!OHOS::DistributedSchedule::g_softbusMockEnabled) {
+        return -1;
+    }
+    // Invoke OnBind with null networkId to cover OnIntentBindCallback's null-branch
+    // (early return, no sessionMutex_ lock -> safe during Bind which is called under sessionMutex_).
+    // Valid-branch / OnShutdown / OnBytes callbacks are NOT invoked here: they would lock
+    // sessionMutex_ and deadlock (Bind runs under sessionMutex_ held by ReuseOrCreateSession).
+    if (listener != nullptr && listener->OnBind != nullptr) {
+        PeerSocketInfo info{};
+        info.networkId = nullptr;
+        listener->OnBind(socket, info);
+    }
+    return 0;
 }
 
 int32_t SendBytes(int32_t socket, const void* data, uint32_t len)
@@ -64,7 +89,10 @@ int32_t SendBytes(int32_t socket, const void* data, uint32_t len)
     (void)socket;
     (void)data;
     (void)len;
-    return OHOS::DistributedSchedule::g_softbusMockEnabled ? 0 : -1;
+    if (!OHOS::DistributedSchedule::g_softbusMockEnabled) {
+        return -1;
+    }
+    return OHOS::DistributedSchedule::g_mockSendBytesFail ? -1 : 0;
 }
 
 void Shutdown(int32_t socket)

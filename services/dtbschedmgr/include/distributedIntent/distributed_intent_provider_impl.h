@@ -50,7 +50,7 @@ public:
     int32_t SerializeResultData(int32_t resultCode,
         const std::string& resultMsg, uint64_t requestCode, std::string& data) override;
     void ParseDisconnectData(const std::string& data,
-        int32_t& resultCode, std::string& resultMsg) override;
+        uint64_t& requestCode, int32_t& resultCode, std::string& resultMsg) override;
     bool ParseResultData(const std::string& data,
         uint64_t& requestCode, int32_t& resultCode, std::string& resultMsg) override;
     bool ParseIntentVersionProfile(const std::string& profileData,

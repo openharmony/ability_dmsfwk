@@ -63,9 +63,13 @@ public:
     bool CheckRegSoftbusListener();
     void RegisterSoftbusListener();
 
+    void HandleDistributedAccountLogin(int32_t localId);
+    void HandleDistributedAccountLogout(int32_t localId);
+
 private:
     void UserSwitchedOnRegisterListenerCache();
     void InitNewUser(int32_t accountId);
+    std::string GetDistributedAccountIdByLocalId(int32_t localId);
 
 private:
     std::atomic<int32_t> currentUserId_;
@@ -77,6 +81,8 @@ private:
     std::mutex recvMutex_;
     std::mutex recomMutex_;
     std::mutex listenerMutex_;
+    std::mutex distributedAccountMutex_;
+    std::map<int32_t, std::string> localIdToDistributedAccountMap_;
     bool hasRegSoftbusEventListener_ = false;
 };
 }  // namespace DistributedSchedule

@@ -142,7 +142,7 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, CreateIntentSocket_Fail_001, Test
 {
     EXPECT_CALL(*softbusMock_, Socket(_)).WillOnce(Return(-1));
     auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
-    EXPECT_EQ(a.CreateIntentSocket(DEVICE_ID_1), ERR_DI_SOCKET_CREATE_FAILED);
+    EXPECT_EQ(a.CreateIntentSocket(DEVICE_ID_1), INVALID_SOCKET_FD);
 }
 
 /**
@@ -253,7 +253,7 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, CreateIntentSocket_Fail_003, Test
 {
     EXPECT_CALL(*softbusMock_, Socket(_)).WillOnce(Return(-1));
     auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
-    EXPECT_EQ(a.CreateIntentSocket(DEVICE_ID_1), ERR_DI_SOCKET_CREATE_FAILED);
+    EXPECT_EQ(a.CreateIntentSocket(DEVICE_ID_1), INVALID_SOCKET_FD);
 }
 
 /**
@@ -1630,6 +1630,180 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, BindIntentSession_AllConnectSucce
     IIntentAllConnectManager::allConnectMock = nullptr;
 }
 #endif
+
+/**
+ * @tc.name: CreateSessionRecord_001
+ * @tc.desc: CreateSessionRecord creates a client session entry with correct fields
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, CreateSessionRecord_001, TestSize.Level3)
+{
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.StopSessionCleanupThread();
+    {
+        std::lock_guard<std::mutex> lock(adapter.sessionMutex_);
+        adapter.sessions_.clear();
+    }
+    adapter.CreateSessionRecord(VALID_FD, DEVICE_ID_1);
+    auto& sessions = adapter.sessions_;
+    EXPECT_TRUE(sessions.find(VALID_FD) != sessions.end());
+    ASSERT_NE(sessions[VALID_FD], nullptr);
+    EXPECT_EQ(sessions[VALID_FD]->peerDeviceId, DEVICE_ID_1);
+    EXPECT_EQ(sessions[VALID_FD]->socketFd, VALID_FD);
+    EXPECT_TRUE(sessions[VALID_FD]->isConnected);
+    EXPECT_FALSE(sessions[VALID_FD]->isServer);
+    EXPECT_EQ(sessions[VALID_FD]->refCount, 1);
+}
+
+/**
+ * @tc.name: RemoveDeviceMutex_001
+ * @tc.desc: RemoveDeviceMutex erases the device mutex entry
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, RemoveDeviceMutex_001, TestSize.Level3)
+{
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    adapter.GetDeviceMutex(DEVICE_ID_1);
+    EXPECT_TRUE(adapter.deviceIdMutexMap_.find(DEVICE_ID_1) != adapter.deviceIdMutexMap_.end());
+    adapter.RemoveDeviceMutex(DEVICE_ID_1);
+    EXPECT_TRUE(adapter.deviceIdMutexMap_.find(DEVICE_ID_1) == adapter.deviceIdMutexMap_.end());
+}
+
+/**
+ * @tc.name: GetPeerDeviceIdBySocket_NotFound_001
+ * @tc.desc: GetPeerDeviceIdBySocket returns empty for unknown socketFd
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, GetPeerDeviceIdBySocket_NotFound_001, TestSize.Level3)
+{
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    {
+        std::lock_guard<std::mutex> lock(adapter.sessionMutex_);
+        adapter.sessions_.clear();
+    }
+    EXPECT_TRUE(adapter.GetPeerDeviceIdBySocket(VALID_FD).empty());
+}
+
+/**
+ * @tc.name: CleanupSocketIfNeeded_ClientSession_001
+ * @tc.desc: CleanupSocketIfNeeded on client session removes device mutex
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, CleanupSocketIfNeeded_ClientSession_001, TestSize.Level3)
+{
+    auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
+    {
+        std::lock_guard<std::mutex> lock(adapter.sessionMutex_);
+        adapter.sessions_.clear();
+    }
+    adapter.deviceIdMutexMap_.clear();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    adapter.GetDeviceMutex(DEVICE_ID_1);
+    EXPECT_TRUE(adapter.deviceIdMutexMap_.find(DEVICE_ID_1) != adapter.deviceIdMutexMap_.end());
+    adapter.CleanupSocketIfNeeded(VALID_FD);
+    EXPECT_TRUE(adapter.sessions_.find(VALID_FD) == adapter.sessions_.end());
+    EXPECT_TRUE(adapter.deviceIdMutexMap_.find(DEVICE_ID_1) == adapter.deviceIdMutexMap_.end());
+}
+
+/**
+ * @tc.name: ProcessFragFrame_MidFrag_005
+ * @tc.desc: ProcessFragFrame with FRAG_MID (seq matches) keeps buffer and does not deliver
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ProcessFragFrame_MidFrag_005, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    a.fragBuffers_.clear();
+    uint32_t typeValue = static_cast<uint32_t>(IntentDataType::INTENT_DATA_TYPE_EXECUTE);
+    a.ProcessFragFrame(VALID_FD, typeValue, 100, 0, FRAG_START, "start_payload");
+    auto& mock = RemoteIntentManager::GetInstance();
+    EXPECT_CALL(mock, OnIntentDataReceived(_, _, _, _)).Times(0);
+    a.ProcessFragFrame(VALID_FD, typeValue, 100, 1, FRAG_MID, "mid_payload");
+    EXPECT_NE(a.fragBuffers_.find(VALID_FD), a.fragBuffers_.end());
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+    a.fragBuffers_.erase(VALID_FD);
+}
+
+/**
+ * @tc.name: ProcessFragFrame_IncompleteReassembly_006
+ * @tc.desc: ProcessFragFrame discards when assembled size != totalLen
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ProcessFragFrame_IncompleteReassembly_006, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    a.fragBuffers_.clear();
+    uint32_t typeValue = static_cast<uint32_t>(IntentDataType::INTENT_DATA_TYPE_EXECUTE);
+    a.ProcessFragFrame(VALID_FD, typeValue, 100, 0, FRAG_START, "abc");
+    auto& mock = RemoteIntentManager::GetInstance();
+    EXPECT_CALL(mock, OnIntentDataReceived(_, _, _, _)).Times(0);
+    a.ProcessFragFrame(VALID_FD, typeValue, 100, 1, FRAG_END, "def");
+    EXPECT_EQ(a.fragBuffers_.find(VALID_FD), a.fragBuffers_.end());
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: ReuseOrCreateSession_CreateFail_006
+ * @tc.desc: ReuseOrCreateSession returns error when CreateIntentSocket fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ReuseOrCreateSession_CreateFail_006, TestSize.Level3)
+{
+    EXPECT_CALL(*softbusMock_, Socket(_)).WillOnce(Return(-1));
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    {
+        std::lock_guard<std::mutex> lock(a.sessionMutex_);
+        a.sessions_.clear();
+    }
+    int32_t fd = -1;
+    EXPECT_EQ(a.ReuseOrCreateSession(DEVICE_ID_1, fd), ERR_DI_SOCKET_CREATE_FAILED);
+    EXPECT_EQ(fd, -1);
+}
+
+/**
+ * @tc.name: StartSessionCleanupThread_AlreadyRunning_001
+ * @tc.desc: StartSessionCleanupThread early-returns when already running
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, StartSessionCleanupThread_AlreadyRunning_001, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.StopSessionCleanupThread();
+    a.sessionCleanupRunning_.store(true);
+    a.StartSessionCleanupThread();
+    EXPECT_TRUE(a.sessionCleanupRunning_.load());
+    a.StopSessionCleanupThread();
+}
+
+/**
+ * @tc.name: AssembleFragPayload_001
+ * @tc.desc: AssembleFragPayload concatenates fragments in seq order and erases buffer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, AssembleFragPayload_001, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.fragBuffers_.clear();
+    auto fragBuf = std::make_shared<IntentFragBuffer>();
+    fragBuf->totalLen = 6;
+    fragBuf->fragments[0] = "abc";
+    fragBuf->fragments[1] = "def";
+    a.fragBuffers_[VALID_FD] = fragBuf;
+    std::string result = a.AssembleFragPayload(VALID_FD, fragBuf);
+    EXPECT_EQ(result, "abcdef");
+    EXPECT_EQ(a.fragBuffers_.find(VALID_FD), a.fragBuffers_.end());
+}
 
 } // namespace DistributedSchedule
 } // namespace OHOS

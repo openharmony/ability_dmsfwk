@@ -14,6 +14,7 @@
  */
 
 #include "multi_user_manager_test.h"
+#include "mock/ohos_account_kits_mock.h"
 
 #define private public
 #include "multi_user_manager.h"
@@ -39,14 +40,18 @@ void MultiUserManagerTest::TearDownTestCase()
     DTEST_LOG << "MultiUserManagerTest::TearDownTestCase" << std::endl;
 }
 
-void MultiUserManagerTest::TearDown()
-{
-    DTEST_LOG << "MultiUserManagerTest::TearDown" << std::endl;
-}
-
 void MultiUserManagerTest::SetUp()
 {
     DTEST_LOG << "MultiUserManagerTest::SetUp" << std::endl;
+    ohosAccountMock_ = std::make_shared<AccountSA::OhosAccountKitsMock>();
+    AccountSA::IOhosAccountKits::ohosAccountMock = ohosAccountMock_;
+}
+
+void MultiUserManagerTest::TearDown()
+{
+    DTEST_LOG << "MultiUserManagerTest::TearDown" << std::endl;
+    AccountSA::IOhosAccountKits::ohosAccountMock = nullptr;
+    ohosAccountMock_.reset();
 }
 
 void RemoteOnListenerStubTest::OnCallback(const AAFwk::OnCallbackInfo &info)
@@ -416,6 +421,156 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_IsUserForeground_001, TestSize.L
     EXPECT_FALSE(ret);
 
     DTEST_LOG << "MultiUserManager_IsCallerForeground_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetDistributedAccountIdByLocalId_InvalidLocalId_001
+ * @tc.desc: Test GetDistributedAccountIdByLocalId with negative localId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MultiUserManagerTest, GetDistributedAccountIdByLocalId_InvalidLocalId_001, TestSize.Level3)
+{
+    DTEST_LOG << "GetDistributedAccountIdByLocalId_InvalidLocalId begin" << std::endl;
+    std::string ret = MultiUserManager::GetInstance().GetDistributedAccountIdByLocalId(-1);
+    EXPECT_TRUE(ret.empty());
+    DTEST_LOG << "GetDistributedAccountIdByLocalId_InvalidLocalId end" << std::endl;
+}
+
+/**
+ * @tc.name: GetDistributedAccountIdByLocalId_GetInfoFail_002
+ * @tc.desc: Test GetDistributedAccountIdByLocalId when GetOsAccountDistributedInfo fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MultiUserManagerTest, GetDistributedAccountIdByLocalId_GetInfoFail_002, TestSize.Level3)
+{
+    DTEST_LOG << "GetDistributedAccountIdByLocalId_GetInfoFail begin" << std::endl;
+    EXPECT_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
+        .WillOnce(Return(-1));
+    std::string ret = MultiUserManager::GetInstance().GetDistributedAccountIdByLocalId(100);
+    EXPECT_TRUE(ret.empty());
+    DTEST_LOG << "GetDistributedAccountIdByLocalId_GetInfoFail end" << std::endl;
+}
+
+/**
+ * @tc.name: GetDistributedAccountIdByLocalId_UidEmpty_003
+ * @tc.desc: Test GetDistributedAccountIdByLocalId when uid_ is empty
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MultiUserManagerTest, GetDistributedAccountIdByLocalId_UidEmpty_003, TestSize.Level3)
+{
+    DTEST_LOG << "GetDistributedAccountIdByLocalId_UidEmpty begin" << std::endl;
+    AccountSA::OhosAccountInfo info{"name", "", 0};
+    EXPECT_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
+        .WillOnce(DoAll(SetArgReferee<1>(info), Return(ERR_OK)));
+    std::string ret = MultiUserManager::GetInstance().GetDistributedAccountIdByLocalId(100);
+    EXPECT_TRUE(ret.empty());
+    DTEST_LOG << "GetDistributedAccountIdByLocalId_UidEmpty end" << std::endl;
+}
+
+/**
+ * @tc.name: GetDistributedAccountIdByLocalId_Success_004
+ * @tc.desc: Test GetDistributedAccountIdByLocalId success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MultiUserManagerTest, GetDistributedAccountIdByLocalId_Success_004, TestSize.Level3)
+{
+    DTEST_LOG << "GetDistributedAccountIdByLocalId_Success begin" << std::endl;
+    AccountSA::OhosAccountInfo info{"name", "dist_acct_001", 0};
+    EXPECT_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
+        .WillOnce(DoAll(SetArgReferee<1>(info), Return(ERR_OK)));
+    std::string ret = MultiUserManager::GetInstance().GetDistributedAccountIdByLocalId(100);
+    EXPECT_EQ(ret, "dist_acct_001");
+    DTEST_LOG << "GetDistributedAccountIdByLocalId_Success end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleDistributedAccountLogin_ResolveFail_001
+ * @tc.desc: Test HandleDistributedAccountLogin when resolve fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MultiUserManagerTest, HandleDistributedAccountLogin_ResolveFail_001, TestSize.Level3)
+{
+    DTEST_LOG << "HandleDistributedAccountLogin_ResolveFail begin" << std::endl;
+    EXPECT_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
+        .WillOnce(Return(-1));
+    MultiUserManager::GetInstance().HandleDistributedAccountLogin(100);
+    EXPECT_TRUE(MultiUserManager::GetInstance().localIdToDistributedAccountMap_.empty());
+    DTEST_LOG << "HandleDistributedAccountLogin_ResolveFail end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleDistributedAccountLogin_Success_002
+ * @tc.desc: Test HandleDistributedAccountLogin caches distributedAccountId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MultiUserManagerTest, HandleDistributedAccountLogin_Success_002, TestSize.Level3)
+{
+    DTEST_LOG << "HandleDistributedAccountLogin_Success begin" << std::endl;
+    AccountSA::OhosAccountInfo info{"name", "dist_acct_002", 0};
+    EXPECT_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
+        .WillOnce(DoAll(SetArgReferee<1>(info), Return(ERR_OK)));
+    MultiUserManager::GetInstance().localIdToDistributedAccountMap_.clear();
+    MultiUserManager::GetInstance().HandleDistributedAccountLogin(100);
+    EXPECT_EQ(MultiUserManager::GetInstance().localIdToDistributedAccountMap_[100], "dist_acct_002");
+    MultiUserManager::GetInstance().localIdToDistributedAccountMap_.clear();
+    DTEST_LOG << "HandleDistributedAccountLogin_Success end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleDistributedAccountLogout_CacheMissFallbackEmpty_001
+ * @tc.desc: Test HandleDistributedAccountLogout cache miss and fallback returns empty
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MultiUserManagerTest, HandleDistributedAccountLogout_CacheMissFallbackEmpty_001, TestSize.Level3)
+{
+    DTEST_LOG << "HandleDistributedAccountLogout_CacheMissFallbackEmpty begin" << std::endl;
+    MultiUserManager::GetInstance().localIdToDistributedAccountMap_.clear();
+    EXPECT_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
+        .WillOnce(Return(-1));
+    MultiUserManager::GetInstance().HandleDistributedAccountLogout(100);
+    EXPECT_TRUE(MultiUserManager::GetInstance().localIdToDistributedAccountMap_.empty());
+    DTEST_LOG << "HandleDistributedAccountLogout_CacheMissFallbackEmpty end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleDistributedAccountLogout_CacheHitPluginNull_002
+ * @tc.desc: Test HandleDistributedAccountLogout cache hit but plugin not loaded
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MultiUserManagerTest, HandleDistributedAccountLogout_CacheHitPluginNull_002, TestSize.Level3)
+{
+    DTEST_LOG << "HandleDistributedAccountLogout_CacheHitPluginNull begin" << std::endl;
+    MultiUserManager::GetInstance().localIdToDistributedAccountMap_.clear();
+    MultiUserManager::GetInstance().localIdToDistributedAccountMap_[100] = "dist_acct_003";
+    MultiUserManager::GetInstance().HandleDistributedAccountLogout(100);
+    EXPECT_TRUE(MultiUserManager::GetInstance().localIdToDistributedAccountMap_.empty());
+    DTEST_LOG << "HandleDistributedAccountLogout_CacheHitPluginNull end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleDistributedAccountLogout_FallbackHitPluginNull_003
+ * @tc.desc: Test HandleDistributedAccountLogout cache miss, fallback hits, but plugin not loaded
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MultiUserManagerTest, HandleDistributedAccountLogout_FallbackHitPluginNull_003, TestSize.Level3)
+{
+    DTEST_LOG << "HandleDistributedAccountLogout_FallbackHitPluginNull begin" << std::endl;
+    MultiUserManager::GetInstance().localIdToDistributedAccountMap_.clear();
+    AccountSA::OhosAccountInfo info{"name", "dist_acct_004", 0};
+    EXPECT_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
+        .WillOnce(DoAll(SetArgReferee<1>(info), Return(ERR_OK)));
+    MultiUserManager::GetInstance().HandleDistributedAccountLogout(100);
+    EXPECT_TRUE(MultiUserManager::GetInstance().localIdToDistributedAccountMap_.empty());
+    DTEST_LOG << "HandleDistributedAccountLogout_FallbackHitPluginNull end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -991,6 +991,8 @@ void DistributedSchedService::InitCommonEventListener()
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     auto applyMonitor = std::make_shared<CommonEventListener>(subscribeInfo);
     EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);

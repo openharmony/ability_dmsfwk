@@ -79,7 +79,7 @@ public:
     virtual int32_t SerializeResultData(int32_t resultCode,
         const std::string& resultMsg, uint64_t requestCode, std::string& data) = 0;
     virtual void ParseDisconnectData(const std::string& data,
-        int32_t& resultCode, std::string& resultMsg) = 0;
+        uint64_t& requestCode, int32_t& resultCode, std::string& resultMsg) = 0;
     virtual bool ParseResultData(const std::string& data,
         uint64_t& requestCode, int32_t& resultCode, std::string& resultMsg) = 0;
     virtual bool ParseIntentVersionProfile(const std::string& profileData,
