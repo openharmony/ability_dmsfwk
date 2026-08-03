@@ -99,10 +99,10 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
             HandleBatteryCharging();
             break;
         case DISTRIBUTED_ACCOUNT_LOGIN :
-            HandleDistributedAccountLogin(accountId);
+            HandleDistributedAccountLogin(want.GetIntParam("userId", -1));
             break;
         case DISTRIBUTED_ACCOUNT_LOGOUT :
-            HandleDistributedAccountLogout(accountId);
+            HandleDistributedAccountLogout(want.GetIntParam("userId", -1));
             break;
         default:
             HILOGW("OnReceiveEvent undefined action");

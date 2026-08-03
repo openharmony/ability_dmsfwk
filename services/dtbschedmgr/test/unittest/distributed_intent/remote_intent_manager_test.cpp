@@ -564,10 +564,14 @@ HWTEST_F(RemoteIntentManagerTest, NotifyIntentResult_NullCallback_023, TestSize.
 HWTEST_F(RemoteIntentManagerTest, RegisterResultCallback_NullCallback_027, TestSize.Level3)
 {
     RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
-    
+    IntentContext ctx;
+    ctx.requestCode = TEST_REQUEST_CODE;
+    ctx.accountInfo.activeAccountId = "";
+    ctx.accountInfo.userId = 100;
+
     RemoteIntentManager::GetInstance().RegisterResultCallback(
-        TEST_REQUEST_CODE, DST_DEVICE_ID, nullptr, "", TEST_SOCKET_FD);
-    
+        DST_DEVICE_ID, nullptr, ctx, TEST_SOCKET_FD);
+
     EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
 }
 
@@ -580,14 +584,19 @@ HWTEST_F(RemoteIntentManagerTest, RegisterResultCallback_NullCallback_027, TestS
 HWTEST_F(RemoteIntentManagerTest, RegisterResultCallback_Success_028, TestSize.Level3)
 {
     RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
-    
+    IntentContext ctx;
+    ctx.requestCode = TEST_REQUEST_CODE;
+    ctx.accountInfo.activeAccountId = "account_A";
+    ctx.accountInfo.userId = 100;
+
     RemoteIntentManager::GetInstance().RegisterResultCallback(
-        TEST_REQUEST_CODE, DST_DEVICE_ID, callback_, "account_A", TEST_SOCKET_FD);
-    
+        DST_DEVICE_ID, callback_, ctx, TEST_SOCKET_FD);
+
     EXPECT_EQ(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.size(), 1u);
     auto it = RemoteIntentManager::GetInstance().requestCodeCallbackMap_.find(TEST_REQUEST_CODE);
     ASSERT_TRUE(it != RemoteIntentManager::GetInstance().requestCodeCallbackMap_.end());
     EXPECT_EQ(it->second.distributedAccountId, "account_A");
+    EXPECT_EQ(it->second.localId, 100);
 }
 
 /**
@@ -1475,7 +1484,7 @@ HWTEST_F(RemoteIntentManagerTest, DisconnectAllSessionsForDistributedAccount_Inv
     DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_InvalidAccountId begin" << std::endl;
     RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
     RemoteIntentManager::GetInstance().requestSocketMap_.clear();
-    EXPECT_NO_FATAL_FAILURE(RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount(""));
+    EXPECT_NO_FATAL_FAILURE(RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount(-1, ""));
     EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
     EXPECT_TRUE(RemoteIntentManager::GetInstance().requestSocketMap_.empty());
     DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_InvalidAccountId end" << std::endl;
@@ -1492,7 +1501,8 @@ HWTEST_F(RemoteIntentManagerTest, DisconnectAllSessionsForDistributedAccount_Emp
     DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_EmptyMaps begin" << std::endl;
     RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
     RemoteIntentManager::GetInstance().requestSocketMap_.clear();
-    EXPECT_NO_FATAL_FAILURE(RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount("account_A"));
+    EXPECT_NO_FATAL_FAILURE(
+        RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount(100, "account_A"));
     EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
     EXPECT_TRUE(RemoteIntentManager::GetInstance().requestSocketMap_.empty());
     DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_EmptyMaps end" << std::endl;
@@ -1510,13 +1520,13 @@ HWTEST_F(RemoteIntentManagerTest, DisconnectAllSessionsForDistributedAccount_Sin
     RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
     auto& socketMap = RemoteIntentManager::GetInstance().requestSocketMap_;
     socketMap.clear();
-    socketMap[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD, "account_A"};
-    socketMap[{DST_DEVICE_ID, TEST_REQUEST_CODE + 1}] = {TEST_SOCKET_FD + 1, "account_B"};
+    socketMap[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD, "account_A", 100};
+    socketMap[{DST_DEVICE_ID, TEST_REQUEST_CODE + 1}] = {TEST_SOCKET_FD + 1, "account_B", 101};
 
     EXPECT_CALL(*mocks_.adapterMock, SendIntentDataBySession(TEST_SOCKET_FD, _, _))
         .WillOnce(Return(ERR_DI_OK));
 
-    RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount("account_A");
+    RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount(100, "account_A");
     EXPECT_EQ(RemoteIntentManager::GetInstance().requestSocketMap_.size(), 1u);
     EXPECT_TRUE(RemoteIntentManager::GetInstance().requestSocketMap_.find({DST_DEVICE_ID, TEST_REQUEST_CODE + 1})
         != RemoteIntentManager::GetInstance().requestSocketMap_.end());
@@ -1540,6 +1550,7 @@ HWTEST_F(RemoteIntentManagerTest, DisconnectAllSessionsForDistributedAccount_Cal
         .deviceId = DST_DEVICE_ID,
         .socketFd = TEST_SOCKET_FD,
         .distributedAccountId = "account_A",
+        .localId = 100,
     };
     CallbackEntry entry2 = {
         .callback = callback_,
@@ -1547,13 +1558,14 @@ HWTEST_F(RemoteIntentManagerTest, DisconnectAllSessionsForDistributedAccount_Cal
         .deviceId = SRC_DEVICE_ID,
         .socketFd = TEST_SOCKET_FD + 1,
         .distributedAccountId = "account_B",
+        .localId = 101,
     };
     RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry1;
     RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE + 1] = entry2;
 
     EXPECT_CALL(*mocks_.adapterMock, UnbindIntentSession(TEST_SOCKET_FD)).Times(1);
 
-    RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount("account_A");
+    RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount(100, "account_A");
     EXPECT_EQ(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.size(), 1u);
     EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.find(TEST_REQUEST_CODE + 1)
         != RemoteIntentManager::GetInstance().requestCodeCallbackMap_.end());
@@ -1577,11 +1589,12 @@ HWTEST_F(RemoteIntentManagerTest, DisconnectAllSessionsForDistributedAccount_Cal
     entry.deviceId = DST_DEVICE_ID;
     entry.socketFd = TEST_SOCKET_FD;
     entry.distributedAccountId = "account_A";
+    entry.localId = 100;
     RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry;
 
     EXPECT_CALL(*mocks_.adapterMock, UnbindIntentSession(TEST_SOCKET_FD)).Times(1);
 
-    RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount("account_A");
+    RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount(100, "account_A");
     EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
     DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_CallerSide_NullCallback end" << std::endl;
 }
@@ -1601,6 +1614,7 @@ HWTEST_F(RemoteIntentManagerTest, StoreSinkSessionDistributedAccount_Success, Te
 
     IDistributedSched::AccountInfo accountInfo;
     accountInfo.activeAccountId = "dist_acct_001";
+    accountInfo.userId = 100;
     EXPECT_CALL(*mocks_.permCheckerMock, GetOsAccountData(_))
         .WillOnce(DoAll(SetArgReferee<0>(accountInfo), Return(true)));
 
@@ -1608,6 +1622,7 @@ HWTEST_F(RemoteIntentManagerTest, StoreSinkSessionDistributedAccount_Success, Te
     auto it = RemoteIntentManager::GetInstance().requestSocketMap_.find({SRC_DEVICE_ID, TEST_REQUEST_CODE});
     ASSERT_TRUE(it != RemoteIntentManager::GetInstance().requestSocketMap_.end());
     EXPECT_EQ(it->second.distributedAccountId, "dist_acct_001");
+    EXPECT_EQ(it->second.localId, 100);
     DTEST_LOG << "StoreSinkSessionDistributedAccount_Success end" << std::endl;
 }
 
@@ -2035,6 +2050,72 @@ HWTEST_F(RemoteIntentManagerTest, RecordSinkSocketMapping_001, TestSize.Level3)
     EXPECT_EQ(it->second.socketFd, TEST_SOCKET_FD);
     EXPECT_TRUE(it->second.distributedAccountId.empty());
     DTEST_LOG << "RecordSinkSocketMapping end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAllSessionsForDistributedAccount_DifferentLocalId_006
+ * @tc.desc: Same distributedAccountId but different localId should not disconnect
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, DisconnectAllSessionsForDistributedAccount_DifferentLocalId_006, TestSize.Level3)
+{
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_DifferentLocalId begin" << std::endl;
+    auto& rm = RemoteIntentManager::GetInstance();
+    rm.requestCodeCallbackMap_.clear();
+    rm.requestSocketMap_.clear();
+    // sink: localId=100, account_A
+    rm.requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = {TEST_SOCKET_FD, "account_A", 100};
+    // sink: localId=101, same account_A
+    rm.requestSocketMap_[{DST_DEVICE_ID, TEST_REQUEST_CODE + 1}] = {TEST_SOCKET_FD + 1, "account_A", 101};
+
+    EXPECT_CALL(*mocks_.adapterMock, SendIntentDataBySession(TEST_SOCKET_FD, _, _))
+        .WillOnce(Return(ERR_DI_OK));
+    // disconnect localId=100 only
+    rm.DisconnectAllSessionsForDistributedAccount(100, "account_A");
+    EXPECT_EQ(rm.requestSocketMap_.size(), 1u);
+    EXPECT_TRUE(rm.requestSocketMap_.find({DST_DEVICE_ID, TEST_REQUEST_CODE + 1})
+        != rm.requestSocketMap_.end());
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_DifferentLocalId end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAllSessionsForDistributedAccount_CallerDiffLocalId
+ * @tc.desc: Caller side: same distributedAccountId but different localId should not disconnect
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, DisconnectAllSessionsForDistributedAccount_CallerDiffLocalId, TestSize.Level3)
+{
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_CallerDifferentLocalId begin" << std::endl;
+    auto& rm = RemoteIntentManager::GetInstance();
+    rm.requestCodeCallbackMap_.clear();
+    rm.requestSocketMap_.clear();
+    CallbackEntry entry1 = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = DST_DEVICE_ID,
+        .socketFd = TEST_SOCKET_FD,
+        .distributedAccountId = "account_A",
+        .localId = 100,
+    };
+    CallbackEntry entry2 = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = SRC_DEVICE_ID,
+        .socketFd = TEST_SOCKET_FD + 1,
+        .distributedAccountId = "account_A",
+        .localId = 101,
+    };
+    rm.requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry1;
+    rm.requestCodeCallbackMap_[TEST_REQUEST_CODE + 1] = entry2;
+
+    EXPECT_CALL(*mocks_.adapterMock, UnbindIntentSession(TEST_SOCKET_FD)).Times(1);
+    rm.DisconnectAllSessionsForDistributedAccount(100, "account_A");
+    EXPECT_EQ(rm.requestCodeCallbackMap_.size(), 1u);
+    EXPECT_TRUE(rm.requestCodeCallbackMap_.find(TEST_REQUEST_CODE + 1)
+        != rm.requestCodeCallbackMap_.end());
+    DTEST_LOG << "DisconnectAllSessionsForDistributedAccount_CallerDifferentLocalId end" << std::endl;
 }
 
 }

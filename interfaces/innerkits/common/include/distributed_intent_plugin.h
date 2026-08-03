@@ -43,7 +43,8 @@ public:
 
     virtual void OnDeviceOffline(const std::string& networkId) = 0;
 
-    virtual void DisconnectAllSessionsForDistributedAccount(const std::string& distributedAccountId) = 0;
+    virtual void DisconnectAllSessionsForDistributedAccount(int32_t localId,
+        const std::string& distributedAccountId) = 0;
 };
 
 } // namespace DistributedSchedule

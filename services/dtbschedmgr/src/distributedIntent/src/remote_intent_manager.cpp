@@ -106,9 +106,8 @@ int32_t RemoteIntentManager::SendIntentToRemote(const std::string& dstDeviceId,
     return ERR_DI_OK;
 }
 
-void RemoteIntentManager::RegisterResultCallback(uint64_t requestCode,
-    const std::string& deviceId, const sptr<IRemoteObject>& callback,
-    const std::string& distributedAccountId, int32_t socketFd)
+void RemoteIntentManager::RegisterResultCallback(const std::string& deviceId,
+    const sptr<IRemoteObject>& callback, const IntentContext& ctx, int32_t socketFd)
 {
     if (callback == nullptr) {
         return;
@@ -120,8 +119,9 @@ void RemoteIntentManager::RegisterResultCallback(uint64_t requestCode,
     entry.timestamp = std::chrono::steady_clock::now();
     entry.deviceId = deviceId;
     entry.socketFd = socketFd;
-    entry.distributedAccountId = distributedAccountId;
-    requestCodeCallbackMap_[requestCode] = entry;
+    entry.distributedAccountId = ctx.accountInfo.activeAccountId;
+    entry.localId = ctx.accountInfo.userId;
+    requestCodeCallbackMap_[ctx.requestCode] = entry;
 }
 
 int32_t RemoteIntentManager::StartRemoteIntent(const OHOS::AAFwk::Want& want,
@@ -167,8 +167,7 @@ int32_t RemoteIntentManager::StartRemoteIntent(const OHOS::AAFwk::Want& want,
     if (ret != ERR_DI_OK) {
         return ret;
     }
-    RegisterResultCallback(intentCallerInfo.requestCode, dstDeviceId,
-        resultCallback, ctx.accountInfo.activeAccountId, socketFd);
+    RegisterResultCallback(dstDeviceId, resultCallback, ctx, socketFd);
     HILOGI("StartRemoteIntent success, socketFd=%{public}d, requestCode=%{public}" PRIu64,
         socketFd, intentCallerInfo.requestCode);
     return ERR_DI_OK;
@@ -360,6 +359,7 @@ void RemoteIntentManager::StoreSinkSessionDistributedAccount(const std::string& 
     auto it = requestSocketMap_.find(socketKey);
     if (it != requestSocketMap_.end()) {
         it->second.distributedAccountId = localAccountInfo.activeAccountId;
+        it->second.localId = localAccountInfo.userId;
     }
 }
 
@@ -773,21 +773,23 @@ void RemoteIntentManager::NotifyAllCallbacksDisconnected(const std::string& devi
         disconnectedCallbacks.size());
 }
 
-void RemoteIntentManager::DisconnectAllSessionsForDistributedAccount(const std::string& distributedAccountId)
+void RemoteIntentManager::DisconnectAllSessionsForDistributedAccount(int32_t localId,
+    const std::string& distributedAccountId)
 {
-    HILOGI("DisconnectAllSessionsForDistributedAccount called, distributedAccountId=%{public}s",
-        GetAnonymStr(distributedAccountId).c_str());
+    HILOGI("DisconnectAllSessionsForDistributedAccount called, localId=%{public}d, distributedAccountId=%{public}s",
+        localId, GetAnonymStr(distributedAccountId).c_str());
     if (distributedAccountId.empty()) {
         HILOGW("invalid distributedAccountId");
         return;
     }
-    size_t sinkCount = CollectAndNotifySinkSessions(distributedAccountId);
-    size_t callerCount = CollectAndCleanupCallerSessions(distributedAccountId);
+    size_t sinkCount = CollectAndNotifySinkSessions(localId, distributedAccountId);
+    size_t callerCount = CollectAndCleanupCallerSessions(localId, distributedAccountId);
     HILOGI("DisconnectAllSessionsForDistributedAccount end, sink=%{public}zu, caller=%{public}zu",
         sinkCount, callerCount);
 }
 
-size_t RemoteIntentManager::CollectAndNotifySinkSessions(const std::string& distributedAccountId)
+size_t RemoteIntentManager::CollectAndNotifySinkSessions(int32_t localId,
+    const std::string& distributedAccountId)
 {
     struct SinkItem {
         std::string deviceId;
@@ -798,7 +800,7 @@ size_t RemoteIntentManager::CollectAndNotifySinkSessions(const std::string& dist
     {
         std::lock_guard<std::mutex> lock(requestSocketMutex_);
         for (auto it = requestSocketMap_.begin(); it != requestSocketMap_.end();) {
-            if (it->second.distributedAccountId == distributedAccountId) {
+            if (it->second.distributedAccountId == distributedAccountId && it->second.localId == localId) {
                 items.push_back({it->first.first, it->first.second, it->second.socketFd});
                 it = requestSocketMap_.erase(it);
             } else {
@@ -815,7 +817,8 @@ size_t RemoteIntentManager::CollectAndNotifySinkSessions(const std::string& dist
     return items.size();
 }
 
-size_t RemoteIntentManager::CollectAndCleanupCallerSessions(const std::string& distributedAccountId)
+size_t RemoteIntentManager::CollectAndCleanupCallerSessions(int32_t localId,
+    const std::string& distributedAccountId)
 {
     struct CallerItem {
         uint64_t requestCode;
@@ -827,7 +830,7 @@ size_t RemoteIntentManager::CollectAndCleanupCallerSessions(const std::string& d
     {
         std::lock_guard<std::mutex> lock(connectMutex_);
         for (auto it = requestCodeCallbackMap_.begin(); it != requestCodeCallbackMap_.end();) {
-            if (it->second.distributedAccountId == distributedAccountId) {
+            if (it->second.distributedAccountId == distributedAccountId && it->second.localId == localId) {
                 items.push_back({it->first, it->second.deviceId,
                     it->second.socketFd, it->second.callback});
                 it = requestCodeCallbackMap_.erase(it);
