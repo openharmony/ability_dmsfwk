@@ -301,7 +301,6 @@ group("unittest") {
     deps = [
       ":AbilityConnectionMgrStubTest",
       ":AbilityConnectionMgrTest",
-      ":AbilityConnectionSessionTest",
       ":DistributedClientTest",
       ":MessageDataHeaderTest",
     ]
