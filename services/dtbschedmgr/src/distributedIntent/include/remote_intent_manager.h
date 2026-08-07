@@ -40,11 +40,13 @@ struct CallbackEntry {
     std::string deviceId;
     int32_t socketFd = INVALID_SOCKET_FD;
     std::string distributedAccountId;
+    int32_t localId = -1;
 };
 
 struct SinkSessionEntry {
     int32_t socketFd = INVALID_SOCKET_FD;
     std::string distributedAccountId;
+    int32_t localId = -1;
 };
 
 struct IntentContext {
@@ -87,7 +89,8 @@ public:
     void NotifyLinkDisconnected(const std::string& deviceId, int32_t reason);
     void NotifyAllCallbacksDisconnected(const std::string& deviceId, int32_t reason);
 
-    void DisconnectAllSessionsForDistributedAccount(const std::string& distributedAccountId);
+    void DisconnectAllSessionsForDistributedAccount(int32_t localId,
+        const std::string& distributedAccountId);
 
     void CleanupSocketMapping(const std::string& deviceId, int32_t socketFd);
     int32_t SendDisconnectToRemote(int32_t socketFd,
@@ -99,12 +102,12 @@ private:
         IDistributedSched::AccountInfo& accountInfo);
     int32_t SendIntentToRemote(const std::string& dstDeviceId, const OHOS::AAFwk::Want& want,
         const IntentContext& ctx, int32_t& socketFd);
-    void RegisterResultCallback(uint64_t requestCode, const std::string& deviceId,
-        const sptr<IRemoteObject>& callback, const std::string& distributedAccountId, int32_t socketFd);
+    void RegisterResultCallback(const std::string& deviceId,
+        const sptr<IRemoteObject>& callback, const IntentContext& ctx, int32_t socketFd);
     void RecordSinkSocketMapping(const std::string& srcDeviceId, uint64_t requestCode, int32_t socketFd);
     void StoreSinkSessionDistributedAccount(const std::string& srcDeviceId, uint64_t requestCode);
-    size_t CollectAndNotifySinkSessions(const std::string& distributedAccountId);
-    size_t CollectAndCleanupCallerSessions(const std::string& distributedAccountId);
+    size_t CollectAndNotifySinkSessions(int32_t localId, const std::string& distributedAccountId);
+    size_t CollectAndCleanupCallerSessions(int32_t localId, const std::string& distributedAccountId);
 
     int32_t ValidateExecuteRequest(const std::string& srcDeviceId, const AAFwk::Want& want,
         const IntentContext& ctx, const std::string& localDeviceId);

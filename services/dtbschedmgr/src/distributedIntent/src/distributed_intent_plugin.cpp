@@ -102,11 +102,12 @@ public:
             GetAnonymStr(networkId).c_str(), closedSockets.size());
     }
 
-    void DisconnectAllSessionsForDistributedAccount(const std::string& distributedAccountId) override
+    void DisconnectAllSessionsForDistributedAccount(int32_t localId,
+        const std::string& distributedAccountId) override
     {
-        HILOGI("DisconnectAllSessionsForDistributedAccount: distributedAccountId=%{public}s",
-            GetAnonymStr(distributedAccountId).c_str());
-        RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount(distributedAccountId);
+        HILOGI("DisconnectAllSessionsForDistributedAccount: localId=%{public}d, distributedAccountId=%{public}s",
+            localId, GetAnonymStr(distributedAccountId).c_str());
+        RemoteIntentManager::GetInstance().DisconnectAllSessionsForDistributedAccount(localId, distributedAccountId);
     }
 
 private:

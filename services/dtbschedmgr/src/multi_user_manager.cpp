@@ -545,7 +545,7 @@ void MultiUserManager::HandleDistributedAccountLogout(int32_t localId)
         HILOGW("intent plugin not loaded, skip intent cleanup, localId=%{public}d", localId);
         return;
     }
-    plugin->DisconnectAllSessionsForDistributedAccount(distributedAccountId);
+    plugin->DisconnectAllSessionsForDistributedAccount(localId, distributedAccountId);
     HILOGI("HandleDistributedAccountLogout done, localId=%{public}d, distributedAccountId=%{public}s",
         localId, GetAnonymStr(distributedAccountId).c_str());
 }
