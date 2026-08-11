@@ -35,6 +35,24 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
 namespace DistributedSchedule {
 
+constexpr uint32_t FUZZ_TEST_API_COUNT = 12;
+constexpr size_t BITS_PER_BYTE = 8;
+
+enum class FuzzTestApiIndex : uint32_t {
+    CONNECT_REMOTE_ABILITY = 0,
+    DISCONNECT_REMOTE_ABILITY = 1,
+    RELEASE_ABILITY_FROM_REMOTE = 2,
+    START_REMOTE_ABILITY_BY_CALL = 3,
+    SET_CALLER_EXTRA_INFO = 4,
+    GET_BUNDLE_NAME_FROM_TOKEN = 5,
+    CONTINUE_LOCAL_MISSION = 6,
+    CONTINUE_ABILITY_WITH_TIMEOUT = 7,
+    SET_D_EXTENSION_CONNECTED = 8,
+    NOTIFY_STATE_CHANGED = 9,
+    CHECK_MDM_CONTROL_BY_UID = 10,
+    IS_TARGET_PERMISSION = 11,
+};
+
 void ConnectRemoteAbilityFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
@@ -227,23 +245,65 @@ void IsTargetPermissionFuzzTest(const uint8_t* data, size_t size)
 
     DistributedSchedService::GetInstance().IsTargetPermission(want);
 }
+
+static void ExecuteFuzzTest(uint32_t index, const uint8_t* data, size_t size)
+{
+    switch (index) {
+        case static_cast<uint32_t>(FuzzTestApiIndex::CONNECT_REMOTE_ABILITY):
+            ConnectRemoteAbilityFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::DISCONNECT_REMOTE_ABILITY):
+            DisconnectRemoteAbilityFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::RELEASE_ABILITY_FROM_REMOTE):
+            ReleaseAbilityFromRemoteFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::START_REMOTE_ABILITY_BY_CALL):
+            StartRemoteAbilityByCallFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::SET_CALLER_EXTRA_INFO):
+            SetCallerExtraInfoFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::GET_BUNDLE_NAME_FROM_TOKEN):
+            GetBundleNameFromTokenFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::CONTINUE_LOCAL_MISSION):
+            ContinueLocalMissionFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::CONTINUE_ABILITY_WITH_TIMEOUT):
+            ContinueAbilityWithTimeoutFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::SET_D_EXTENSION_CONNECTED):
+            SetDExtensionConnectedFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::NOTIFY_STATE_CHANGED):
+            NotifyStateChangedFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::CHECK_MDM_CONTROL_BY_UID):
+            CheckMDMControlByUidFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::IS_TARGET_PERMISSION):
+            IsTargetPermissionFuzzTest(data, size);
+            break;
+        default:
+            break;
+    }
 }
-}
+
+}  // namespace DistributedSchedule
+}  // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DistributedSchedule::ConnectRemoteAbilityFuzzTest(data, size);
-    OHOS::DistributedSchedule::DisconnectRemoteAbilityFuzzTest(data, size);
-    OHOS::DistributedSchedule::ReleaseAbilityFromRemoteFuzzTest(data, size);
-    OHOS::DistributedSchedule::StartRemoteAbilityByCallFuzzTest(data, size);
-    OHOS::DistributedSchedule::SetCallerExtraInfoFuzzTest(data, size);
-    OHOS::DistributedSchedule::GetBundleNameFromTokenFuzzTest(data, size);
-    OHOS::DistributedSchedule::ContinueLocalMissionFuzzTest(data, size);
-    OHOS::DistributedSchedule::ContinueAbilityWithTimeoutFuzzTest(data, size);
-    OHOS::DistributedSchedule::SetDExtensionConnectedFuzzTest(data, size);
-    OHOS::DistributedSchedule::NotifyStateChangedFuzzTest(data, size);
-    OHOS::DistributedSchedule::CheckMDMControlByUidFuzzTest(data, size);
-    OHOS::DistributedSchedule::IsTargetPermissionFuzzTest(data, size);
+    if (data == nullptr || size < sizeof(uint32_t)) {
+        return 0;
+    }
+    uint32_t index = 0;
+    for (size_t i = 0; i < sizeof(uint32_t); ++i) {
+        index = (index << OHOS::DistributedSchedule::BITS_PER_BYTE) | data[i];
+    }
+    index = index % OHOS::DistributedSchedule::FUZZ_TEST_API_COUNT;
+    OHOS::DistributedSchedule::ExecuteFuzzTest(index, data, size);
     return 0;
 }

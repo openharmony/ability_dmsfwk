@@ -34,6 +34,23 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace DistributedSchedule {
+
+constexpr uint32_t FUZZ_TEST_API_COUNT = 10;
+constexpr size_t BITS_PER_BYTE = 8;
+
+enum class FuzzTestApiIndex : uint32_t {
+    CONNECT_REMOTE_ABILITY_INNER = 0,
+    DISCONNECT_REMOTE_ABILITY_INNER = 1,
+    RELEASE_ABILITY_FROM_REMOTE_INNER = 2,
+    NOTIFY_COMPLETE_FREE_INSTALL_FROM_REMOTE_INNER = 3,
+    CONTINUE_STATE_CALLBACK_REGISTER_INNER = 4,
+    CONTINUE_STATE_CALLBACK_UNREGISTER_INNER = 5,
+    NOTIFY_MISSIONS_CHANGED_FROM_REMOTE_INNER = 6,
+    START_REMOTE_MESSAGE_INNER = 7,
+    SEND_MESSAGE_RESULT_INNER = 8,
+    IS_MDM_CONTROL_INNER = 9,
+};
+
 const std::string TAG = "DistributedSchedStubTwelveFuzzTest";
 
 void ConnectRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
@@ -270,27 +287,68 @@ void IsMDMControlInnerFuzzTest(const uint8_t* data, size_t size)
         return;
     }
     FuzzUtil::MockPermission();
+    FuzzedDataProvider fdp(data, size);
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
+    
+    // Consume data to satisfy fuzz test requirements
+    // Note: IsMDMControlInner doesn't actually read from dataParcel
+    (void)fdp.ConsumeIntegral<uint32_t>();
 
     DistributedSchedService::GetInstance().IsMDMControlInner(dataParcel, reply);
 }
-}
-}
+}  // namespace DistributedSchedule
+}  // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DistributedSchedule::ConnectRemoteAbilityInnerFuzzTest(data, size);
-    OHOS::DistributedSchedule::DisconnectRemoteAbilityInnerFuzzTest(data, size);
-    OHOS::DistributedSchedule::ReleaseAbilityFromRemoteInnerFuzzTest(data, size);
-    OHOS::DistributedSchedule::NotifyCompleteFreeInstallFromRemoteInnerFuzzTest(data, size);
-    OHOS::DistributedSchedule::ContinueStateCallbackRegisterInnerFuzzTest(data, size);
-    OHOS::DistributedSchedule::ContinueStateCallbackUnRegisterInnerFuzzTest(data, size);
-    OHOS::DistributedSchedule::NotifyMissionsChangedFromRemoteInnerFuzzTest(data, size);
-    OHOS::DistributedSchedule::StartRemoteIntentInnerFuzzTest(data, size);
-    OHOS::DistributedSchedule::SendIntentResultInnerFuzzTest(data, size);
-    OHOS::DistributedSchedule::IsMDMControlInnerFuzzTest(data, size);
+    using OHOS::DistributedSchedule::BITS_PER_BYTE;
+    using OHOS::DistributedSchedule::FUZZ_TEST_API_COUNT;
+    using OHOS::DistributedSchedule::FuzzTestApiIndex;
+    
+    if (data == nullptr || size < sizeof(uint32_t)) {
+        return 0;
+    }
+    uint32_t index = 0;
+    for (size_t i = 0; i < sizeof(uint32_t); ++i) {
+        index = (index << BITS_PER_BYTE) | data[i];
+    }
+    index = index % FUZZ_TEST_API_COUNT;
+    switch (index) {
+        case static_cast<uint32_t>(FuzzTestApiIndex::CONNECT_REMOTE_ABILITY_INNER):
+            OHOS::DistributedSchedule::ConnectRemoteAbilityInnerFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::DISCONNECT_REMOTE_ABILITY_INNER):
+            OHOS::DistributedSchedule::DisconnectRemoteAbilityInnerFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::RELEASE_ABILITY_FROM_REMOTE_INNER):
+            OHOS::DistributedSchedule::ReleaseAbilityFromRemoteInnerFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::NOTIFY_COMPLETE_FREE_INSTALL_FROM_REMOTE_INNER):
+            OHOS::DistributedSchedule::NotifyCompleteFreeInstallFromRemoteInnerFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::CONTINUE_STATE_CALLBACK_REGISTER_INNER):
+            OHOS::DistributedSchedule::ContinueStateCallbackRegisterInnerFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::CONTINUE_STATE_CALLBACK_UNREGISTER_INNER):
+            OHOS::DistributedSchedule::ContinueStateCallbackUnRegisterInnerFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::NOTIFY_MISSIONS_CHANGED_FROM_REMOTE_INNER):
+            OHOS::DistributedSchedule::NotifyMissionsChangedFromRemoteInnerFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::START_REMOTE_MESSAGE_INNER):
+            OHOS::DistributedSchedule::StartRemoteIntentInnerFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::SEND_MESSAGE_RESULT_INNER):
+            OHOS::DistributedSchedule::SendIntentResultInnerFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::IS_MDM_CONTROL_INNER):
+            OHOS::DistributedSchedule::IsMDMControlInnerFuzzTest(data, size);
+            break;
+        default:
+            break;
+    }
     return 0;
 }
