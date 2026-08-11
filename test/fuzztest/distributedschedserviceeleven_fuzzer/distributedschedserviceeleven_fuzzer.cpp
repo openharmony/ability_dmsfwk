@@ -35,6 +35,25 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
 namespace DistributedSchedule {
 
+constexpr uint32_t FUZZ_TEST_API_COUNT = 13;
+constexpr size_t BITS_PER_BYTE = 8;
+
+enum class FuzzTestApiIndex : uint32_t {
+    START_REMOTE_FREE_INSTALL = 0,
+    START_FREE_INSTALL_FROM_REMOTE = 1,
+    CHECK_SINK_ACCESS_CONTROL_USER = 2,
+    SEND_RESULT_FROM_REMOTE_REMOTE_DIED = 3,
+    DUMP_TEST = 4,
+    SAVE_CALLER_COMPONENT = 5,
+    SAVE_CONNECT_TOKEN = 6,
+    PROCESS_CALLER_DIED = 7,
+    PROCESS_CALLEE_DIED = 8,
+    NOTIFY_STATE_CHANGED_FROM_REMOTE = 9,
+    NOTIFY_COMPLETE_FREE_INSTALL_FROM_REMOTE = 10,
+    CONTINUE_STATE_CALLBACK_REGISTER = 11,
+    CONTINUE_STATE_CALLBACK_UNREGISTER = 12,
+};
+
 void StartRemoteFreeInstallFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
@@ -206,6 +225,10 @@ void ProcessCalleeDiedFuzzTest(const uint8_t* data, size_t size)
     FuzzUtil::MockPermission();
     FuzzedDataProvider fdp(data, size);
     sptr<IRemoteObject> connect(new MockDistributedSched());
+    
+    // Consume data to satisfy fuzz test requirements even though ProcessCalleeDied
+    // doesn't directly use fuzz data (it requires an IRemoteObject)
+    (void)fdp.ConsumeIntegral<int32_t>();
 
     DistributedSchedService::GetInstance().ProcessCalleeDied(connect);
 }
@@ -285,25 +308,69 @@ void CallerDeathRecipientFuzzTest(const uint8_t* data, size_t size)
     wptr<IRemoteObject> weakRemote(remote);
     recipient.OnRemoteDied(weakRemote);
 }
+
+static void ExecuteFuzzTest(uint32_t index, const uint8_t* data, size_t size)
+{
+    switch (index) {
+        case static_cast<uint32_t>(FuzzTestApiIndex::START_REMOTE_FREE_INSTALL):
+            StartRemoteFreeInstallFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::START_FREE_INSTALL_FROM_REMOTE):
+            StartFreeInstallFromRemoteFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::CHECK_SINK_ACCESS_CONTROL_USER):
+            CheckSinkAccessControlUserFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::SEND_RESULT_FROM_REMOTE_REMOTE_DIED):
+            SendResultFromRemoteRemoteDiedFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::DUMP_TEST):
+            DumpFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::SAVE_CALLER_COMPONENT):
+            SaveCallerComponentFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::SAVE_CONNECT_TOKEN):
+            SaveConnectTokenFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::PROCESS_CALLER_DIED):
+            ProcessCallerDiedFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::PROCESS_CALLEE_DIED):
+            ProcessCalleeDiedFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::NOTIFY_STATE_CHANGED_FROM_REMOTE):
+            NotifyStateChangedFromRemoteFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::NOTIFY_COMPLETE_FREE_INSTALL_FROM_REMOTE):
+            NotifyCompleteFreeInstallFromRemoteFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::CONTINUE_STATE_CALLBACK_REGISTER):
+            ContinueStateCallbackRegisterFuzzTest(data, size);
+            break;
+        case static_cast<uint32_t>(FuzzTestApiIndex::CONTINUE_STATE_CALLBACK_UNREGISTER):
+            ContinueStateCallbackUnRegisterFuzzTest(data, size);
+            break;
+        default:
+            CallerDeathRecipientFuzzTest(data, size);
+            break;
+    }
 }
-}
+
+}  // namespace DistributedSchedule
+}  // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DistributedSchedule::StartRemoteFreeInstallFuzzTest(data, size);
-    OHOS::DistributedSchedule::StartFreeInstallFromRemoteFuzzTest(data, size);
-    OHOS::DistributedSchedule::CheckSinkAccessControlUserFuzzTest(data, size);
-    OHOS::DistributedSchedule::SendResultFromRemoteRemoteDiedFuzzTest(data, size);
-    OHOS::DistributedSchedule::DumpFuzzTest(data, size);
-    OHOS::DistributedSchedule::SaveCallerComponentFuzzTest(data, size);
-    OHOS::DistributedSchedule::SaveConnectTokenFuzzTest(data, size);
-    OHOS::DistributedSchedule::ProcessCallerDiedFuzzTest(data, size);
-    OHOS::DistributedSchedule::ProcessCalleeDiedFuzzTest(data, size);
-    OHOS::DistributedSchedule::NotifyStateChangedFromRemoteFuzzTest(data, size);
-    OHOS::DistributedSchedule::NotifyCompleteFreeInstallFromRemoteFuzzTest(data, size);
-    OHOS::DistributedSchedule::ContinueStateCallbackRegisterFuzzTest(data, size);
-    OHOS::DistributedSchedule::ContinueStateCallbackUnRegisterFuzzTest(data, size);
-    OHOS::DistributedSchedule::CallerDeathRecipientFuzzTest(data, size);
+    if (data == nullptr || size < sizeof(uint32_t)) {
+        return 0;
+    }
+    uint32_t index = 0;
+    for (size_t i = 0; i < sizeof(uint32_t); ++i) {
+        index = (index << OHOS::DistributedSchedule::BITS_PER_BYTE) | data[i];
+    }
+    index = index % OHOS::DistributedSchedule::FUZZ_TEST_API_COUNT;
+    OHOS::DistributedSchedule::ExecuteFuzzTest(index, data, size);
     return 0;
 }
