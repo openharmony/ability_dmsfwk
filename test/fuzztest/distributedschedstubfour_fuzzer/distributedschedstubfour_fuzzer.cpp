@@ -41,7 +41,7 @@ const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.acces
 
 void StartRemoteFreeInstallInnerFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < sizeof(int32_t))) {
+    if (data == nullptr) {
         return;
     }
     FuzzUtil::MockPermission();
@@ -68,7 +68,7 @@ void StartRemoteFreeInstallInnerFuzzTest(const uint8_t* data, size_t size)
 
 void StartRemoteShareFormInnerFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < sizeof(int32_t))) {
+    if (data == nullptr) {
         return;
     }
     FuzzUtil::MockPermission();
@@ -90,7 +90,7 @@ void StartRemoteShareFormInnerFuzzTest(const uint8_t* data, size_t size)
 
 void StopRemoteExtensionAbilityInnerFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < sizeof(int32_t))) {
+    if (data == nullptr) {
         return;
     }
     FuzzUtil::MockPermission();
@@ -122,7 +122,7 @@ void StopRemoteExtensionAbilityInnerFuzzTest(const uint8_t* data, size_t size)
 
 void RegisterOnListenerInnerFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < sizeof(int32_t))) {
+    if (data == nullptr) {
         return;
     }
     FuzzedDataProvider fdp(data, size);
@@ -144,7 +144,7 @@ void RegisterOnListenerInnerFuzzTest(const uint8_t* data, size_t size)
 
 void StopSyncMissionsFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < sizeof(int32_t))) {
+    if (data == nullptr) {
         return;
     }
     FuzzUtil::MockPermission();
