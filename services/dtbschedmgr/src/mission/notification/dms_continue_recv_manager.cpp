@@ -150,6 +150,7 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
         }
         std::vector<sptr<IRemoteObject>> objs;
         registerOnListener_[type] = objs;
+        iterItem = registerOnListener_.find(type);
     }
     for (auto iter : iterItem->second) {
         if (iter == obj) {
