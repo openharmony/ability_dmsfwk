@@ -62,6 +62,8 @@ public:
     bool IsCallerForeground(int32_t callingUid);
     bool CheckRegSoftbusListener();
     void RegisterSoftbusListener();
+    void HandleAccountLogin(int32_t userId, const OHOS::AccountSA::OhosAccountInfo& accountInfo);
+    void HandleAccountLogout(int32_t userId);
 
     void HandleDistributedAccountLogin(int32_t localId);
     void HandleDistributedAccountLogout(int32_t localId);
@@ -69,7 +71,6 @@ public:
 private:
     void UserSwitchedOnRegisterListenerCache();
     void InitNewUser(int32_t accountId);
-    std::string GetDistributedAccountIdByLocalId(int32_t localId);
 
 private:
     std::atomic<int32_t> currentUserId_;
@@ -77,12 +78,14 @@ private:
     std::map<int32_t, std::shared_ptr<DMSContinueRecvMgr>> recvMgrMap_;
     std::map<int32_t, std::shared_ptr<DMSContinueRecomMgr>> recomMgrMap_;
     std::map<int32_t, std::map<std::string, sptr<IRemoteObject>>> listenerCache_;
+    std::map<int32_t, std::map<std::string, MultiAccountListenerInfo>> multiListenerCache_;
     std::mutex sendMutex_;
     std::mutex recvMutex_;
     std::mutex recomMutex_;
     std::mutex listenerMutex_;
     std::mutex distributedAccountMutex_;
     std::map<int32_t, std::string> localIdToDistributedAccountMap_;
+    std::mutex accountMutex_;
     bool hasRegSoftbusEventListener_ = false;
 };
 }  // namespace DistributedSchedule

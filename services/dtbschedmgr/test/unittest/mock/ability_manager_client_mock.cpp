@@ -28,9 +28,10 @@ ErrCode AbilityManagerClient::GetMissionInfo(const std::string& deviceId, int32_
     return IAbilityManagerClient::clientMock->GetMissionInfo(deviceId, missionId, missionInfo);
 }
 
-ErrCode AbilityManagerClient::ContinueAbility(const std::string &deviceId, int32_t missionId, uint32_t versionCode)
+ErrCode AbilityManagerClient::ContinueAbility(const std::string &deviceId, int32_t missionId, uint32_t versionCode,
+    int32_t userId)
 {
-    return IAbilityManagerClient::clientMock->ContinueAbility(deviceId, missionId, versionCode);
+    return IAbilityManagerClient::clientMock->ContinueAbility(deviceId, missionId, versionCode, userId);
 }
 
 int32_t AbilityManagerClient::GetAbilityStateByPersistentId(int32_t persistentId, bool &state)

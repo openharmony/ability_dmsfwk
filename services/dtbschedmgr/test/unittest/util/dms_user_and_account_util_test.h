@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,31 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_ADAPTER_TEST_H
-#define SOFTBUS_ADAPTER_TEST_H
+#ifndef DMS_USER_AND_ACCOUNT_UTIL_TEST_H
+#define DMS_USER_AND_ACCOUNT_UTIL_TEST_H
 
 #include "gtest/gtest.h"
-
-#include "softbus_adapter/softbus_adapter.h"
 #include "mock/ohos_account_kits_mock.h"
 #include "mock/os_account_manager_mock.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-class SoftbusAdapterTest : public testing::Test {
+class DmsUserAndAccountUtilTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
+    void SetUp() override;
+    void TearDown() override;
     static std::shared_ptr<AccountSA::OhosAccountKitsMock> ohosAccountMock_;
     static std::shared_ptr<AccountSA::OsAccountManagerMock> osAccountMock_;
 };
-
-class SubSoftbusAdapterListener : public SoftbusAdapterListener {
-public:
-    void OnDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen, std::string accountIdTrunc) {};
-};
 } // namespace DistributedSchedule
 } // namespace OHOS
-#endif // SOFTBUS_ADAPTER_TEST_H
+#endif // DMS_USER_AND_ACCOUNT_UTIL_TEST_H

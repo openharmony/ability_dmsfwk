@@ -16,6 +16,8 @@
 #include "mission/notification/dms_continue_send_manager.h"
 #include "mission/notification/dms_continue_recv_manager.h"
 #include "mission/notification/dms_continue_send_strategy.h"
+#include "mission/distributed_mission_broadcast_listener.h"
+#include "multi_user_manager.h"
 
 #include "datashare_manager.h"
 #include "dtbschedmgr_log.h"
@@ -27,6 +29,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace DistributedSchedule {
+
+void SendMgrRemoteOnListenerStubTest::OnCallback(const AAFwk::OnCallbackInfo &info) {}
 
 static bool g_mockBool = false;
 static bool g_mockWifiBool = false;
@@ -43,6 +47,8 @@ void DMSContinueSendMgrTest::SetUpTestCase()
     IDmsContinueConditionMgr::conditionMgrMock = mgrMock_;
     clientMock_ = std::make_shared<AbilityManagerClientMock>();
     AbilityManagerClientMock::clientMock = clientMock_;
+    ohosAccountMock_ = std::make_shared<AccountSA::OhosAccountKitsMock>();
+    AccountSA::IOhosAccountKits::ohosAccountMock = ohosAccountMock_;
 }
 
 void DMSContinueSendMgrTest::TearDownTestCase()
@@ -53,6 +59,8 @@ void DMSContinueSendMgrTest::TearDownTestCase()
     mgrMock_ = nullptr;
     clientMock_ = nullptr;
     AbilityManagerClientMock::clientMock = nullptr;
+    AccountSA::IOhosAccountKits::ohosAccountMock = nullptr;
+    ohosAccountMock_ = nullptr;
 }
 
 void DMSContinueSendMgrTest::SetUp()
@@ -60,6 +68,16 @@ void DMSContinueSendMgrTest::SetUp()
     ASSERT_NE(mgrMock_, nullptr);
     ::testing::Mock::VerifyAndClearExpectations(mgrMock_.get());
     ON_CALL(*mgrMock_, IsScreenLocked()).WillByDefault(Return(false));
+    ASSERT_NE(ohosAccountMock_, nullptr);
+    ::testing::Mock::VerifyAndClearExpectations(ohosAccountMock_.get());
+    ON_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
+        .WillByDefault(Invoke([](int32_t localId, AccountSA::OhosAccountInfo& info) {
+            if (localId < 0) {
+                return static_cast<ErrCode>(-1);
+            }
+            info.uid_ = "test_uid";
+            return 0;
+        }));
 }
 
 void DMSContinueSendMgrTest::TearDown()
@@ -69,6 +87,8 @@ void DMSContinueSendMgrTest::TearDown()
 //DMSContinueRecvMgrTest
 void DMSContinueRecvMgrTest::SetUpTestCase()
 {
+    mgrMock_ = std::make_shared<DmsContinueConditionMgrMock>();
+    IDmsContinueConditionMgr::conditionMgrMock = mgrMock_;
     bundleMgrMock_ = std::make_shared<BundleManagerInternalMock>();
     BundleManagerInternalMock::bundleMgrMock = bundleMgrMock_;
     dmsKvMock_ = std::make_shared<DmsKvSyncE2EMock>();
@@ -77,6 +97,8 @@ void DMSContinueRecvMgrTest::SetUpTestCase()
 
 void DMSContinueRecvMgrTest::TearDownTestCase()
 {
+    IDmsContinueConditionMgr::conditionMgrMock = nullptr;
+    mgrMock_ = nullptr;
     BundleManagerInternalMock::bundleMgrMock = nullptr;
     bundleMgrMock_ = nullptr;
     DmsKvSyncE2EMock::dmsKvMock = nullptr;
@@ -85,6 +107,9 @@ void DMSContinueRecvMgrTest::TearDownTestCase()
 
 void DMSContinueRecvMgrTest::SetUp()
 {
+    ASSERT_NE(mgrMock_, nullptr);
+    ::testing::Mock::VerifyAndClearExpectations(mgrMock_.get());
+    ON_CALL(*mgrMock_, IsScreenLocked()).WillByDefault(Return(false));
 }
 
 void DMSContinueRecvMgrTest::TearDown()
@@ -412,7 +437,8 @@ HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_001, TestSize.Level1)
     std::string senderNetworkId = "NetworkId";
     uint8_t payload[] = {0xf0};
     uint32_t dataLen1 = 1;
-    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1));
+    std::string accountIdTrunc = "testAccountId";
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1, accountIdTrunc));
     DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_001 end" << std::endl;
 }
 
@@ -430,7 +456,8 @@ HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_002, TestSize.Level1)
     uint8_t payload[] = {0xf0};
     uint32_t dataLen1 = 1;
     g_mockBool = false;
-    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1));
+    std::string accountIdTrunc = "testAccountId";
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1, accountIdTrunc));
     DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_002 end" << std::endl;
 }
 
@@ -449,7 +476,8 @@ HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_003, TestSize.Level1)
     uint32_t dataLen1 = 1;
     g_mockBool = true;
     g_mockWifiBool = false;
-    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1));
+    std::string accountIdTrunc = "testAccountId";
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1, accountIdTrunc));
     DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_003 end" << std::endl;
 }
 
@@ -468,7 +496,8 @@ HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_004, TestSize.Level1)
     uint32_t dataLen1 = 1;
     g_mockBool = true;
     g_mockWifiBool = true;
-    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1));
+    std::string accountIdTrunc = "testAccountId";
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1, accountIdTrunc));
     DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_004 end" << std::endl;
 }
 
@@ -569,12 +598,12 @@ HWTEST_F(DMSContinueSendMgrTest, ExecuteSendStrategyBackground_001, TestSize.Lev
     auto strategy = std::make_shared<SendStrategyBackground>(sendMgr);
     sendMgr->strategyMap_[MISSION_EVENT_BACKGROUND] = strategy;
     sendMgr->screenLockedHandler_ = std::make_shared<DMSContinueSendMgr::ScreenLockedHandler>(sendMgr);
-    DmsContinueConditionMgr::GetInstance().SetIsScreenLocked(false);
+    EXPECT_CALL(*mgrMock_, IsScreenLocked()).WillOnce(Return(false));
     int32_t ret = sendMgr->ExecuteSendStrategy(MISSION_EVENT_BACKGROUND, status, sendType);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(sendType, BROADCAST_TYPE_DISAPPEAR);
 
-    DmsContinueConditionMgr::GetInstance().SetIsScreenLocked(true);
+    EXPECT_CALL(*mgrMock_, IsScreenLocked()).WillOnce(Return(true));
     ret = sendMgr->ExecuteSendStrategy(MISSION_EVENT_BACKGROUND, status, sendType);
     EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
     EXPECT_EQ(sendType, BROADCAST_TYPE_DISAPPEAR);
@@ -674,7 +703,8 @@ HWTEST_F(DMSContinueSendMgrTest, SendSoftbusEvent_001, TestSize.Level1)
     uint16_t bundleNameId = 100;
     uint8_t continueTypeId = 1;
     uint8_t type = BROADCAST_TYPE_APPEAR;
-    EXPECT_NO_FATAL_FAILURE(sendMgr->SendSoftbusEvent(bundleNameId, continueTypeId, type));
+    std::string accountId = "testAccountId";
+    EXPECT_NO_FATAL_FAILURE(sendMgr->SendSoftbusEvent(bundleNameId, continueTypeId, type, accountId));
     DTEST_LOG << "DMSContinueSendMgrTest SendSoftbusEvent_001 end" << std::endl;
 }
 
@@ -767,10 +797,11 @@ HWTEST_F(DMSContinueRecvMgrTest, RetryPostBroadcast_Test_001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueRecvMgrTest RetryPostBroadcast_Test_001 start" << std::endl;
     std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
-    int32_t ret = recvMgr->RetryPostBroadcast("networkId", 1, 1, 0, 5);
+    std::string accountIdTrunc = "testAccountId";
+    int32_t ret = recvMgr->RetryPostBroadcast("networkId", 1, 1, accountIdTrunc, 0, 5);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
-    ret = recvMgr->RetryPostBroadcast("networkId", 1, 1, 0, 0);
+    ret = recvMgr->RetryPostBroadcast("networkId", 1, 1, accountIdTrunc, 0, 0);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DMSContinueRecvMgrTest RetryPostBroadcast_Test_001 end" << std::endl;
 }
@@ -839,10 +870,11 @@ HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_005, TestSize.Level1)
     g_mockWifiBool = true;
     uint8_t payload[] = {0x10, 0x01, 0x02, 0x03};
     uint32_t dataLen = 4;
-    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen));
+    std::string accountIdTrunc = "testAccountId";
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen, accountIdTrunc));
 
     uint8_t payload2[] = {0x00, 0x01, 0x02, 0x03};
-    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload2, dataLen));
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload2, dataLen, accountIdTrunc));
     DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_005 end" << std::endl;
 }
 
@@ -855,7 +887,8 @@ HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_006, TestSize.Level1)
     g_mockWifiBool = true;
     uint8_t payload[] = {0x11, 0x00, 0x00, 0x00};
     uint32_t dataLen = 4;
-    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen));
+    std::string accountIdTrunc = "testAccountId";
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen, accountIdTrunc));
     DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_006 end" << std::endl;
 }
 
@@ -985,7 +1018,7 @@ HWTEST_F(DMSContinueSendMgrTest, SendStrategyBackground_IsScreenLocked_001, Test
     uint8_t sendType = 0;
 
     auto strategy = std::make_shared<SendStrategyBackground>(sendMgr);
-    DmsContinueConditionMgr::GetInstance().SetIsScreenLocked(true);
+    EXPECT_CALL(*mgrMock_, IsScreenLocked()).WillOnce(Return(true));
     int32_t ret = strategy->ExecuteSendStrategy(status, sendType);
     EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
     EXPECT_EQ(sendType, BROADCAST_TYPE_DISAPPEAR);
@@ -1116,6 +1149,264 @@ HWTEST_F(DMSContinueSendMgrTest, SendStrategyContinueSwitchOff_002, TestSize.Lev
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(sendType, BROADCAST_TYPE_DISAPPEAR);
     DTEST_LOG << "DMSContinueSendMgrTest SendStrategyContinueSwitchOff_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: SendContinueBroadcast_AccountInfo_001
+ * @tc.desc: test SendContinueBroadcast with GetForegroundAccountInfo success, covering line 245
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueSendMgrTest, SendContinueBroadcast_AccountInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueSendMgrTest SendContinueBroadcast_AccountInfo_001 start" << std::endl;
+    std::shared_ptr<DMSContinueSendMgr> sendMgr = std::make_shared<DMSContinueSendMgr>();
+    auto strategy = std::make_shared<SendStrategyContinueSwitchOff>(sendMgr);
+    sendMgr->strategyMap_[MISSION_EVENT_CONTINUE_SWITCH_OFF] = strategy;
+    MissionStatus status;
+    status.bundleName = "com.test.bundle";
+    status.abilityName = "TestAbility";
+    status.continueState = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition(_)).WillOnce(Return(true));
+    EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillOnce(Return(true));
+    EXPECT_CALL(*bundleMgrMock_, GetBundleNameId(_, _)).WillOnce(Return(0));
+    EXPECT_CALL(*bundleMgrMock_, GetContinueTypeId(_, _, _)).WillOnce(Return(0));
+    EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MISSION_EVENT_CONTINUE_SWITCH_OFF));
+    DTEST_LOG << "DMSContinueSendMgrTest SendContinueBroadcast_AccountInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SendContinueBroadcast_AccountInfo_002
+ * @tc.desc: test SendContinueBroadcast with GetForegroundAccountInfo failed, uid set to "0"
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueSendMgrTest, SendContinueBroadcast_AccountInfo_002, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueSendMgrTest SendContinueBroadcast_AccountInfo_002 start" << std::endl;
+    std::shared_ptr<DMSContinueSendMgr> sendMgr = std::make_shared<DMSContinueSendMgr>();
+    auto strategy = std::make_shared<SendStrategyContinueSwitchOff>(sendMgr);
+    sendMgr->strategyMap_[MISSION_EVENT_CONTINUE_SWITCH_OFF] = strategy;
+    MissionStatus status;
+    status.bundleName = "com.test.bundle";
+    status.abilityName = "TestAbility";
+    status.continueState = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
+    EXPECT_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
+        .WillOnce(Return(static_cast<ErrCode>(-1)));
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition(_)).WillOnce(Return(true));
+    EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillOnce(Return(true));
+    EXPECT_CALL(*bundleMgrMock_, GetBundleNameId(_, _)).WillOnce(Return(0));
+    EXPECT_CALL(*bundleMgrMock_, GetContinueTypeId(_, _, _)).WillOnce(Return(0));
+    EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MISSION_EVENT_CONTINUE_SWITCH_OFF));
+    DTEST_LOG << "DMSContinueSendMgrTest SendContinueBroadcast_AccountInfo_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: DistributedMissionBroadcastListener_OnDataRecv_001
+ * @tc.desc: test OnDataRecv with accountIdTrunc parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecvMgrTest, DistributedMissionBroadcastListener_OnDataRecv_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedMissionBroadcastListener_OnDataRecv_001 start" << std::endl;
+    MultiUserManager::GetInstance().Init();
+    DistributedMissionBroadcastListener listener;
+    std::string senderNetworkId = "test_network_id";
+    uint8_t payload[] = {0x00, 0x01, 0x02, 0x03};
+    uint32_t dataLen = 4;
+    std::string accountIdTrunc = "te";
+    EXPECT_NO_FATAL_FAILURE(listener.OnDataRecv(senderNetworkId, payload, dataLen, accountIdTrunc));
+    MultiUserManager::GetInstance().UnInit();
+    DTEST_LOG << "DistributedMissionBroadcastListener_OnDataRecv_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyDataRecv_PostOnBroadcast_001
+ * @tc.desc: test NotifyDataRecv reaches PostOnBroadcastBusiness with valid payload
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_PostOnBroadcast_001, TestSize.Level3)
+{
+    DTEST_LOG << "NotifyDataRecv_PostOnBroadcast_001 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    recvMgr->Init(100);
+    std::string senderNetworkId = "test_network_id";
+    // type=0x00(FOCUSED), len=0x03(DMS_DATA_LEN), bundleNameId=0x0102, continueTypeId=0x03
+    uint8_t payload[] = {0x03, 0x01, 0x02, 0x03};
+    uint32_t dataLen = 4;
+    std::string accountIdTrunc = "te";
+    DataShareManager::GetInstance().SetCurrentContinueSwitch(true);
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen, accountIdTrunc));
+    recvMgr->UnInit();
+    DTEST_LOG << "NotifyDataRecv_PostOnBroadcast_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterOnListenerForMultiAccount_001
+ * @tc.desc: test RegisterOnListenerForMultiAccount with valid params
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecvMgrTest, RegisterOnListenerForMultiAccount_001, TestSize.Level3)
+{
+    DTEST_LOG << "RegisterOnListenerForMultiAccount_001 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    recvMgr->Init(100);
+    sptr<IRemoteObject> obj = new SendMgrRemoteOnListenerStubTest();
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    accountInfo.uid_ = "test_uid";
+    accountInfo.name_ = "test_name";
+    int32_t ret = recvMgr->RegisterOnListenerForMultiAccount("continue", obj, accountInfo);
+    EXPECT_EQ(ret, ERR_OK);
+    recvMgr->UnInit();
+    DTEST_LOG << "RegisterOnListenerForMultiAccount_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterOnListenerForMultiAccount_002
+ * @tc.desc: test RegisterOnListenerForMultiAccount with null obj
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecvMgrTest, RegisterOnListenerForMultiAccount_002, TestSize.Level3)
+{
+    DTEST_LOG << "RegisterOnListenerForMultiAccount_002 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    recvMgr->Init(100);
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    int32_t ret = recvMgr->RegisterOnListenerForMultiAccount("continue", nullptr, accountInfo);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    recvMgr->UnInit();
+    DTEST_LOG << "RegisterOnListenerForMultiAccount_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterOnListenerForMultiAccount_003
+ * @tc.desc: test RegisterOnListenerForMultiAccount with duplicate obj
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecvMgrTest, RegisterOnListenerForMultiAccount_003, TestSize.Level3)
+{
+    DTEST_LOG << "RegisterOnListenerForMultiAccount_003 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    recvMgr->Init(100);
+    sptr<IRemoteObject> obj = new SendMgrRemoteOnListenerStubTest();
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    accountInfo.uid_ = "test_uid";
+    accountInfo.name_ = "test_name";
+    int32_t ret = recvMgr->RegisterOnListenerForMultiAccount("continue", obj, accountInfo);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = recvMgr->RegisterOnListenerForMultiAccount("continue", obj, accountInfo);
+    EXPECT_EQ(ret, NO_MISSION_INFO_FOR_MISSION_ID);
+    recvMgr->UnInit();
+    DTEST_LOG << "RegisterOnListenerForMultiAccount_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: DealDockDisplayBusinessForMultiAccount_001
+ * @tc.desc: test DealDockDisplayBusinessForMultiAccount with ACTIVE state
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecvMgrTest, DealDockDisplayBusinessForMultiAccount_001, TestSize.Level3)
+{
+    DTEST_LOG << "DealDockDisplayBusinessForMultiAccount_001 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    recvMgr->Init(100);
+    // Register a multi-account listener first
+    sptr<IRemoteObject> obj = new SendMgrRemoteOnListenerStubTest();
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    accountInfo.uid_ = "te_uid";
+    accountInfo.name_ = "test_name";
+    recvMgr->RegisterOnListenerForMultiAccount("continue", obj, accountInfo);
+    currentIconInfo info("sender_net_id", "src_bundle", "sink_bundle", "continue_type");
+    std::string accountIdTrunc = "te";
+    int32_t ret = recvMgr->DealDockDisplayBusinessForMultiAccount(1, info, 0, accountIdTrunc);
+    EXPECT_EQ(ret, ERR_OK);
+    recvMgr->UnInit();
+    DTEST_LOG << "DealDockDisplayBusinessForMultiAccount_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DealDockDisplayBusinessForMultiAccount_002
+ * @tc.desc: test DealDockDisplayBusinessForMultiAccount with INACTIVE state and mismatched sender
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecvMgrTest, DealDockDisplayBusinessForMultiAccount_002, TestSize.Level3)
+{
+    DTEST_LOG << "DealDockDisplayBusinessForMultiAccount_002 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    recvMgr->Init(100);
+    // First set iconInfo_ with ACTIVE state via VerifyBroadcastSource
+    currentIconInfo activeInfo("sender_net_id", "src_bundle", "sink_bundle", "continue_type");
+    recvMgr->DealDockDisplayBusiness(1, activeInfo, 0);
+    // Now test INACTIVE with mismatched sender
+    currentIconInfo mismatchInfo("other_net_id", "src_bundle", "sink_bundle", "continue_type");
+    std::string accountIdTrunc = "te";
+    int32_t ret = recvMgr->DealDockDisplayBusinessForMultiAccount(1, mismatchInfo, 1, accountIdTrunc);
+    EXPECT_NE(ret, ERR_OK);
+    recvMgr->UnInit();
+    DTEST_LOG << "DealDockDisplayBusinessForMultiAccount_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyDockDisplayForMultiAccount_001
+ * @tc.desc: test NotifyDockDisplayForMultiAccount with matching accountId
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecvMgrTest, NotifyDockDisplayForMultiAccount_001, TestSize.Level3)
+{
+    DTEST_LOG << "NotifyDockDisplayForMultiAccount_001 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    recvMgr->Init(100);
+    // Register listener with matching uid prefix
+    sptr<IRemoteObject> obj = new SendMgrRemoteOnListenerStubTest();
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    accountInfo.uid_ = "test_uid_value";
+    accountInfo.name_ = "test_name";
+    recvMgr->RegisterOnListenerForMultiAccount("continue", obj, accountInfo);
+    currentIconInfo info("sender_net_id", "src_bundle", "sink_bundle", "continue_type");
+    std::string accountIdTrunc = "te";
+    int32_t ret = recvMgr->NotifyDockDisplayForMultiAccount(1, info, 0, accountIdTrunc);
+    EXPECT_EQ(ret, ERR_OK);
+    recvMgr->UnInit();
+    DTEST_LOG << "NotifyDockDisplayForMultiAccount_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyDockDisplayForMultiAccount_002
+ * @tc.desc: test NotifyDockDisplayForMultiAccount with no registered type
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecvMgrTest, NotifyDockDisplayForMultiAccount_002, TestSize.Level3)
+{
+    DTEST_LOG << "NotifyDockDisplayForMultiAccount_002 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    recvMgr->Init(100);
+    currentIconInfo info("sender_net_id", "src_bundle", "sink_bundle", "continue_type");
+    std::string accountIdTrunc = "te";
+    int32_t ret = recvMgr->NotifyDockDisplayForMultiAccount(1, info, 0, accountIdTrunc);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    recvMgr->UnInit();
+    DTEST_LOG << "NotifyDockDisplayForMultiAccount_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyDockDisplayForMultiAccount_003
+ * @tc.desc: test NotifyDockDisplayForMultiAccount with non-matching accountId
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecvMgrTest, NotifyDockDisplayForMultiAccount_003, TestSize.Level3)
+{
+    DTEST_LOG << "NotifyDockDisplayForMultiAccount_003 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    recvMgr->Init(100);
+    sptr<IRemoteObject> obj = new SendMgrRemoteOnListenerStubTest();
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    accountInfo.uid_ = "xy_uid_value";
+    accountInfo.name_ = "test_name";
+    recvMgr->RegisterOnListenerForMultiAccount("continue", obj, accountInfo);
+    currentIconInfo info("sender_net_id", "src_bundle", "sink_bundle", "continue_type");
+    std::string accountIdTrunc = "te";
+    int32_t ret = recvMgr->NotifyDockDisplayForMultiAccount(1, info, 0, accountIdTrunc);
+    EXPECT_EQ(ret, ERR_OK);
+    recvMgr->UnInit();
+    DTEST_LOG << "NotifyDockDisplayForMultiAccount_003 end" << std::endl;
 }
 }
 }

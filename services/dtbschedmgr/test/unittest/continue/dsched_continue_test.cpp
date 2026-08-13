@@ -1621,7 +1621,7 @@ HWTEST_F(DSchedContinueTest, ExecuteContinueAbility_074, TestSize.Level1)
             missionInfo.continueState = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
             return ERR_OK;
         });
-    EXPECT_CALL(*clientMock_, ContinueAbility(_, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*clientMock_, ContinueAbility(_, _, _, _)).WillOnce(Return(-1));
     int32_t appVersion = 0;
     int32_t ret = conti_->ExecuteContinueAbility(appVersion);
     EXPECT_EQ(ret, CONTINUE_CALL_CONTINUE_ABILITY_FAILED);

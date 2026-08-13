@@ -424,70 +424,6 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_IsUserForeground_001, TestSize.L
 }
 
 /**
- * @tc.name: GetDistributedAccountIdByLocalId_InvalidLocalId_001
- * @tc.desc: Test GetDistributedAccountIdByLocalId with negative localId
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(MultiUserManagerTest, GetDistributedAccountIdByLocalId_InvalidLocalId_001, TestSize.Level3)
-{
-    DTEST_LOG << "GetDistributedAccountIdByLocalId_InvalidLocalId begin" << std::endl;
-    std::string ret = MultiUserManager::GetInstance().GetDistributedAccountIdByLocalId(-1);
-    EXPECT_TRUE(ret.empty());
-    DTEST_LOG << "GetDistributedAccountIdByLocalId_InvalidLocalId end" << std::endl;
-}
-
-/**
- * @tc.name: GetDistributedAccountIdByLocalId_GetInfoFail_002
- * @tc.desc: Test GetDistributedAccountIdByLocalId when GetOsAccountDistributedInfo fails
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(MultiUserManagerTest, GetDistributedAccountIdByLocalId_GetInfoFail_002, TestSize.Level3)
-{
-    DTEST_LOG << "GetDistributedAccountIdByLocalId_GetInfoFail begin" << std::endl;
-    EXPECT_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
-        .WillOnce(Return(-1));
-    std::string ret = MultiUserManager::GetInstance().GetDistributedAccountIdByLocalId(100);
-    EXPECT_TRUE(ret.empty());
-    DTEST_LOG << "GetDistributedAccountIdByLocalId_GetInfoFail end" << std::endl;
-}
-
-/**
- * @tc.name: GetDistributedAccountIdByLocalId_UidEmpty_003
- * @tc.desc: Test GetDistributedAccountIdByLocalId when uid_ is empty
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(MultiUserManagerTest, GetDistributedAccountIdByLocalId_UidEmpty_003, TestSize.Level3)
-{
-    DTEST_LOG << "GetDistributedAccountIdByLocalId_UidEmpty begin" << std::endl;
-    AccountSA::OhosAccountInfo info{"name", "", 0};
-    EXPECT_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
-        .WillOnce(DoAll(SetArgReferee<1>(info), Return(ERR_OK)));
-    std::string ret = MultiUserManager::GetInstance().GetDistributedAccountIdByLocalId(100);
-    EXPECT_TRUE(ret.empty());
-    DTEST_LOG << "GetDistributedAccountIdByLocalId_UidEmpty end" << std::endl;
-}
-
-/**
- * @tc.name: GetDistributedAccountIdByLocalId_Success_004
- * @tc.desc: Test GetDistributedAccountIdByLocalId success
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(MultiUserManagerTest, GetDistributedAccountIdByLocalId_Success_004, TestSize.Level3)
-{
-    DTEST_LOG << "GetDistributedAccountIdByLocalId_Success begin" << std::endl;
-    AccountSA::OhosAccountInfo info{"name", "dist_acct_001", 0};
-    EXPECT_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
-        .WillOnce(DoAll(SetArgReferee<1>(info), Return(ERR_OK)));
-    std::string ret = MultiUserManager::GetInstance().GetDistributedAccountIdByLocalId(100);
-    EXPECT_EQ(ret, "dist_acct_001");
-    DTEST_LOG << "GetDistributedAccountIdByLocalId_Success end" << std::endl;
-}
-
-/**
  * @tc.name: HandleDistributedAccountLogin_ResolveFail_001
  * @tc.desc: Test HandleDistributedAccountLogin when resolve fails
  * @tc.type: FUNC
@@ -572,5 +508,108 @@ HWTEST_F(MultiUserManagerTest, HandleDistributedAccountLogout_FallbackHitPluginN
     EXPECT_TRUE(MultiUserManager::GetInstance().localIdToDistributedAccountMap_.empty());
     DTEST_LOG << "HandleDistributedAccountLogout_FallbackHitPluginNull end" << std::endl;
 }
+
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+/**
+ * @tc.name: MultiUserManager_OnRegisterOnListener_MultiAccount_001
+ * @tc.desc: test OnRegisterOnListener with multi account feature
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiUserManagerTest, MultiUserManager_OnRegisterOnListener_MultiAccount_001, TestSize.Level3)
+{
+    DTEST_LOG << "MultiUserManager_OnRegisterOnListener_MultiAccount_001 start" << std::endl;
+    /**
+     * @tc.steps: step1. test OnRegisterOnListener with multi account listener cache
+     */
+    MultiUserManager::GetInstance().Init();
+
+    int32_t callingUid = 20000100;
+    sptr<IRemoteObject> obj(new RemoteOnListenerStubTest());
+    auto ret = MultiUserManager::GetInstance().OnRegisterOnListener(TYPE, obj, callingUid);
+    EXPECT_EQ(ret, ERR_OK);
+
+    MultiUserManager::GetInstance().UnInit();
+    DTEST_LOG << "MultiUserManager_OnRegisterOnListener_MultiAccount_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: MultiUserManager_OnRegisterOnListener_MultiAccount_002
+ * @tc.desc: test OnRegisterOnListener with invalid user
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiUserManagerTest, MultiUserManager_OnRegisterOnListener_MultiAccount_002, TestSize.Level3)
+{
+    DTEST_LOG << "MultiUserManager_OnRegisterOnListener_MultiAccount_002 start" << std::endl;
+    /**
+     * @tc.steps: step1. test OnRegisterOnListener with invalid callingUid
+     */
+    MultiUserManager::GetInstance().Init();
+
+    int32_t callingUid = -1;
+    sptr<IRemoteObject> obj(new RemoteOnListenerStubTest());
+    auto ret = MultiUserManager::GetInstance().OnRegisterOnListener(TYPE, obj, callingUid);
+    EXPECT_NE(ret, ERR_OK);
+
+    MultiUserManager::GetInstance().UnInit();
+    DTEST_LOG << "MultiUserManager_OnRegisterOnListener_MultiAccount_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: MultiUserManager_OnRegisterOnListener_MultiAccount_003
+ * @tc.desc: test OnRegisterOnListener with null object
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiUserManagerTest, MultiUserManager_OnRegisterOnListener_MultiAccount_003, TestSize.Level3)
+{
+    DTEST_LOG << "MultiUserManager_OnRegisterOnListener_MultiAccount_003 start" << std::endl;
+    /**
+     * @tc.steps: step1. test OnRegisterOnListener with null object
+     */
+    MultiUserManager::GetInstance().Init();
+
+    int32_t callingUid = 20000100;
+    sptr<IRemoteObject> obj = nullptr;
+    auto ret = MultiUserManager::GetInstance().OnRegisterOnListener(TYPE, obj, callingUid);
+    EXPECT_NE(ret, ERR_OK);
+
+    MultiUserManager::GetInstance().UnInit();
+    DTEST_LOG << "MultiUserManager_OnRegisterOnListener_MultiAccount_003 end" << std::endl;
+}
+#endif
+
+/**
+ * @tc.name: MultiUserManager_HandleAccountLogin_001
+ * @tc.desc: test HandleAccountLogin with valid userId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiUserManagerTest, MultiUserManager_HandleAccountLogin_001, TestSize.Level3)
+{
+    DTEST_LOG << "MultiUserManager_HandleAccountLogin_001 start" << std::endl;
+    int32_t userId = 100;
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    accountInfo.uid_ = "testAccountId";
+
+    MultiUserManager::GetInstance().Init();
+    EXPECT_NO_FATAL_FAILURE(MultiUserManager::GetInstance().HandleAccountLogin(userId, accountInfo));
+    MultiUserManager::GetInstance().UnInit();
+    DTEST_LOG << "MultiUserManager_HandleAccountLogin_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: MultiUserManager_HandleAccountLogout_001
+ * @tc.desc: test HandleAccountLogout with valid userId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiUserManagerTest, MultiUserManager_HandleAccountLogout_001, TestSize.Level3)
+{
+    DTEST_LOG << "MultiUserManager_HandleAccountLogout_001 start" << std::endl;
+    int32_t userId = 100;
+
+    MultiUserManager::GetInstance().Init();
+    EXPECT_NO_FATAL_FAILURE(MultiUserManager::GetInstance().HandleAccountLogout(userId));
+    MultiUserManager::GetInstance().UnInit();
+    DTEST_LOG << "MultiUserManager_HandleAccountLogout_001 end" << std::endl;
+}
+
 } // namespace DistributedSchedule
 } // namespace OHOS

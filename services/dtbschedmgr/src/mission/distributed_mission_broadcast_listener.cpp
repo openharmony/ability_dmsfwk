@@ -25,7 +25,8 @@ namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DistributedMissionBroadcastListener";
 }
-void DistributedMissionBroadcastListener::OnDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen)
+void DistributedMissionBroadcastListener::OnDataRecv(std::string& senderNetworkId,
+    uint8_t* payload, uint32_t dataLen, std::string accountIdTrunc)
 {
     HILOGI("OnDataRecv, dataLen = %{public}u", dataLen);
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
@@ -33,7 +34,7 @@ void DistributedMissionBroadcastListener::OnDataRecv(std::string& senderNetworkI
         HILOGI("GetRecvMgr failed.");
         return;
     }
-    recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen);
+    recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen, accountIdTrunc);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

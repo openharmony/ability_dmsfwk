@@ -25,6 +25,8 @@
 #include "os_account_manager.h"
 #include "switch_status_dependency.h"
 #include "util/distributed_sched_memory_utils.h"
+#include "util/dms_user_and_account_util.h"
+#include "dsched_collab_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -229,16 +231,41 @@ void CommonEventListener::HandleBatteryCharging()
     HILOGI("end.");
 }
 
-void CommonEventListener::HandleDistributedAccountLogin(int32_t localId)
+void CommonEventListener::HandleDistributedAccountLogin(int32_t userId)
 {
-    HILOGI("DISTRIBUTED_ACCOUNT_LOGIN: localId=%{public}d", localId);
-    MultiUserManager::GetInstance().HandleDistributedAccountLogin(localId);
+    HILOGI("DISTRIBUTED_ACCOUNT_LOGIN: localId=%{public}d", userId);
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+    int32_t foregroundUserId = 0;
+    ErrCode ret = DmsUserAndAccountUtil::GetForegroundUserId(foregroundUserId);
+    if (ret != ERR_OK || userId != foregroundUserId) {
+        HILOGE("UserId %{public}d is not foreground user, foregroundUserId=%{public}d", userId, foregroundUserId);
+        return;
+    }
+    MultiUserManager::GetInstance().HandleDistributedAccountLogin(userId);
+#else
+    HILOGI("DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS not enabled, skip HandleAccountLogin");
+#endif
 }
 
-void CommonEventListener::HandleDistributedAccountLogout(int32_t localId)
+void CommonEventListener::HandleDistributedAccountLogout(int32_t userId)
 {
-    HILOGI("DISTRIBUTED_ACCOUNT_LOGOUT: localId=%{public}d", localId);
-    MultiUserManager::GetInstance().HandleDistributedAccountLogout(localId);
+    HILOGI("HandleAccountLogout: userId=%{public}d", userId);
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+    // 清理协同业务，协同业务当前在副屏支持发起，因此不能只清理中控
+    HILOGI("CleanUp sessions for user: %{public}d", userId);
+    DSchedCollabManager::GetInstance().DisconnectAllSessionsForUser(userId);
+
+    int32_t foregroundUserId = 0;
+    ErrCode ret = DmsUserAndAccountUtil::GetForegroundUserId(foregroundUserId);
+    if (ret != ERR_OK || userId != foregroundUserId) {
+        HILOGE("UserId %{public}d is not foreground user, foregroundUserId=%{public}d", userId, foregroundUserId);
+        return;
+    }
+    MultiUserManager::GetInstance().HandleDistributedAccountLogout(userId);
+
+#else
+    HILOGI("DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS not enabled, skip HandleAccountLogout");
+#endif
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

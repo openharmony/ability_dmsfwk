@@ -34,7 +34,7 @@ void SoftbusAdapter::UnInit()
     HILOGI("%{public}s common called. ", __func__);
 }
 
-int32_t SoftbusAdapter::SendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer)
+int32_t SoftbusAdapter::SendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer, std::string accountId)
 {
     HILOGI("%{public}s common called. ", __func__);
     return 0;
@@ -46,7 +46,8 @@ int32_t SoftbusAdapter::StopSoftbusEvent()
     return 0;
 }
 
-void SoftbusAdapter::OnBroadCastRecv(std::string& networkId, uint8_t* data, uint32_t dataLen)
+void SoftbusAdapter::OnBroadCastRecv(std::string& networkId, uint8_t* data,
+    uint32_t dataLen, std::string accountIdTrunc)
 {
     HILOGI("%{public}s common called. ", __func__);
     return;

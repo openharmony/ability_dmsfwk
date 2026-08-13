@@ -25,6 +25,7 @@
 
 #include "event_handler.h"
 #include "single_instance.h"
+#include "account_info.h"
 #include "mission/dms_continue_condition_manager.h"
 #include "mission/notification/dms_continue_send_strategy.h"
 
@@ -73,6 +74,8 @@ public:
     void OnDeviceScreenOn();
     void OnUserSwitched();
 
+    void SetAccountInfo(const OHOS::AccountSA::OhosAccountInfo& accountInfo);
+
 private:
     void StartEvent();
     void SendContinueBroadcast(int32_t missionId, MissionEventType type);
@@ -80,7 +83,7 @@ private:
     void SendContinueBroadcastAfterDelay(int32_t missionId);
     int32_t ExecuteSendStrategy(MissionEventType type, const MissionStatus& status, uint8_t &sendType);
     int32_t QueryBroadcastInfo(const MissionStatus& status, uint16_t& bundleNameId, uint8_t& continueTypeId);
-    void SendSoftbusEvent(uint16_t& bundleNameId, uint8_t& continueTypeId, uint8_t type);
+    void SendSoftbusEvent(uint16_t& bundleNameId, uint8_t& continueTypeId, uint8_t type, std::string accountId);
     void AddMMIListener();
     void RemoveMMIListener();
     int32_t CheckContinueState(const int32_t missionId);
@@ -116,6 +119,7 @@ private:
 private:
     int32_t accountId_ = DEFAULT_USER;
     int32_t mmiMonitorId_ = INVALID_ID;
+    OHOS::AccountSA::OhosAccountInfo accountInfo_;
     std::thread eventThread_;
     std::condition_variable eventCon_;
     std::mutex eventMutex_;

@@ -107,6 +107,9 @@ config("distributed_sched_config") {
   if (dmsfwk_continuation_recommend_installation) {
     defines += [ "SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION" ]
   }
+  if (dmsfwk_enable_multi_distributed_accounts) {
+    defines += [ "DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS" ]
+  }
 }
 
 ohos_prebuilt_etc("dextension_prebuilt_config") {
@@ -216,6 +219,7 @@ ohos_shared_library("distributedschedsvr") {
       "src/softbus_adapter/transport/dsched_softbus_session.cpp",
       "src/softbus_adapter/transport/dsched_transport_softbus_adapter.cpp",
       "src/util/distributed_sched_memory_utils.cpp",
+      "src/util/dms_user_and_account_util.cpp",
       "src/svc_distributed_connection.cpp",
       "src/switch_status_dependency.cpp",
       "src/distributedIntent/src/distributed_intent_provider_impl.cpp",

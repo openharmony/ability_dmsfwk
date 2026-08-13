@@ -18,6 +18,7 @@
 
 #include <string>
 #include <thread>
+#include <memory>
 
 #include "dsched_data_buffer.h"
 #include "event_handler.h"
@@ -35,11 +36,11 @@ public:
 public:
     void Init();
     void UnInit();
-    int32_t SendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer);
+    int32_t SendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer, std::string accountId);
     int32_t StopSoftbusEvent();
     int32_t RegisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener);
     int32_t UnregisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener);
-    void OnBroadCastRecv(std::string& networkId, uint8_t* data, uint32_t dataLen);
+    void OnBroadCastRecv(std::string& networkId, uint8_t* data, uint32_t dataLen, std::string accountIdTrunc);
     void ReRegister();
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     IDmsBroadcastAdapter dmsAdapetr_ = {
@@ -54,8 +55,10 @@ public:
 private:
     SoftbusAdapter() {}
     void StartEvent();
-    int32_t DealSendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer, const int32_t retry = 0);
-    int32_t RetrySendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer, const int32_t retry);
+    int32_t DealSendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer, std::string accountId,
+        const int32_t retry = 0);
+    int32_t RetrySendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer, std::string accountId,
+        const int32_t retry);
     std::shared_ptr<SoftbusAdapterListener> softbusAdapterListener_;
     std::string pkgName_ = "dms";
     std::thread eventThread_;

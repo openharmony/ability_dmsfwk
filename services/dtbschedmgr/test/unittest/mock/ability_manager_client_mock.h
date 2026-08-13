@@ -30,7 +30,8 @@ public:
     virtual ErrCode GetMissionInfo(const std::string &deviceId, int32_t missionId, MissionInfo &missionInfo) = 0;
     virtual ErrCode GetMissionInfo(const std::string &deviceId, int32_t missionId, MissionInfo &missionInfo,
         DisplayInfo &displayInfo) = 0;
-    virtual ErrCode ContinueAbility(const std::string &deviceId, int32_t missionId, uint32_t versionCode) = 0;
+    virtual ErrCode ContinueAbility(const std::string &deviceId, int32_t missionId,
+        uint32_t versionCode, int32_t userId) = 0;
     virtual int32_t GetAbilityStateByPersistentId(int32_t persistentId, bool &state) = 0;
     virtual ErrCode CleanMission(int32_t missionId) = 0;
     virtual ErrCode StartAbility(const Want &want, int requestCode = DEFAULT_INVAL_VALUE,
@@ -49,7 +50,8 @@ public:
     MOCK_METHOD3(GetMissionInfo, ErrCode(const std::string &deviceId, int32_t missionId, MissionInfo &missionInfo));
     MOCK_METHOD4(GetMissionInfo, ErrCode(const std::string &deviceId, int32_t missionId, MissionInfo &missionInfo,
         DisplayInfo &displayInfo));
-    MOCK_METHOD3(ContinueAbility, ErrCode(const std::string &deviceId, int32_t missionId, uint32_t versionCode));
+    MOCK_METHOD4(ContinueAbility, ErrCode(const std::string &deviceId,
+        int32_t missionId, uint32_t versionCode, int32_t userId));
     MOCK_METHOD2(GetAbilityStateByPersistentId, int32_t(int32_t persistentId, bool &state));
     MOCK_METHOD1(CleanMission, ErrCode(int32_t missionId));
     MOCK_METHOD4(StartAbility, ErrCode(const Want &want, int requestCode, int32_t userId,

@@ -25,6 +25,7 @@
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_condition_manager.h"
 #include "softbus_adapter/softbus_adapter.h"
+#include "util/dms_user_and_account_util.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -209,6 +210,14 @@ void DMSContinueSendMgr::SendContinueBroadcast(const MissionStatus& status, Miss
     if (MissionEventType::MISSION_EVENT_DESTORYED == type) {
         screenLockedHandler_->ResetScreenLockedInfo();
     }
+
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    ErrCode getAccountInfoResult = DmsUserAndAccountUtil::GetForegroundAccountInfo(accountInfo);
+    if (getAccountInfoResult != ERR_OK) {
+        HILOGE("Get Account info failed!");
+        accountInfo.uid_ = "0";
+    }
+
     if (!DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition(status) ||
         !DmsContinueConditionMgr::GetInstance().CheckMissionSendCondition(status, type)) {
         HILOGE("CheckBroadcastCondition %{public}s failed! status: %{public}s",
@@ -233,9 +242,8 @@ void DMSContinueSendMgr::SendContinueBroadcast(const MissionStatus& status, Miss
         return;
     }
 
-    SendSoftbusEvent(bundleNameId, continueTypeId, sendType);
+    SendSoftbusEvent(bundleNameId, continueTypeId, sendType, accountInfo.uid_);
     HILOGI("end");
-    return;
 }
 
 int32_t DMSContinueSendMgr::ExecuteSendStrategy(MissionEventType type, const MissionStatus& status, uint8_t &sendType)
@@ -278,11 +286,11 @@ int32_t DMSContinueSendMgr::QueryBroadcastInfo(
     return ERR_OK;
 }
 
-void DMSContinueSendMgr::SendSoftbusEvent(uint16_t& bundleNameId, uint8_t& continueTypeId, uint8_t type)
+void DMSContinueSendMgr::SendSoftbusEvent(uint16_t& bundleNameId, uint8_t& continueTypeId, uint8_t type,
+    std::string accountId)
 {
-    HILOGI("bundleNameId: %{public}u, continueTypeId: %{public}u, sendType %{public}u",
-        bundleNameId, continueTypeId, type);
-
+    HILOGI("bundleNameId: %{public}u, continueTypeId: %{public}u, sendType %{public}u, accountId %{public}s",
+        bundleNameId, continueTypeId, type, accountId.c_str());
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(DMS_SEND_LEN);
     if (buffer->Data() == nullptr || buffer->Size() < DMS_SEND_LEN) {
         HILOGE("Failed to initialize DSchedDataBuffer");
@@ -294,7 +302,7 @@ void DMSContinueSendMgr::SendSoftbusEvent(uint16_t& bundleNameId, uint8_t& conti
     buffer->Data()[INDEX_2] = bundleNameId & DMS_0XFF;
     buffer->Data()[INDEX_3] = continueTypeId & DMS_0XFF;
 
-    SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer);
+    SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer, accountId);
 }
 
 void DMSContinueSendMgr::SendContinueBroadcastAfterDelay(int32_t missionId)
@@ -387,8 +395,12 @@ int32_t DMSContinueSendMgr::SendScreenLockedEvent(uint8_t type)
         HILOGE("check ContinueState send failed, ContinueState is not CONTINUESTATE_ACTIVE.");
         return DMS_PERMISSION_DENIED;
     }
-
-    SendSoftbusEvent(bundleNameId, continueTypeId, type);
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    int32_t getAccountInfoResult = DmsUserAndAccountUtil::GetForegroundAccountInfo(accountInfo);
+    if (getAccountInfoResult != ERR_OK) {
+        accountInfo.uid_ = "0";
+    }
+    SendSoftbusEvent(bundleNameId, continueTypeId, type, accountInfo.uid_);
     HILOGI("end");
     return ERR_OK;
 }
@@ -471,6 +483,12 @@ void DMSContinueSendMgr::ScreenLockedHandler::SetMissionContinueStateInfo(const 
 {
     HILOGI("set last unfocused info, status: %{public}s", status.ToString().c_str());
     unfoInfo_.status.continueState = status.continueState;
+}
+
+void DMSContinueSendMgr::SetAccountInfo(const OHOS::AccountSA::OhosAccountInfo& accountInfo)
+{
+    HILOGI("SetAccountInfo: accountId=%{public}s", accountInfo.uid_.c_str());
+    accountInfo_ = accountInfo;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
