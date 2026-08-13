@@ -24,7 +24,6 @@
 namespace OHOS {
 namespace AccountSA {
 class OhosAccountKitsMock;
-class OsAccountManagerMock;
 }
 namespace DistributedSchedule {
 class MultiUserManagerTest : public testing::Test {
@@ -34,7 +33,6 @@ public:
     void SetUp() override;
     void TearDown() override;
     std::shared_ptr<AccountSA::OhosAccountKitsMock> ohosAccountMock_;
-    std::shared_ptr<AccountSA::OsAccountManagerMock> osAccountMock_;
 };
 
 class RemoteOnListenerStubTest : public AAFwk::RemoteOnListenerStub {

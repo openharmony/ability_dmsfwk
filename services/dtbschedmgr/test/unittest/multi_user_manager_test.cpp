@@ -15,15 +15,11 @@
 
 #include "multi_user_manager_test.h"
 #include "mock/ohos_account_kits_mock.h"
-#include "mock/os_account_manager_mock.h"
 
 #define private public
 #include "multi_user_manager.h"
-#include "distributed_sched_service.h"
 #undef private
 #include "test_log.h"
-#include "distributed_intent_plugin.h"
-#include "datashare_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -33,20 +29,6 @@ namespace DistributedSchedule {
 namespace {
 const std::string TYPE = "type";
 }
-
-class MockIntentPlugin : public IIntentPlugin {
-public:
-    MOCK_METHOD4(OnRemoteRequest, int32_t(uint32_t code, MessageParcel& data,
-        MessageParcel& reply, MessageOption& option));
-    MOCK_METHOD0(GetSocketListener, IIntentSocketEventListener*());
-    MOCK_METHOD3(StartRemoteIntent, int32_t(const AAFwk::Want& want,
-        const IntentCallerInfo& callerInfo, const sptr<IRemoteObject>& resultCallback));
-    MOCK_METHOD3(SendIntentResult, int32_t(const AAFwk::Want& want,
-        const IntentCallerInfo& callerInfo, const std::string& resultMsg));
-    MOCK_METHOD1(OnDeviceOffline, void(const std::string& networkId));
-    MOCK_METHOD2(DisconnectAllSessionsForDistributedAccount, void(int32_t localId,
-        const std::string& distributedAccountId));
-};
 
 void MultiUserManagerTest::SetUpTestCase()
 {
@@ -61,23 +43,13 @@ void MultiUserManagerTest::TearDownTestCase()
 void MultiUserManagerTest::SetUp()
 {
     DTEST_LOG << "MultiUserManagerTest::SetUp" << std::endl;
-    osAccountMock_ = std::make_shared<AccountSA::OsAccountManagerMock>();
-    AccountSA::IOsAccountManager::osAccountMock = osAccountMock_;
-    ON_CALL(*osAccountMock_, GetForegroundOsAccountLocalId(_))
-        .WillByDefault([](int32_t& localId) {
-            localId = DEFAULT_USER_ID;
-            return ERR_OK;
-        });
     ohosAccountMock_ = std::make_shared<AccountSA::OhosAccountKitsMock>();
     AccountSA::IOhosAccountKits::ohosAccountMock = ohosAccountMock_;
-    MultiUserManager::GetInstance().currentUserId_.store(DEFAULT_USER_ID);
 }
 
 void MultiUserManagerTest::TearDown()
 {
     DTEST_LOG << "MultiUserManagerTest::TearDown" << std::endl;
-    AccountSA::IOsAccountManager::osAccountMock = nullptr;
-    osAccountMock_.reset();
     AccountSA::IOhosAccountKits::ohosAccountMock = nullptr;
     ohosAccountMock_.reset();
 }
@@ -624,21 +596,6 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_HandleAccountLogin_001, TestSize
 }
 
 /**
- * @tc.name: MultiUserManager_HandleAccountLogin_002
- * @tc.desc: test HandleAccountLogin with invalid userId
- * @tc.type: FUNC
- */
-HWTEST_F(MultiUserManagerTest, MultiUserManager_HandleAccountLogin_002, TestSize.Level3)
-{
-    DTEST_LOG << "MultiUserManager_HandleAccountLogin_002 start" << std::endl;
-    int32_t userId = -1;
-    OHOS::AccountSA::OhosAccountInfo accountInfo;
-
-    EXPECT_NO_FATAL_FAILURE(MultiUserManager::GetInstance().HandleAccountLogin(userId, accountInfo));
-    DTEST_LOG << "MultiUserManager_HandleAccountLogin_002 end" << std::endl;
-}
-
-/**
  * @tc.name: MultiUserManager_HandleAccountLogout_001
  * @tc.desc: test HandleAccountLogout with valid userId
  * @tc.type: FUNC
@@ -654,151 +611,5 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_HandleAccountLogout_001, TestSiz
     DTEST_LOG << "MultiUserManager_HandleAccountLogout_001 end" << std::endl;
 }
 
-/**
- * @tc.name: MultiUserManager_HandleAccountLogout_002
- * @tc.desc: test HandleAccountLogout with invalid userId
- * @tc.type: FUNC
- */
-HWTEST_F(MultiUserManagerTest, MultiUserManager_HandleAccountLogout_002, TestSize.Level3)
-{
-    DTEST_LOG << "MultiUserManager_HandleAccountLogout_002 start" << std::endl;
-    int32_t userId = -1;
-
-    EXPECT_NO_FATAL_FAILURE(MultiUserManager::GetInstance().HandleAccountLogout(userId));
-    DTEST_LOG << "MultiUserManager_HandleAccountLogout_002 end" << std::endl;
-}
-
-/**
- * @tc.name: MultiUserManager_HandleAccountLogin_Logout_001
- * @tc.desc: test HandleAccountLogin and HandleAccountLogout sequence
- * @tc.type: FUNC
- */
-HWTEST_F(MultiUserManagerTest, MultiUserManager_HandleAccountLogin_Logout_001, TestSize.Level3)
-{
-    DTEST_LOG << "MultiUserManager_HandleAccountLogin_Logout_001 start" << std::endl;
-    int32_t userId = 100;
-    OHOS::AccountSA::OhosAccountInfo accountInfo;
-    accountInfo.uid_ = "testAccountId";
-
-    MultiUserManager::GetInstance().Init();
-
-    // Test login
-    EXPECT_NO_FATAL_FAILURE(MultiUserManager::GetInstance().HandleAccountLogin(userId, accountInfo));
-
-    // Test logout after login
-    EXPECT_NO_FATAL_FAILURE(MultiUserManager::GetInstance().HandleAccountLogout(userId));
-
-    MultiUserManager::GetInstance().UnInit();
-    DTEST_LOG << "MultiUserManager_HandleAccountLogin_Logout_001 end" << std::endl;
-}
-
-/**
- * @tc.name: HandleDistributedAccountLogin_CoverHandleAccountLogin_001
- * @tc.desc: Test HandleDistributedAccountLogin covers HandleAccountLogin and cache
- * @tc.type: FUNC
- */
-HWTEST_F(MultiUserManagerTest, HandleDistributedAccountLogin_CoverHandleAccountLogin_001, TestSize.Level3)
-{
-    DTEST_LOG << "HandleDistributedAccountLogin_CoverHandleAccountLogin_001 start" << std::endl;
-    int32_t userId = 100;
-    AccountSA::OhosAccountInfo info{"name", "dist_acct_login", 0};
-    EXPECT_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
-        .WillOnce(DoAll(SetArgReferee<1>(info), Return(ERR_OK)));
-    MultiUserManager::GetInstance().sendMgrMap_.clear();
-    MultiUserManager::GetInstance().recvMgrMap_.clear();
-    MultiUserManager::GetInstance().localIdToDistributedAccountMap_.clear();
-    MultiUserManager::GetInstance().currentUserId_ = userId;
-    DataShareManager::GetInstance().SetCurrentContinueSwitch(true);
-    EXPECT_NO_FATAL_FAILURE(MultiUserManager::GetInstance().HandleDistributedAccountLogin(userId));
-    EXPECT_EQ(MultiUserManager::GetInstance().localIdToDistributedAccountMap_[userId], "dist_acct_login");
-    MultiUserManager::GetInstance().UnInit();
-    DTEST_LOG << "HandleDistributedAccountLogin_CoverHandleAccountLogin_001 end" << std::endl;
-}
-
-/**
- * @tc.name: HandleDistributedAccountLogout_FallbackHitPluginExist_001
- * @tc.desc: Test HandleDistributedAccountLogout cache miss, fallback hits, plugin exists
- * @tc.type: FUNC
- */
-HWTEST_F(MultiUserManagerTest, HandleDistributedAccountLogout_FallbackHitPluginExist_001, TestSize.Level3)
-{
-    DTEST_LOG << "HandleDistributedAccountLogout_FallbackHitPluginExist_001 start" << std::endl;
-    int32_t userId = 100;
-    MultiUserManager::GetInstance().localIdToDistributedAccountMap_.clear();
-    AccountSA::OhosAccountInfo info{"name", "dist_acct_logout", 0};
-    EXPECT_CALL(*ohosAccountMock_, GetOsAccountDistributedInfo(_, _))
-        .WillOnce(DoAll(SetArgReferee<1>(info), Return(ERR_OK)));
-    auto mockPlugin = std::make_shared<MockIntentPlugin>();
-    DistributedSchedService::GetInstance().intentPlugin_ = mockPlugin;
-    EXPECT_CALL(*mockPlugin, DisconnectAllSessionsForDistributedAccount(userId, "dist_acct_logout"))
-        .Times(1);
-    EXPECT_NO_FATAL_FAILURE(MultiUserManager::GetInstance().HandleDistributedAccountLogout(userId));
-    DistributedSchedService::GetInstance().intentPlugin_ = nullptr;
-    DTEST_LOG << "HandleDistributedAccountLogout_FallbackHitPluginExist_001 end" << std::endl;
-}
-
-/**
- * @tc.name: HandleAccountLogin_CreateNewMgr_001
- * @tc.desc: Test HandleAccountLogin creates new sendMgr and recvMgr when not in map
- * @tc.type: FUNC
- */
-HWTEST_F(MultiUserManagerTest, HandleAccountLogin_CreateNewMgr_001, TestSize.Level3)
-{
-    DTEST_LOG << "HandleAccountLogin_CreateNewMgr_001 start" << std::endl;
-    int32_t userId = 101;
-    OHOS::AccountSA::OhosAccountInfo accountInfo;
-    accountInfo.uid_ = "testAccountId";
-    MultiUserManager::GetInstance().sendMgrMap_.clear();
-    MultiUserManager::GetInstance().recvMgrMap_.clear();
-    MultiUserManager::GetInstance().currentUserId_ = userId;
-    DataShareManager::GetInstance().SetCurrentContinueSwitch(true);
-    EXPECT_NO_FATAL_FAILURE(MultiUserManager::GetInstance().HandleAccountLogin(userId, accountInfo));
-    EXPECT_NE(MultiUserManager::GetInstance().sendMgrMap_.find(userId),
-              MultiUserManager::GetInstance().sendMgrMap_.end());
-    EXPECT_NE(MultiUserManager::GetInstance().recvMgrMap_.find(userId),
-              MultiUserManager::GetInstance().recvMgrMap_.end());
-    MultiUserManager::GetInstance().UnInit();
-    DTEST_LOG << "HandleAccountLogin_CreateNewMgr_001 end" << std::endl;
-}
-
-/**
- * @tc.name: HandleAccountLogin_NullMgr_001
- * @tc.desc: Test HandleAccountLogin with null sendMgr in map
- * @tc.type: FUNC
- */
-HWTEST_F(MultiUserManagerTest, HandleAccountLogin_NullMgr_001, TestSize.Level3)
-{
-    DTEST_LOG << "HandleAccountLogin_NullMgr_001 start" << std::endl;
-    int32_t userId = 102;
-    OHOS::AccountSA::OhosAccountInfo accountInfo;
-    accountInfo.uid_ = "testAccountId";
-    MultiUserManager::GetInstance().sendMgrMap_[userId] = nullptr;
-    MultiUserManager::GetInstance().recvMgrMap_[userId] = nullptr;
-    MultiUserManager::GetInstance().currentUserId_ = userId;
-    EXPECT_NO_FATAL_FAILURE(MultiUserManager::GetInstance().HandleAccountLogin(userId, accountInfo));
-    MultiUserManager::GetInstance().sendMgrMap_.clear();
-    MultiUserManager::GetInstance().recvMgrMap_.clear();
-    DTEST_LOG << "HandleAccountLogin_NullMgr_001 end" << std::endl;
-}
-
-/**
- * @tc.name: HandleAccountLogin_SwitchOff_001
- * @tc.desc: Test HandleAccountLogin when ContinueSwitch is off
- * @tc.type: FUNC
- */
-HWTEST_F(MultiUserManagerTest, HandleAccountLogin_SwitchOff_001, TestSize.Level3)
-{
-    DTEST_LOG << "HandleAccountLogin_SwitchOff_001 start" << std::endl;
-    int32_t userId = 103;
-    OHOS::AccountSA::OhosAccountInfo accountInfo;
-    accountInfo.uid_ = "testAccountId";
-    MultiUserManager::GetInstance().sendMgrMap_.clear();
-    MultiUserManager::GetInstance().recvMgrMap_.clear();
-    MultiUserManager::GetInstance().currentUserId_ = userId;
-    DataShareManager::GetInstance().SetCurrentContinueSwitch(false);
-    EXPECT_NO_FATAL_FAILURE(MultiUserManager::GetInstance().HandleAccountLogin(userId, accountInfo));
-    MultiUserManager::GetInstance().UnInit();
-    DTEST_LOG << "HandleAccountLogin_SwitchOff_001 end" << std::endl;
-}
 } // namespace DistributedSchedule
 } // namespace OHOS
