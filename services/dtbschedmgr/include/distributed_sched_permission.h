@@ -75,6 +75,7 @@ public:
     bool IsHigherAclVersion(const CallerInfo& callerInfo);
     bool CheckSrcBackgroundPermission(uint32_t accessTokenId);
     bool IsAbilityForeground(uint32_t accessTokenId);
+    bool VerifySourceDeviceConnected(const CallerInfo& callerInfo) const;
     bool CheckDeviceSecurityLevel(const std::string& srcDeviceId, const std::string& dstDeviceId) const;
     bool CheckTargetAbilityVisible(const AppExecFwk::AbilityInfo& targetAbility, const CallerInfo& callerInfo) const;
     bool GetOsAccountData(AccountInfo& dmsAccountInfo);

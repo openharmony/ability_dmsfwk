@@ -68,6 +68,7 @@ public:
     void SetCallingTokenId(int32_t callingTokenId);
     bool GetSessionIdByDeviceId(const std::string &peerDeviceId, int32_t &sessionId);
     std::string GetPeerDeviceIdBySocket(const int32_t sessionId);
+    bool IsDeviceConnected(const std::string &peerDeviceId);
     bool IsNeedAllConnect(DSchedServiceType type);
     int32_t GetIntentServerSocket() const { return intentServerSocket_; }
 

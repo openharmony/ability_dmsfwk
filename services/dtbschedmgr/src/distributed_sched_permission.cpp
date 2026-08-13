@@ -34,6 +34,7 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "json_util.h"
+#include "softbus_adapter/transport/dsched_transport_softbus_adapter.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -329,6 +330,9 @@ bool DistributedSchedPermission::CheckSameAccount(const std::string& dstNetworkI
     const AccountInfo& dmsAccountInfo, const CallerInfo& callerInfo, bool isSrc)
 {
     HILOGI("called");
+    if (!VerifySourceDeviceConnected(callerInfo)) {
+        return false;
+    }
     if (IsHigherAclVersion(callerInfo)) {
         return CheckDstSameAccount(dstNetworkId, dmsAccountInfo, callerInfo, isSrc);
     } else {
@@ -453,6 +457,9 @@ bool DistributedSchedPermission::CheckAclList(const std::string& dstNetworkId, c
     const CallerInfo& callerInfo, bool isSrc, const std::string& targetBundleName)
 {
     HILOGI("called");
+    if (!VerifySourceDeviceConnected(callerInfo)) {
+        return false;
+    }
     if (IsHigherAclVersion(callerInfo)) {
         return CheckNewAclList(dstNetworkId, dmsAccountInfo, callerInfo, isSrc, targetBundleName);
     } else {
@@ -796,6 +803,9 @@ bool DistributedSchedPermission::VerifyPermission(uint64_t accessToken, const st
 bool DistributedSchedPermission::CheckAccountAccessPermission(const CallerInfo& callerInfo,
     const AccountInfo& accountInfo, const std::string& targetBundleName, bool isNewCollab)
 {
+    if (!VerifySourceDeviceConnected(callerInfo)) {
+        return false;
+    }
     std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(callerInfo.sourceDeviceId);
     std::string dstNetworkId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(dstNetworkId)) {
@@ -1051,6 +1061,20 @@ bool DistributedSchedPermission::CheckMinApiVersion(const AppExecFwk::AbilityInf
         return true;
     }
     return false;
+}
+
+bool DistributedSchedPermission::VerifySourceDeviceConnected(const CallerInfo& callerInfo) const
+{
+    if (callerInfo.sourceDeviceId.empty()) {
+        HILOGE("sourceDeviceId is empty, verification failed");
+        return false;
+    }
+    if (!DSchedTransportSoftbusAdapter::GetInstance().IsDeviceConnected(callerInfo.sourceDeviceId)) {
+        HILOGE("sourceDeviceId %{public}s is not in connected device list, verification failed",
+            GetAnonymStr(callerInfo.sourceDeviceId).c_str());
+        return false;
+    }
+    return true;
 }
 
 bool DistributedSchedPermission::CheckDeviceSecurityLevel(const std::string& srcDeviceId,
