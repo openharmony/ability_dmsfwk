@@ -23,6 +23,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+constexpr int32_t DEFAULT_USER_ID = 100;
+}
 
 std::shared_ptr<AccountSA::OhosAccountKitsMock> DmsUserAndAccountUtilTest::ohosAccountMock_;
 std::shared_ptr<AccountSA::OsAccountManagerMock> DmsUserAndAccountUtilTest::osAccountMock_;
@@ -62,7 +65,7 @@ void DmsUserAndAccountUtilTest::SetUp()
     ::testing::Mock::VerifyAndClearExpectations(osAccountMock_.get());
     ON_CALL(*osAccountMock_, GetForegroundOsAccountLocalId(_))
         .WillByDefault(Invoke([](int32_t& localId) {
-            localId = 100;
+            localId = DEFAULT_USER_ID;
             return 0;
         }));
     ON_CALL(*osAccountMock_, GetOsAccountLocalIdFromUid(_, _))
