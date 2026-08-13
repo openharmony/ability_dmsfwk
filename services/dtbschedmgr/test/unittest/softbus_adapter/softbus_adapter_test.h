@@ -19,6 +19,8 @@
 #include "gtest/gtest.h"
 
 #include "softbus_adapter/softbus_adapter.h"
+#include "mock/ohos_account_kits_mock.h"
+#include "mock/os_account_manager_mock.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -28,11 +30,13 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    static std::shared_ptr<AccountSA::OhosAccountKitsMock> ohosAccountMock_;
+    static std::shared_ptr<AccountSA::OsAccountManagerMock> osAccountMock_;
 };
 
 class SubSoftbusAdapterListener : public SoftbusAdapterListener {
 public:
-    void OnDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen) {};
+    void OnDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen, std::string accountIdTrunc) {};
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

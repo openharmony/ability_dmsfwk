@@ -50,7 +50,7 @@ constexpr int32_t DBMS_RETRY_MAX_TIME = 5;
 constexpr uint8_t DMS_FOCUSED_TYPE = 0x00;
 }
 
-int32_t SoftbusAdapter::SendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer)
+int32_t SoftbusAdapter::SendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer, std::string accountId)
 {
     return CAN_NOT_FOUND_ABILITY_ERR;
 }
@@ -241,13 +241,16 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
     int32_t state = 0;
 
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    std::string accountIdTrunc = "testAccountId";
     ASSERT_NE(nullptr, recvMgr);
-    recvMgr->PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state);
+    recvMgr->PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, accountIdTrunc, state, 0);
 
-    int32_t ret = recvMgr->DealOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state, 0);
+    int32_t ret = recvMgr->DealOnBroadcastBusiness(senderNetworkId,
+        bundleNameId, continueTypeId, accountIdTrunc, state, 0);
     EXPECT_EQ(ret, ERR_OK);
 
-    ret = recvMgr->DealOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state, DBMS_RETRY_MAX_TIME);
+    ret = recvMgr->DealOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId,
+        accountIdTrunc, state, DBMS_RETRY_MAX_TIME);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     /**
@@ -440,11 +443,12 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDataRecv001, TestSize.Level1)
     uint8_t payload[] = {0xf0};
     uint32_t dataLen1 = DMS_SEND_LEN - 1;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    std::string accountIdTrunc = "testAccountId";
     ASSERT_NE(nullptr, recvMgr);
-    recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1);
+    recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1, accountIdTrunc);
 
     uint32_t dataLen2 = DMS_SEND_LEN;
-    recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen2);
+    recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen2, accountIdTrunc);
     EXPECT_NE(payload[0] & DMS_0X0F, sizeof(uint32_t));
     DTEST_LOG << "DMSContinueManagerTest testNotifyDataRecv001 end" << std::endl;
 }

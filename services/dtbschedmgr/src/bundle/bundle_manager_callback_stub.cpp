@@ -16,6 +16,7 @@
 #include "bundle/bundle_manager_callback_stub.h"
 
 #include "ability_manager_client.h"
+#include "util/dms_user_and_account_util.h"
 #include "distributed_sched_service.h"
 #include "dtbschedmgr_log.h"
 #include "message_parcel.h"
@@ -60,7 +61,10 @@ int32_t DmsBundleManagerCallbackStub::OnQueryInstallationFinished(int32_t result
     HILOGI("able to install on target device, start continue ability with freeInstall");
     std::string deviceId = DistributedSchedService::GetInstance().GetContinuaitonDevice(missionId);
     DistributedSchedService::GetInstance().SetContinuationTimeout(missionId, CONTINUATION_FREE_INSTALL_TIMEOUT);
-    result = AAFwk::AbilityManagerClient::GetInstance()->ContinueAbility(deviceId, missionId, versionCode);
+    int32_t userId = -1;
+    DmsUserAndAccountUtil::GetForegroundUserId(userId);
+    HILOGI("ContinueAbility missionId:%{public}d userId:%{public}d", missionId, userId);
+    result = AAFwk::AbilityManagerClient::GetInstance()->ContinueAbility(deviceId, missionId, versionCode, userId);
     return result;
 }
 

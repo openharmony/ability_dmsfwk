@@ -310,6 +310,8 @@ ohos_unittest("multiusermanagertest") {
   sources = [
     "unittest/multi_user_manager_test.cpp",
     "unittest/mock/ohos_account_kits_mock.cpp",
+    "unittest/mock/os_account_manager_mock.cpp",
+    "unittest/util/dms_user_and_account_util_test.cpp"
   ]
   sources += dtbschedmgr_sources
 
@@ -922,6 +924,8 @@ ohos_unittest("softbusadaptertest") {
       "unittest/softbus_adapter/softbus_adapter_test.cpp",
       "unittest/softbus_adapter/softbus_transport_test.cpp",
       "unittest/softbus_adapter/softbus_transport_session_reuse_test.cpp",
+      "unittest/mock/ohos_account_kits_mock.cpp",
+      "unittest/mock/os_account_manager_mock.cpp",
     ]
   } else {
     sources += [ "unittest/softbus_adapter/softbus_adapter_common_test.cpp" ]

@@ -34,6 +34,7 @@
 #include "softbus_adapter/softbus_adapter.h"
 #include "switch_status_dependency.h"
 #include "os_account_manager.h"
+#include "util/dms_user_and_account_util.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -53,6 +54,7 @@ const std::u16string DESCRIPTOR = u"ohos.aafwk.RemoteOnListener";
 const std::string QUICK_START_CONFIGURATION = "_ContinueQuickStart";
 const std::string ICON_TIMEOUT_TASK = "icon_timeout_task";
 constexpr int32_t TIMEOUT_SENT_EVENT_DELAY = 60000;
+constexpr int32_t VALID_ACCOUNT_ID_LENGTH = 2;
 }
 
 DMSContinueRecvMgr::~DMSContinueRecvMgr()
@@ -96,7 +98,7 @@ void DMSContinueRecvMgr::UnInit()
 }
 
 void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
-    uint8_t* payload, uint32_t dataLen)
+    uint8_t* payload, uint32_t dataLen, std::string accountIdTrunc)
 {
     HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}u. accountId: %{public}d.",
         GetAnonymStr(senderNetworkId).c_str(), dataLen, accountId_);
@@ -125,7 +127,7 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
     if (type == DMS_UNFOCUSED_TYPE) {
         state = INACTIVE;
     }
-    PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state);
+    PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, accountIdTrunc, state);
     HILOGI("NotifyDataRecv end");
 }
 
@@ -148,11 +150,11 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
             HILOGE("registerOnListener_ is full, type: %{public}s", type.c_str());
             return INVALID_PARAMETERS_ERR;
         }
-        std::vector<sptr<IRemoteObject>> objs;
-        registerOnListener_[type] = objs;
+        auto result = registerOnListener_.emplace(type, std::vector<sptr<IRemoteObject>>{});
+        iterItem = result.first;
         iterItem = registerOnListener_.find(type);
     }
-    for (auto iter : iterItem->second) {
+    for (auto iter : registerOnListener_[type]) {
         if (iter == obj) {
             HILOGI("already have obj");
             return NO_MISSION_INFO_FOR_MISSION_ID;
@@ -165,8 +167,49 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
         return INVALID_PARAMETERS_ERR;
     }
     validatedObj->AddDeathRecipient(missionDiedListener_);
-    registerOnListener_[type].emplace_back(validatedObj);
+    iterItem->second.emplace_back(validatedObj);
     HILOGI("RegisterOnListener end");
+    return ERR_OK;
+}
+
+int32_t DMSContinueRecvMgr::RegisterOnListenerForMultiAccount(const std::string& type, const sptr<IRemoteObject>& obj,
+    const OHOS::AccountSA::OhosAccountInfo& accountInfo)
+{
+    HILOGI("RegisterOnListenerForMultiAccount start, type: %{public}s. accountName: %{public}s.",
+        type.c_str(), accountInfo.name_.c_str());
+    if (obj == nullptr) {
+        HILOGE("obj is null, type: %{public}s", type.c_str());
+        return INVALID_PARAMETERS_ERR;
+    }
+    onType_ = type;
+    std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
+    auto iterItem = multiAccountListener_.find(type);
+    if (iterItem == multiAccountListener_.end()) {
+        if (multiAccountListener_.size() >= REGIST_MAX_SIZE) {
+            HILOGE("registerOnListener_ is full, type: %{public}s", type.c_str());
+            return INVALID_PARAMETERS_ERR;
+        }
+        auto result = multiAccountListener_.emplace(type, std::vector<MultiAccountListenerInfo>{});
+        iterItem = result.first;
+    }
+    for (auto iter : multiAccountListener_[type]) {
+        if (iter.obj == obj) {
+            HILOGI("already have obj");
+            return NO_MISSION_INFO_FOR_MISSION_ID;
+        }
+    }
+    wptr<IRemoteObject> weakObj = obj;
+    sptr<IRemoteObject> validatedObj = weakObj.promote();
+    if (validatedObj == nullptr) {
+        HILOGE("obj promotion failed, type: %{public}s", type.c_str());
+        return INVALID_PARAMETERS_ERR;
+    }
+    validatedObj->AddDeathRecipient(missionDiedListener_);
+    MultiAccountListenerInfo info;
+    info.accountInfo = accountInfo;
+    info.obj = validatedObj;
+    iterItem->second.emplace_back(info);
+    HILOGI("RegisterOnListenerForMultiAccount end");
     return ERR_OK;
 }
 
@@ -248,11 +291,12 @@ int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetwo
 }
 
 void DMSContinueRecvMgr::PostOnBroadcastBusiness(const std::string& senderNetworkId,
-    uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t delay, const int32_t retry)
+    uint16_t bundleNameId, uint8_t continueTypeId, std::string accountIdTrunc,
+    const int32_t state, const int32_t delay, const int32_t retry)
 {
-    HILOGI("accountId: %{public}d.", accountId_);
-    auto feedfunc = [this, senderNetworkId, bundleNameId, continueTypeId, state, retry]() mutable {
-        DealOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state, retry);
+    HILOGI("accountId: %{public}d.  accountIdTrunc: %{public}s", accountId_, accountIdTrunc.c_str());
+    auto feedfunc = [this, senderNetworkId, bundleNameId, continueTypeId, accountIdTrunc, state, retry]() mutable {
+        DealOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, accountIdTrunc, state, retry);
     };
     if (eventHandler_ != nullptr) {
         eventHandler_->RemoveTask(DBMS_RETRY_TASK);
@@ -263,14 +307,15 @@ void DMSContinueRecvMgr::PostOnBroadcastBusiness(const std::string& senderNetwor
 }
 
 int32_t DMSContinueRecvMgr::RetryPostBroadcast(const std::string& senderNetworkId,
-    uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t retry)
+    uint16_t bundleNameId, uint8_t continueTypeId, std::string accountIdTrunc, const int32_t state, const int32_t retry)
 {
     HILOGI("Retry post broadcast, current retry times %{public}d. accountId: %{public}d.", retry, accountId_);
     if (retry == DBMS_RETRY_MAX_TIME) {
         HILOGE("meet max retry time!");
         return INVALID_PARAMETERS_ERR;
     }
-    PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state, DBMS_RETRY_DELAY, retry + 1);
+    PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId,
+        accountIdTrunc, state, DBMS_RETRY_DELAY, retry + 1);
     return ERR_OK;
 }
 
@@ -481,7 +526,7 @@ void DMSContinueRecvMgr::PrintFinalBundleInfoLog(const currentIconInfo& continue
 #endif
 
 int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNetworkId,
-    uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t retry)
+    uint16_t bundleNameId, uint8_t continueTypeId, std::string accountIdTrunc, const int32_t state, const int32_t retry)
 {
     HILOGI("start, senderNetworkId: %{public}s, bundleNameId: %{public}u, state: %{public}d. accountId: %{public}d.",
         GetAnonymStr(senderNetworkId).c_str(), bundleNameId, state, accountId_);
@@ -490,7 +535,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         distributedBundleInfo)) {
         HILOGW("get distributedBundleInfo failed, try = %{public}d", retry);
         DmsKvSyncE2E::GetInstance()->PushAndPullData(senderNetworkId);
-        return RetryPostBroadcast(senderNetworkId, bundleNameId, continueTypeId, state, retry);
+        return RetryPostBroadcast(senderNetworkId, bundleNameId, continueTypeId, accountIdTrunc, state, retry);
     }
 
     BundleValidationContext context;
@@ -501,7 +546,11 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
 
     currentIconInfo info(senderNetworkId, distributedBundleInfo.bundleName, context.finalBundleName,
         context.continueType, context.appIdentifiers);
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+    int32_t ret = DealDockDisplayBusinessForMultiAccount(bundleNameId, info, state, accountIdTrunc);
+#else
     int32_t ret = DealDockDisplayBusiness(bundleNameId, info, state);
+#endif
     if (ret != ERR_OK) {
         HILOGE("DealDockDisplayBusiness failed!");
         return ret;
@@ -580,6 +629,37 @@ int32_t DMSContinueRecvMgr::DealDockDisplayBusiness(uint16_t bundleNameId, const
     return ERR_OK;
 }
 
+int32_t DMSContinueRecvMgr::DealDockDisplayBusinessForMultiAccount(uint16_t bundleNameId, const currentIconInfo info,
+    const int32_t state, std::string accountIdTrunc)
+{
+    HILOGI("DealDockDisplayBusiness start");
+    int32_t ret = VerifyBroadcastSource(info.senderNetworkId, info.sourceBundleName, info.bundleName,
+                                        info.continueType, state);
+    if (ret != ERR_OK) {
+        HILOGE("VerifyBroadcastSource failed!");
+        return ret;
+    }
+    if (eventHandler_ == nullptr) {
+        HILOGE("eventHandler_ is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
+    eventHandler_->RemoveTask(ICON_TIMEOUT_TASK);
+    ret = NotifyDockDisplayForMultiAccount(bundleNameId, info, state, accountIdTrunc);
+    if (ret != ERR_OK) {
+        HILOGE("NotifyDockDisplay failed!");
+        return ret;
+    }
+    auto feedfunc = [this, bundleNameId, info, state, accountIdTrunc]() mutable {
+        HILOGI("icon timeout");
+        NotifyDockDisplayForMultiAccount(bundleNameId, info, INACTIVE, accountIdTrunc);
+    };
+    if (state == ACTIVE) {
+        eventHandler_->PostTask(feedfunc, ICON_TIMEOUT_TASK, TIMEOUT_SENT_EVENT_DELAY);
+    }
+    HILOGI("DealDockDisplayBusiness end");
+    return ERR_OK;
+}
+
 void DMSContinueRecvMgr::NotifyIconDisappear(uint16_t bundleNameId, const std::string &senderNetworkId,
     const int32_t state)
 {
@@ -600,6 +680,31 @@ int32_t DMSContinueRecvMgr::NotifyDockDisplay(uint16_t bundleNameId, const curre
     std::vector<sptr<IRemoteObject>> objs = iterItem->second;
     for (auto iter : objs) {
         NotifyRecvBroadcast(iter, continueInfo, state);
+    }
+    return ERR_OK;
+}
+
+int32_t DMSContinueRecvMgr::NotifyDockDisplayForMultiAccount(uint16_t bundleNameId, const currentIconInfo& continueInfo,
+    const int32_t state, std::string accountIdTrunc)
+{
+    std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
+    auto iterItem = multiAccountListener_.find(onType_);
+    if (iterItem == multiAccountListener_.end()) {
+        HILOGE("get iterItem failed from registerOnListener_, bundleNameId: %{public}u", bundleNameId);
+        return INVALID_PARAMETERS_ERR;
+    }
+    std::vector<MultiAccountListenerInfo> objs = iterItem->second;
+    for (const auto& iter: objs) {
+        HILOGI("state: %{public}d; Account Hash: %{public}d, name: %{public}s, uid: %{public}s, status: %{public}d, "
+                "callingUid: %{public}d, nickname: %{public}s, avatar: %{public}s, scalableData: %{public}s",
+               state, iter.uidHash, iter.accountInfo.name_.c_str(), iter.accountInfo.uid_.c_str(),
+               iter.accountInfo.status_, iter.accountInfo.callingUid_, iter.accountInfo.nickname_.c_str(),
+               iter.accountInfo.avatar_.c_str(), iter.accountInfo.scalableData_.c_str());
+        if (iter.accountInfo.uid_.substr(0, VALID_ACCOUNT_ID_LENGTH) !=
+            accountIdTrunc.substr(0, VALID_ACCOUNT_ID_LENGTH)) {
+            continue;
+        }
+        NotifyRecvBroadcast(iter.obj, continueInfo, state);
     }
     return ERR_OK;
 }
@@ -923,6 +1028,12 @@ std::string DMSContinueRecvMgr::GetSenderNetworkId()
 {
     std::lock_guard<std::mutex> currentIconLock(iconMutex_);
     return iconInfo_.senderNetworkId;
+}
+
+void DMSContinueRecvMgr::SetAccountInfo(const OHOS::AccountSA::OhosAccountInfo& accountInfo)
+{
+    HILOGI("SetAccountInfo: accountId=%{public}s", accountInfo.uid_.c_str());
+    accountInfo_ = accountInfo;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

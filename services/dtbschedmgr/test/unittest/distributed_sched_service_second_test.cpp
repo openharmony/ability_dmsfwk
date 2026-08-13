@@ -40,6 +40,7 @@
 #include "thread_pool.h"
 #include "mock/accesstoken_kit_mock.h"
 #include "mock/ability_manager_client_mock.h"
+#include "distributed_sched_continuation.h"
 #undef private
 #undef protected
 
@@ -2024,6 +2025,54 @@ HWTEST_F(DistributedSchedServiceSecondTest, StartShareFormFromRemote_004, TestSi
         abilityInfo, requestCode, callerInfo, accountInfo);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceSecondTest StartShareFormFromRemote_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueAbilityWithTimeout_001
+ * @tc.desc: test ContinueAbilityWithTimeout with valid params, ContinueAbility returns ERR_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, ContinueAbilityWithTimeout_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest ContinueAbilityWithTimeout_001 start" << std::endl;
+    std::string dstDeviceId = "test_device_id";
+    int32_t missionId = 100;
+    auto callback = GetDSchedService();
+    uint32_t remoteBundleVersion = 1;
+    DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    FuncContinuationCallback continuationCallback = [](int32_t missionId) {};
+    DistributedSchedService::GetInstance().dschedContinuation_->Init(continuationCallback);
+    EXPECT_CALL(*clientMock_, ContinueAbility(_, _, _, _))
+        .WillOnce(Return(ERR_OK));
+    int32_t ret = DistributedSchedService::GetInstance().ContinueAbilityWithTimeout(
+        dstDeviceId, missionId, callback, remoteBundleVersion);
+    EXPECT_EQ(ret, ERR_OK);
+    DistributedSchedService::GetInstance().dschedContinuation_ = nullptr;
+    DTEST_LOG << "DistributedSchedServiceSecondTest ContinueAbilityWithTimeout_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueAbilityWithTimeout_002
+ * @tc.desc: test ContinueAbilityWithTimeout when ContinueAbility returns ERR_INVALID_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, ContinueAbilityWithTimeout_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest ContinueAbilityWithTimeout_002 start" << std::endl;
+    std::string dstDeviceId = "test_device_id";
+    int32_t missionId = 200;
+    auto callback = GetDSchedService();
+    uint32_t remoteBundleVersion = 1;
+    DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    FuncContinuationCallback continuationCallback = [](int32_t missionId) {};
+    DistributedSchedService::GetInstance().dschedContinuation_->Init(continuationCallback);
+    EXPECT_CALL(*clientMock_, ContinueAbility(_, _, _, _))
+        .WillOnce(Return(ERR_INVALID_VALUE));
+    int32_t ret = DistributedSchedService::GetInstance().ContinueAbilityWithTimeout(
+        dstDeviceId, missionId, callback, remoteBundleVersion);
+    EXPECT_EQ(ret, MISSION_FOR_CONTINUING_IS_NOT_ALIVE);
+    DistributedSchedService::GetInstance().dschedContinuation_ = nullptr;
+    DTEST_LOG << "DistributedSchedServiceSecondTest ContinueAbilityWithTimeout_002 end" << std::endl;
 }
 }
 }

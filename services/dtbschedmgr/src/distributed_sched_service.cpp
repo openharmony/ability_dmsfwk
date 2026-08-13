@@ -25,6 +25,7 @@
 #include "accesstoken_kit.h"
 #include "bool_wrapper.h"
 #include "datetime_ex.h"
+#include "util/dms_user_and_account_util.h"
 #include "element_name.h"
 #include "file_ex.h"
 #include "ipc_skeleton.h"
@@ -1681,7 +1682,11 @@ int32_t DistributedSchedService::ContinueAbilityWithTimeout(const std::string& d
     int64_t saveDataBegin = GetTickCount();
     DmsContinueTime::GetInstance().SetSaveDataDurationBegin(saveDataBegin);
     DmsRadar::GetInstance().SaveDataDmsContinue("ContinueAbility", ERR_OK);
-    int32_t result = AbilityManagerClient::GetInstance()->ContinueAbility(dstDeviceId, missionId, remoteBundleVersion);
+    int32_t userId = -1;
+    DmsUserAndAccountUtil::GetForegroundUserId(userId);
+    HILOGI("ContinueAbility missionId:%{public}d userId:%{public}d", missionId, userId);
+    int32_t result = AbilityManagerClient::GetInstance()->ContinueAbility(
+        dstDeviceId, missionId, remoteBundleVersion, userId);
     HILOGI("result: %{public}d!", result);
     if (result == ERR_INVALID_VALUE) {
         return MISSION_FOR_CONTINUING_IS_NOT_ALIVE;

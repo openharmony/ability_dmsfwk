@@ -44,6 +44,7 @@ declare_args() {
   dmsfwk_enable_enterprise_device_management = false
   dmsfwk_check_screenlock = false
   dmsfwk_vpe_enable = false
+  dmsfwk_enable_multi_distributed_accounts = false
   if (defined(global_parts_info)) {
     if (defined(global_parts_info.multimedia_image_framework)) {
       dmsfwk_mission_manager = true

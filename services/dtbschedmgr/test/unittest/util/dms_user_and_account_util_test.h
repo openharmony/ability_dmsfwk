@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,34 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef MULTI_USER_MANAGER_TEST_H
-#define MULTI_USER_MANAGER_TEST_H
+#ifndef DMS_USER_AND_ACCOUNT_UTIL_TEST_H
+#define DMS_USER_AND_ACCOUNT_UTIL_TEST_H
 
 #include "gtest/gtest.h"
-#include <memory>
-
-#include "remote_on_listener_stub.h"
+#include "mock/ohos_account_kits_mock.h"
+#include "mock/os_account_manager_mock.h"
 
 namespace OHOS {
-namespace AccountSA {
-class OhosAccountKitsMock;
-class OsAccountManagerMock;
-}
 namespace DistributedSchedule {
-class MultiUserManagerTest : public testing::Test {
+class DmsUserAndAccountUtilTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    std::shared_ptr<AccountSA::OhosAccountKitsMock> ohosAccountMock_;
-    std::shared_ptr<AccountSA::OsAccountManagerMock> osAccountMock_;
-};
-
-class RemoteOnListenerStubTest : public AAFwk::RemoteOnListenerStub {
-public:
-    void OnCallback(const AAFwk::OnCallbackInfo &info) override;
+    static std::shared_ptr<AccountSA::OhosAccountKitsMock> ohosAccountMock_;
+    static std::shared_ptr<AccountSA::OsAccountManagerMock> osAccountMock_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
-#endif // MULTI_USER_MANAGER_TEST_H
+#endif // DMS_USER_AND_ACCOUNT_UTIL_TEST_H

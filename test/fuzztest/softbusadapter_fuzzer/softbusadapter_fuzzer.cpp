@@ -42,7 +42,8 @@ void FuzzSendSoftbusEvent(const uint8_t* data, size_t size)
     if (memcpy_s(buffer->Data(), buffer->Capacity(), data, size) != ERR_OK) {
         return;
     }
-    SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer);
+    std::string accountId = "0000";
+    SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer, accountId);
     SoftbusAdapter::GetInstance().StopSoftbusEvent();
 }
 
@@ -55,7 +56,8 @@ void FuzzOnBroadCastRecv(const uint8_t* data, size_t size)
     int32_t dataLen = fdp.ConsumeIntegral<uint32_t>();
     std::string networkId = fdp.ConsumeRandomLengthString();
     uint8_t* newdata = const_cast<uint8_t*>(data);
-    SoftbusAdapter::GetInstance().OnBroadCastRecv(networkId, newdata, dataLen);
+    std::string accountId = "0000";
+    SoftbusAdapter::GetInstance().OnBroadCastRecv(networkId, newdata, dataLen, accountId);
     std::shared_ptr<SoftbusAdapterListener> listener = std::make_shared<DistributedMissionBroadcastListener>();
     SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
     SoftbusAdapter::GetInstance().UnregisterSoftbusEventListener(listener);
@@ -70,13 +72,14 @@ void FuzzDealSendSoftbusEvent(const uint8_t* data, size_t size)
     FuzzedDataProvider fdp(data, size);
     std::shared_ptr<DSchedDataBuffer> buffer = nullptr;
     int32_t retry = fdp.ConsumeIntegral<int32_t>();
+    std::string accountId = "0000";
     SoftbusAdapter::GetInstance().Init();
-    SoftbusAdapter::GetInstance().DealSendSoftbusEvent(buffer, retry);
-    SoftbusAdapter::GetInstance().RetrySendSoftbusEvent(buffer, retry);
+    SoftbusAdapter::GetInstance().DealSendSoftbusEvent(buffer, accountId, retry);
+    SoftbusAdapter::GetInstance().RetrySendSoftbusEvent(buffer, accountId, retry);
 
     buffer = std::make_shared<DSchedDataBuffer>(CAPACITY);
-    SoftbusAdapter::GetInstance().DealSendSoftbusEvent(buffer, retry);
-    SoftbusAdapter::GetInstance().RetrySendSoftbusEvent(buffer, retry);
+    SoftbusAdapter::GetInstance().DealSendSoftbusEvent(buffer, accountId, retry);
+    SoftbusAdapter::GetInstance().RetrySendSoftbusEvent(buffer, accountId, retry);
     usleep(WAITTIME);
     SoftbusAdapter::GetInstance().UnInit();
 }
