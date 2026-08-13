@@ -70,7 +70,7 @@ void DmsUserAndAccountUtilTest::SetUp()
             if (uid < 0) {
                 return static_cast<ErrCode>(-1);
             }
-            id = uid / 200000;
+            id = uid;
             return 0;
         }));
 }

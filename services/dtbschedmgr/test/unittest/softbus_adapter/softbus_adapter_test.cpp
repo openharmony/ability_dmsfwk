@@ -30,6 +30,7 @@ static int32_t g_mockRet = 0;
 namespace {
 const std::string NETWORKID_01 = "networkId01";
 constexpr int32_t RETRY_SENT_EVENT_MAX_TIME = 3;
+constexpr int32_t DEFAULT_USER_ID = 100;
 const int32_t WAITTIME = 2000;
 }
 
@@ -76,7 +77,7 @@ void SoftbusAdapterTest::SetUp()
     ::testing::Mock::VerifyAndClearExpectations(osAccountMock_.get());
     ON_CALL(*osAccountMock_, GetForegroundOsAccountLocalId(_))
         .WillByDefault(Invoke([](int32_t& localId) {
-            localId = 100;
+            localId = DEFAULT_USER_ID;
             return ERR_OK;
         }));
     ON_CALL(*osAccountMock_, GetOsAccountLocalIdFromUid(_, _))
@@ -84,7 +85,7 @@ void SoftbusAdapterTest::SetUp()
             if (uid < 0) {
                 return static_cast<ErrCode>(-1);
             }
-            id = uid / 200000;
+            id = uid;
             return 0;
         }));
 }

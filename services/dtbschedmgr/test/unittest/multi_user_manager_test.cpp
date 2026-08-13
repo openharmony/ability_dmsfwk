@@ -64,10 +64,13 @@ void MultiUserManagerTest::SetUp()
     osAccountMock_ = std::make_shared<AccountSA::OsAccountManagerMock>();
     AccountSA::IOsAccountManager::osAccountMock = osAccountMock_;
     ON_CALL(*osAccountMock_, GetForegroundOsAccountLocalId(_))
-        .WillByDefault([](int32_t& localId) { localId = 100; return ERR_OK; });
+        .WillByDefault([](int32_t& localId) {
+            localId = DEFAULT_USER_ID;
+            return ERR_OK;
+        });
     ohosAccountMock_ = std::make_shared<AccountSA::OhosAccountKitsMock>();
     AccountSA::IOhosAccountKits::ohosAccountMock = ohosAccountMock_;
-    MultiUserManager::GetInstance().currentUserId_.store(100);
+    MultiUserManager::GetInstance().currentUserId_.store(DEFAULT_USER_ID);
 }
 
 void MultiUserManagerTest::TearDown()
@@ -750,8 +753,10 @@ HWTEST_F(MultiUserManagerTest, HandleAccountLogin_CreateNewMgr_001, TestSize.Lev
     MultiUserManager::GetInstance().currentUserId_ = userId;
     DataShareManager::GetInstance().SetCurrentContinueSwitch(true);
     EXPECT_NO_FATAL_FAILURE(MultiUserManager::GetInstance().HandleAccountLogin(userId, accountInfo));
-    EXPECT_NE(MultiUserManager::GetInstance().sendMgrMap_.find(userId), MultiUserManager::GetInstance().sendMgrMap_.end());
-    EXPECT_NE(MultiUserManager::GetInstance().recvMgrMap_.find(userId), MultiUserManager::GetInstance().recvMgrMap_.end());
+    EXPECT_NE(MultiUserManager::GetInstance().sendMgrMap_.find(userId),
+              MultiUserManager::GetInstance().sendMgrMap_.end());
+    EXPECT_NE(MultiUserManager::GetInstance().recvMgrMap_.find(userId),
+              MultiUserManager::GetInstance().recvMgrMap_.end());
     MultiUserManager::GetInstance().UnInit();
     DTEST_LOG << "HandleAccountLogin_CreateNewMgr_001 end" << std::endl;
 }
