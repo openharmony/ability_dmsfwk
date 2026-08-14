@@ -199,7 +199,6 @@ int32_t SoftbusAdapter::RegisterSoftbusEventListener(const std::shared_ptr<Softb
         HILOGE("Get Account info failed!");
         return INVALID_PARAMETERS_ERR;
     }
-    HILOGE("Account Hash: %{public}s", accountInfo.uid_.c_str());
     int32_t ret = dmsAdapetr_.RegisterSoftbusEventListenerForMultiAccount(
         true, (void *)OnBroadCastRecvAdapt, accountInfo.uid_);
 #else
@@ -236,7 +235,6 @@ int32_t SoftbusAdapter::UnregisterSoftbusEventListener(const std::shared_ptr<Sof
         HILOGE("Get Account info failed!");
         return INVALID_PARAMETERS_ERR;
     }
-    HILOGE("Account Hash: %{public}s", accountInfo.uid_.c_str());
     int32_t ret = dmsAdapetr_.UnregisterSoftbusEventListenerForMultiAccount(
         true, (void *)OnBroadCastRecvAdapt, accountInfo.uid_);
 #else

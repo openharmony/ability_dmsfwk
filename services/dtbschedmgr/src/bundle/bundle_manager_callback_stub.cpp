@@ -63,7 +63,6 @@ int32_t DmsBundleManagerCallbackStub::OnQueryInstallationFinished(int32_t result
     DistributedSchedService::GetInstance().SetContinuationTimeout(missionId, CONTINUATION_FREE_INSTALL_TIMEOUT);
     int32_t userId = -1;
     DmsUserAndAccountUtil::GetForegroundUserId(userId);
-    HILOGI("ContinueAbility missionId:%{public}d userId:%{public}d", missionId, userId);
     result = AAFwk::AbilityManagerClient::GetInstance()->ContinueAbility(deviceId, missionId, versionCode, userId);
     return result;
 }

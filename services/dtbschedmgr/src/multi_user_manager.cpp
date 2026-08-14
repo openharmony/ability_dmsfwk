@@ -627,6 +627,7 @@ void MultiUserManager::HandleAccountLogin(int32_t userId, const OHOS::AccountSA:
 
     if (DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
         sendMgr->OnDeviceOnline();
+        DSchedContinueManager::GetInstance().UnInit();
         DSchedContinueManager::GetInstance().Init();
     } else {
         recvMgr->OnContinueSwitchOff();

@@ -1684,7 +1684,6 @@ int32_t DistributedSchedService::ContinueAbilityWithTimeout(const std::string& d
     DmsRadar::GetInstance().SaveDataDmsContinue("ContinueAbility", ERR_OK);
     int32_t userId = -1;
     DmsUserAndAccountUtil::GetForegroundUserId(userId);
-    HILOGI("ContinueAbility missionId:%{public}d userId:%{public}d", missionId, userId);
     int32_t result = AbilityManagerClient::GetInstance()->ContinueAbility(
         dstDeviceId, missionId, remoteBundleVersion, userId);
     HILOGI("result: %{public}d!", result);

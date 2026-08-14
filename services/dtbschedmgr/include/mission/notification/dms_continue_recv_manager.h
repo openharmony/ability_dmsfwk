@@ -101,19 +101,25 @@ public:
     void UnInit();
     void NotifyDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen, std::string accountIdTrunc);
     int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj);
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
     int32_t RegisterOnListenerForMultiAccount(const std::string& type, const sptr<IRemoteObject>& obj,
         const OHOS::AccountSA::OhosAccountInfo& accountInfo);
+#endif
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj);
     void NotifyDied(const sptr<IRemoteObject>& obj);
     void NotifyDeviceOffline(const std::string& networkId);
     void NotifyPackageRemoved(const std::string& sinkBundleName);
     void NotifyIconDisappear(uint16_t bundleNameId, const std::string &senderNetworkId, int32_t state);
     int32_t DealDockDisplayBusiness(uint16_t bundleNameId, const currentIconInfo info, int32_t state);
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
     int32_t DealDockDisplayBusinessForMultiAccount(uint16_t bundleNameId, const currentIconInfo info,
         const int32_t state, std::string accountIdTrunc);
+#endif
     int32_t NotifyDockDisplay(uint16_t bundleNameId, const currentIconInfo& continueInfo, int32_t state);
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
     int32_t NotifyDockDisplayForMultiAccount(uint16_t bundleNameId, const currentIconInfo& continueInfo,
         int32_t state, std::string accountIdTrunc);
+#endif
     void OnDeviceScreenOff();
     void OnContinueSwitchOff();
     void OnUserSwitch();

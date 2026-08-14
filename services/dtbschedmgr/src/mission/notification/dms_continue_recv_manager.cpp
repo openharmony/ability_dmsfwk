@@ -152,9 +152,8 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
         }
         auto result = registerOnListener_.emplace(type, std::vector<sptr<IRemoteObject>>{});
         iterItem = result.first;
-        iterItem = registerOnListener_.find(type);
     }
-    for (auto iter : registerOnListener_[type]) {
+    for (auto iter : iterItem->second) {
         if (iter == obj) {
             HILOGI("already have obj");
             return NO_MISSION_INFO_FOR_MISSION_ID;
@@ -172,11 +171,12 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
     return ERR_OK;
 }
 
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
 int32_t DMSContinueRecvMgr::RegisterOnListenerForMultiAccount(const std::string& type, const sptr<IRemoteObject>& obj,
     const OHOS::AccountSA::OhosAccountInfo& accountInfo)
 {
     HILOGI("RegisterOnListenerForMultiAccount start, type: %{public}s. accountName: %{public}s.",
-        type.c_str(), accountInfo.name_.c_str());
+        type.c_str(), GetAnonymStr(accountInfo.name_).c_str());
     if (obj == nullptr) {
         HILOGE("obj is null, type: %{public}s", type.c_str());
         return INVALID_PARAMETERS_ERR;
@@ -212,6 +212,7 @@ int32_t DMSContinueRecvMgr::RegisterOnListenerForMultiAccount(const std::string&
     HILOGI("RegisterOnListenerForMultiAccount end");
     return ERR_OK;
 }
+#endif
 
 int32_t DMSContinueRecvMgr::RegisterOffListener(const std::string& type,
     const sptr<IRemoteObject>& obj)
@@ -629,6 +630,7 @@ int32_t DMSContinueRecvMgr::DealDockDisplayBusiness(uint16_t bundleNameId, const
     return ERR_OK;
 }
 
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
 int32_t DMSContinueRecvMgr::DealDockDisplayBusinessForMultiAccount(uint16_t bundleNameId, const currentIconInfo info,
     const int32_t state, std::string accountIdTrunc)
 {
@@ -659,6 +661,7 @@ int32_t DMSContinueRecvMgr::DealDockDisplayBusinessForMultiAccount(uint16_t bund
     HILOGI("DealDockDisplayBusiness end");
     return ERR_OK;
 }
+#endif
 
 void DMSContinueRecvMgr::NotifyIconDisappear(uint16_t bundleNameId, const std::string &senderNetworkId,
     const int32_t state)
@@ -684,6 +687,7 @@ int32_t DMSContinueRecvMgr::NotifyDockDisplay(uint16_t bundleNameId, const curre
     return ERR_OK;
 }
 
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
 int32_t DMSContinueRecvMgr::NotifyDockDisplayForMultiAccount(uint16_t bundleNameId, const currentIconInfo& continueInfo,
     const int32_t state, std::string accountIdTrunc)
 {
@@ -708,6 +712,7 @@ int32_t DMSContinueRecvMgr::NotifyDockDisplayForMultiAccount(uint16_t bundleName
     }
     return ERR_OK;
 }
+#endif
 
 bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo,
     const std::string &srcAbilityName, const std::string &srcModuleName, const std::string &srcContinueType)
@@ -1032,7 +1037,7 @@ std::string DMSContinueRecvMgr::GetSenderNetworkId()
 
 void DMSContinueRecvMgr::SetAccountInfo(const OHOS::AccountSA::OhosAccountInfo& accountInfo)
 {
-    HILOGI("SetAccountInfo: accountId=%{public}s", accountInfo.uid_.c_str());
+    HILOGI("SetAccountInfo: accountId=%{public}s", GetAnonymStr(accountInfo.uid_).c_str());
     accountInfo_ = accountInfo;
 }
 } // namespace DistributedSchedule

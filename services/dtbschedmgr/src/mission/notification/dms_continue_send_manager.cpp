@@ -290,7 +290,7 @@ void DMSContinueSendMgr::SendSoftbusEvent(uint16_t& bundleNameId, uint8_t& conti
     std::string accountId)
 {
     HILOGI("bundleNameId: %{public}u, continueTypeId: %{public}u, sendType %{public}u, accountId %{public}s",
-        bundleNameId, continueTypeId, type, accountId.c_str());
+        bundleNameId, continueTypeId, type, GetAnonymStr(accountId).c_str());
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(DMS_SEND_LEN);
     if (buffer->Data() == nullptr || buffer->Size() < DMS_SEND_LEN) {
         HILOGE("Failed to initialize DSchedDataBuffer");
