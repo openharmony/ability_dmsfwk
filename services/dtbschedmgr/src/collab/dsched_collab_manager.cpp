@@ -103,17 +103,21 @@ void DSchedCollabManager::Init()
 int32_t DSchedCollabManager::CheckCollabRelation(const CollabInfo *sourceInfo, const CollabInfo *sinkInfo)
 {
     HILOGI("called");
-    if (collabs_.empty()) {
-        HILOGE("No collab in progress.");
-        return INVALID_PARAMETERS_ERR;
-    }
-    DSchedCollabInfo collabInfo;
-    for (auto iter = collabs_.begin(); iter != collabs_.end(); iter++) {
-        if (iter->second == nullptr) {
-            HILOGE("collab is nullptr");
-            continue;
+    std::vector<DSchedCollabInfo> collabInfoList;
+    {
+        std::shared_lock<std::shared_mutex> readLock(collabMutex_);
+        if (collabs_.empty()) {
+            HILOGE("No collab in progress.");
+            return INVALID_PARAMETERS_ERR;
         }
-        collabInfo = iter->second->GetCollabInfo();
+        for (auto iter = collabs_.begin(); iter != collabs_.end(); iter++) {
+            if (iter->second == nullptr) {
+                continue;
+            }
+            collabInfoList.emplace_back(iter->second->GetCollabInfo());
+        }
+    }
+    for (const auto& collabInfo : collabInfoList) {
         HILOGI("collabInfo: %{public}s", collabInfo.ToString().c_str());
         if (CheckSrcCollabRelation(sourceInfo, &collabInfo) == ERR_OK &&
             (sinkInfo->pid == NO_NEED_TO_CHECK_ID || CheckSinkCollabRelation(sinkInfo, &collabInfo) == ERR_OK)) {
@@ -214,7 +218,10 @@ void DSchedCollabManager::UnInit()
     HILOGI("UnInit start");
     DSchedTransportSoftbusAdapter::GetInstance().UnregisterListener(SERVICE_TYPE_COLLAB, softbusListener_);
     DSchedTransportSoftbusAdapter::GetInstance().ReleaseChannel();
-    collabs_.clear();
+    {
+        std::unique_lock<std::shared_mutex> writeLock(collabMutex_);
+        collabs_.clear();
+    }
 
     if (eventHandler_ != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
@@ -565,7 +572,7 @@ int32_t DSchedCollabManager::ReleaseAbilityLink(const std::string &bundleName, c
     DSchedCollabInfo dSchedCollabInfo;
     std::string collabToken;
     {
-        std::shared_lock<std::shared_mutex> readLock(collabReadMutex_);
+        std::shared_lock<std::shared_mutex> readLock(collabMutex_);
         for (auto iter = collabs_.begin(); iter != collabs_.end(); iter++) {
             if (iter->second == nullptr) {
                 continue;
@@ -642,7 +649,7 @@ void DSchedCollabManager::DisconnectAllSessionsForUser(int32_t userId)
 
     std::vector<std::string> tokensToClean;
     {
-        std::lock_guard<std::mutex> lock(collabMutex_);
+        std::shared_lock<std::shared_mutex> readLock(collabMutex_);
         for (const auto& iter : collabs_) {
             if (iter.second == nullptr) {
                 continue;
@@ -675,6 +682,7 @@ void DSchedCollabManager::DisconnectAllSessionsForUser(int32_t userId)
 void DSchedCollabManager::NotifyWifiOpen()
 {
     HILOGI("called");
+    std::shared_lock<std::shared_mutex> readLock(collabMutex_);
     for (auto iter = collabs_.begin(); iter != collabs_.end(); iter++) {
         if (iter->second != nullptr) {
             iter->second->NotifyWifiOpen();
@@ -713,7 +721,7 @@ int32_t DSchedCollabManager::CleanUpSession(const std::string &collabToken)
         dCollab->UnInit();
         RemoveTimeout(collabToken);
         {
-            std::lock_guard<std::mutex> collabLock(collabMutex_);
+            std::unique_lock<std::shared_mutex> writeLock(collabMutex_);
             collabs_.erase(collabToken);
         }
     };
@@ -729,7 +737,7 @@ int32_t DSchedCollabManager::CleanUpSession(const std::string &collabToken)
 std::shared_ptr<DSchedCollab> DSchedCollabManager::GetDSchedCollabByTokenId(const std::string &tokenId)
 {
     HILOGI("called, tokenId: %{public}s", GetAnonymStr(tokenId).c_str());
-    std::lock_guard<std::mutex> collabLock(collabMutex_);
+    std::shared_lock<std::shared_mutex> readLock(collabMutex_);
     if (tokenId.empty() || collabs_.count(tokenId) == 0) {
         HILOGE("no such collaboration in progress.");
         return nullptr;
@@ -854,7 +862,7 @@ void DSchedCollabManager::OnShutdown(int32_t socket, bool isSelfCalled)
         return;
     }
     auto func = [this, socket]() {
-        std::lock_guard<std::mutex> collabLock(collabMutex_);
+        std::shared_lock<std::shared_mutex> readLock(collabMutex_);
         if (collabs_.empty()) {
             return;
         }
