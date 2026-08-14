@@ -35,7 +35,6 @@ constexpr int32_t DSCHED_QOS_TYPE_MIN_BW = 80 * 1024;
 constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW = 40 * 1024 * 1024;
 constexpr int32_t DSCHED_QOS_TYPE_MAX_LATENCY = 6000;
 constexpr int32_t DSCHED_QOS_TYPE_MIN_LATENCY = 1000;
-
 constexpr const char* SOCKET_DMS_SESSION_NAME = "ohos.distributedschedule.dms.connect";
 constexpr const char* SOCKET_DMS_PKG_NAME = "dms";
 constexpr const char* SOCKET_DMS_INTENT_NAME = "ohos.distributedschedule.dms.intent";
@@ -68,6 +67,7 @@ public:
     void SetCallingTokenId(int32_t callingTokenId);
     bool GetSessionIdByDeviceId(const std::string &peerDeviceId, int32_t &sessionId);
     std::string GetPeerDeviceIdBySocket(const int32_t sessionId);
+    bool IsDeviceConnected(const std::string &peerDeviceId);
     bool IsNeedAllConnect(DSchedServiceType type);
     int32_t GetIntentServerSocket() const { return intentServerSocket_; }
 
