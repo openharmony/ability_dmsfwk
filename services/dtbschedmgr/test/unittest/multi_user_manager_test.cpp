@@ -58,6 +58,10 @@ void RemoteOnListenerStubTest::OnCallback(const AAFwk::OnCallbackInfo &info)
 {
 }
 
+int32_t MultiUserManager::GetForegroundUser() {
+    return DEFAULT_USER_ID;
+}
+
 /**
  * @tc.name: MultiUserManager_Init_001
  * @tc.desc: test Init

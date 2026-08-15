@@ -163,7 +163,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckSendResultPermission_002, TestSize
     EXPECT_CALL(*adapter_, CheckAccessToGroup(_, _)).WillRepeatedly(Return(true));
     int32_t ret = DistributedSchedPermission::GetInstance().CheckSendResultPermission(want,
         callerInfo, accountInfo, targetAbility);
-    EXPECT_EQ(ret, DMS_COMPONENT_ACCESS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, DMS_ACCOUNT_ACCESS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedPermissionTest CheckSendResultPermission_002 end ret:" << ret << std::endl;
 }
 
@@ -184,7 +184,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckSendResultPermission_003, TestSize
     targetAbility.visible = true;
     int32_t ret = DistributedSchedPermission::GetInstance().CheckSendResultPermission(want,
         callerInfo, accountInfo, targetAbility);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, DMS_ACCOUNT_ACCESS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedPermissionTest CheckSendResultPermission_003 end ret:" << ret << std::endl;
 }
 
@@ -334,7 +334,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckStartPermission_002, TestSize.Leve
     EXPECT_CALL(*adapter_, CheckAccessToGroup(_, _)).WillRepeatedly(Return(true));
     int32_t ret = DistributedSchedPermission::GetInstance().CheckStartPermission(want,
         callerInfo, accountInfo, targetAbility);
-    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, DMS_ACCOUNT_ACCESS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedPermissionTest CheckStartPermission_002 end ret:" << ret << std::endl;
 }
 
@@ -355,7 +355,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckStartPermission_003, TestSize.Leve
     AppExecFwk::AbilityInfo targetAbility;
     int32_t ret = DistributedSchedPermission::GetInstance().CheckStartPermission(want,
         callerInfo, accountInfo, targetAbility, false);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, DMS_ACCOUNT_ACCESS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedPermissionTest CheckStartPermission_003 end ret:" << ret << std::endl;
 }
 
@@ -399,7 +399,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckCollabStartPermission_002, TestSiz
     EXPECT_CALL(*adapter_, CheckAccessToGroup(_, _)).WillRepeatedly(Return(true));
     int32_t ret = DistributedSchedPermission::GetInstance().CheckCollabStartPermission(want,
         callerInfo, accountInfo, targetAbility);
-    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, DMS_ACCOUNT_ACCESS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedPermissionTest CheckCollabStartPermission_002 end ret:" << ret << std::endl;
 }
 
@@ -423,7 +423,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckCollabStartPermission_003, TestSiz
     EXPECT_CALL(*adapter_, CheckAccessToGroup(_, _)).WillRepeatedly(Return(true));
     int32_t ret = DistributedSchedPermission::GetInstance().CheckCollabStartPermission(want,
         callerInfo, accountInfo, targetAbility);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, DMS_ACCOUNT_ACCESS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedPermissionTest CheckCollabStartPermission_003 end ret:" << ret << std::endl;
 }
 
