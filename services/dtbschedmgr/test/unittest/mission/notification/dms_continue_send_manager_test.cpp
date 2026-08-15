@@ -1238,7 +1238,7 @@ HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_PostOnBroadcast_001, TestSize.Le
     recvMgr->UnInit();
     DTEST_LOG << "NotifyDataRecv_PostOnBroadcast_001 end" << std::endl;
 }
-
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
 /**
  * @tc.name: RegisterOnListenerForMultiAccount_001
  * @tc.desc: test RegisterOnListenerForMultiAccount with valid params
@@ -1408,5 +1408,6 @@ HWTEST_F(DMSContinueRecvMgrTest, NotifyDockDisplayForMultiAccount_003, TestSize.
     recvMgr->UnInit();
     DTEST_LOG << "NotifyDockDisplayForMultiAccount_003 end" << std::endl;
 }
+#endif
 }
 }
