@@ -330,9 +330,6 @@ bool DistributedSchedPermission::CheckSameAccount(const std::string& dstNetworkI
     const AccountInfo& dmsAccountInfo, const CallerInfo& callerInfo, bool isSrc)
 {
     HILOGI("called");
-    if (!VerifySourceDeviceConnected(callerInfo)) {
-        return false;
-    }
     if (IsHigherAclVersion(callerInfo)) {
         return CheckDstSameAccount(dstNetworkId, dmsAccountInfo, callerInfo, isSrc);
     } else {
@@ -457,9 +454,6 @@ bool DistributedSchedPermission::CheckAclList(const std::string& dstNetworkId, c
     const CallerInfo& callerInfo, bool isSrc, const std::string& targetBundleName)
 {
     HILOGI("called");
-    if (!VerifySourceDeviceConnected(callerInfo)) {
-        return false;
-    }
     if (IsHigherAclVersion(callerInfo)) {
         return CheckNewAclList(dstNetworkId, dmsAccountInfo, callerInfo, isSrc, targetBundleName);
     } else {
