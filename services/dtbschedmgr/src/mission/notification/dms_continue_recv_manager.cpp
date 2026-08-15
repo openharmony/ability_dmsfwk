@@ -54,7 +54,9 @@ const std::u16string DESCRIPTOR = u"ohos.aafwk.RemoteOnListener";
 const std::string QUICK_START_CONFIGURATION = "_ContinueQuickStart";
 const std::string ICON_TIMEOUT_TASK = "icon_timeout_task";
 constexpr int32_t TIMEOUT_SENT_EVENT_DELAY = 60000;
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
 constexpr int32_t VALID_ACCOUNT_ID_LENGTH = 2;
+#endif
 }
 
 DMSContinueRecvMgr::~DMSContinueRecvMgr()
