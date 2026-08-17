@@ -27,7 +27,8 @@ namespace DistributedSchedule {
 class SoftbusAdapterListener {
 public:
     virtual ~SoftbusAdapterListener() = default;
-    virtual void OnDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen) = 0;
+    virtual void OnDataRecv(std::string& senderNetworkId, uint8_t* payload,
+        uint32_t dataLen, std::string accountIdTrunc) = 0;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

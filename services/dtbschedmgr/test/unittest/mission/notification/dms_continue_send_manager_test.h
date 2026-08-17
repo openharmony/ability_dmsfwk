@@ -22,9 +22,16 @@
 #include "mock/bundle_manager_internal_mock.h"
 #include "mock/dms_continue_condition_manager_mock.h"
 #include "mock/dsched_sync_e2e_mock.h"
+#include "mock/ohos_account_kits_mock.h"
+#include "remote_on_listener_stub.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
+class SendMgrRemoteOnListenerStubTest : public AAFwk::RemoteOnListenerStub {
+public:
+    void OnCallback(const AAFwk::OnCallbackInfo &info) override;
+};
+
 class DMSContinueSendMgrTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -34,6 +41,7 @@ public:
     static inline std::shared_ptr<AbilityManagerClientMock> clientMock_ = nullptr;
     static inline std::shared_ptr<BundleManagerInternalMock> bundleMgrMock_ = nullptr;
     static inline std::shared_ptr<DmsContinueConditionMgrMock> mgrMock_ = nullptr;
+    static inline std::shared_ptr<AccountSA::OhosAccountKitsMock> ohosAccountMock_ = nullptr;
 };
 
 class DMSContinueRecvMgrTest : public testing::Test {
@@ -44,6 +52,7 @@ public:
     void TearDown();
     static inline std::shared_ptr<BundleManagerInternalMock> bundleMgrMock_ = nullptr;
     static inline std::shared_ptr<DmsKvSyncE2EMock> dmsKvMock_ = nullptr;
+    static inline std::shared_ptr<DmsContinueConditionMgrMock> mgrMock_ = nullptr;
 };
 }
 }

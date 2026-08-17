@@ -34,7 +34,6 @@ void FuzzMultiUserManager(const uint8_t* data, size_t size)
     MultiUserManager::GetInstance().OnUserRemoved(accountId);
     MultiUserManager::GetInstance().GetSendMgrByCallingUid(accountId);
     MultiUserManager::GetInstance().GetRecvMgrByCallingUid(accountId);
-    MultiUserManager::GetInstance().GetDistributedAccountIdByLocalId(accountId);
     MultiUserManager::GetInstance().HandleDistributedAccountLogin(accountId);
     MultiUserManager::GetInstance().HandleDistributedAccountLogout(accountId);
     MultiUserManager::GetInstance().UnInit();

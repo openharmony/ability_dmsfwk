@@ -65,6 +65,10 @@ void CommonEventListenerTest::SetUp()
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_TOKEN_INVALID);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     applyMonitor = std::make_shared<CommonEventListener>(subscribeInfo);
 }
@@ -135,6 +139,37 @@ HWTEST_F(CommonEventListenerTest, OnReceiveEvent002, TestSize.Level3)
     eventData.SetWant(want);
     EXPECT_NO_FATAL_FAILURE(applyMonitor->OnReceiveEvent(eventData));
     DTEST_LOG << "CommonEventListenerTest OnReceiveEvent002 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnReceiveEvent003
+ * @tc.desc: call OnReceiveEvent with distributed account events
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventListenerTest, OnReceiveEvent003, TestSize.Level3)
+{
+    DTEST_LOG << "CommonEventListenerTest OnReceiveEvent003 start" << std::endl;
+    AAFwk::Want want;
+    EventFwk::CommonEventData eventData;
+
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN);
+    eventData.SetWant(want);
+    eventData.SetCode(100);
+    EXPECT_NO_FATAL_FAILURE(applyMonitor->OnReceiveEvent(eventData));
+
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT);
+    eventData.SetWant(want);
+    EXPECT_NO_FATAL_FAILURE(applyMonitor->OnReceiveEvent(eventData));
+
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF);
+    eventData.SetWant(want);
+    EXPECT_NO_FATAL_FAILURE(applyMonitor->OnReceiveEvent(eventData));
+
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_TOKEN_INVALID);
+    eventData.SetWant(want);
+    EXPECT_NO_FATAL_FAILURE(applyMonitor->OnReceiveEvent(eventData));
+
+    DTEST_LOG << "CommonEventListenerTest OnReceiveEvent003 end" << std::endl;
 }
 }
 }

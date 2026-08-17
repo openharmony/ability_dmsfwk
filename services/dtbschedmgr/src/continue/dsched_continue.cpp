@@ -48,6 +48,7 @@
 #include "scene_board_judgement.h"
 #include "softbus_adapter/transport/dsched_transport_softbus_adapter.h"
 #include "softbus_error_code.h"
+#include "util/dms_user_and_account_util.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -140,7 +141,9 @@ DSchedContinue::DSchedContinue(int32_t subServiceType, int32_t direction,  const
     HILOGI("DSchedContinue create");
     version_ = DSCHED_CONTINUE_PROTOCOL_VERSION;
     continueByType_ = !continueInfo.continueType_.empty();
-
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+    DmsUserAndAccountUtil::GetForegroundUserId(userId_);
+#endif
     SetEventData();
     NotifyDSchedEventResult(ERR_OK);
 }
@@ -176,6 +179,9 @@ DSchedContinue::DSchedContinue(std::shared_ptr<DSchedContinueStartCmd> startCmd,
         continueInfo_.sinkBundleName_ = missionInfo.want.GetBundle();
     }
     accountId_ = accountId;
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+    DmsUserAndAccountUtil::GetForegroundUserId(userId_);
+#endif
 }
 
 DSchedContinue::~DSchedContinue()
@@ -699,10 +705,10 @@ int32_t DSchedContinue::ExecuteContinueAbility(int32_t appVersion)
     DmsContinueTime::GetInstance().SetDurationEnd(CONTINUE_FIRST_TRANS_TIME, tick);
     DmsContinueTime::GetInstance().SetSaveDataDurationBegin(tick);
 
-    HILOGI("ExecuteContinueAbility call continueAbility begin, continueInfo: %{public}s",
-        continueInfo_.ToString().c_str());
+    HILOGI("ExecuteContinueAbility call continueAbility begin, continueInfo: %{public}s, userId:%{public}s",
+        continueInfo_.ToString().c_str(), GetAnonymInt32(userId_).c_str());
     result = AbilityManagerClient::GetInstance()->ContinueAbility(continueInfo_.sinkDeviceId_,
-        continueInfo_.missionId_, appVersion);
+        continueInfo_.missionId_, appVersion, userId_);
     HILOGI("ExecuteContinueAbility call continueAbility end, result: %{public}d.", result);
 
     if (result != ERR_OK) {

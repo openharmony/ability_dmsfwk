@@ -21,6 +21,7 @@
 #include "dtbschedmgr_log.h"
 #include "softbus_error_code.h"
 #include "mission/distributed_mission_broadcast_listener.h"
+#include "util/dms_user_and_account_util.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -34,9 +35,9 @@ constexpr int32_t RETRY_SENT_EVENT_MAX_TIME = 3;
 
 IMPLEMENT_SINGLE_INSTANCE(SoftbusAdapter);
 
-static void OnBroadCastRecvAdapt(std::string &networkId, uint8_t *data, uint32_t dataLen)
+static void OnBroadCastRecvAdapt(std::string &networkId, uint8_t *data, uint32_t dataLen, std::string accountIdTrunc)
 {
-    SoftbusAdapter::GetInstance().OnBroadCastRecv(networkId, data, dataLen);
+    SoftbusAdapter::GetInstance().OnBroadCastRecv(networkId, data, dataLen, accountIdTrunc);
 }
 
 void SoftbusAdapter::Init()
@@ -85,11 +86,11 @@ void SoftbusAdapter::UnInit()
     HILOGI("UnInit end");
 }
 
-int32_t SoftbusAdapter::SendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer)
+int32_t SoftbusAdapter::SendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer, std::string accountId)
 {
     HILOGI("pkgName: %{public}s.", pkgName_.c_str());
-    auto feedfunc = [this, buffer]() {
-        DealSendSoftbusEvent(buffer);
+    auto feedfunc = [this, buffer, accountId]() {
+        DealSendSoftbusEvent(buffer, accountId);
     };
     if (eventHandler_ != nullptr) {
         eventHandler_->PostTask(feedfunc);
@@ -100,7 +101,8 @@ int32_t SoftbusAdapter::SendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffe
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusAdapter::DealSendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer, const int32_t retry)
+int32_t SoftbusAdapter::DealSendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer,
+    std::string accountId, const int32_t retry)
 {
     if (eventHandler_ != nullptr) {
         eventHandler_->RemoveTask(RETRY_SENT_EVENT_TASK);
@@ -118,23 +120,24 @@ int32_t SoftbusAdapter::DealSendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> b
         HILOGE("Dms interactive SendSoftbusEvent is null.");
         return INVALID_PARAMETERS_ERR;
     }
-    int32_t ret = dmsAdapetr_.SendSoftbusEvent(true, buffer->Data(), buffer->Capacity());
+    int32_t ret = dmsAdapetr_.SendSoftbusEvent(true, buffer->Data(), buffer->Capacity(), accountId);
     if (ret != SOFTBUS_OK) {
         HILOGW("SendEvent failed, ret:%{public}d.", ret);
-        return RetrySendSoftbusEvent(buffer, retry);
+        return RetrySendSoftbusEvent(buffer, accountId, retry);
     }
     return ret;
 }
 
-int32_t SoftbusAdapter::RetrySendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer, const int32_t retry)
+int32_t SoftbusAdapter::RetrySendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer,
+    std::string accountId, const int32_t retry)
 {
     HILOGI("Retry post broadcast, current retry times %{public}d", retry);
     if (retry == RETRY_SENT_EVENT_MAX_TIME) {
         HILOGE("meet max retry time!");
         return INVALID_PARAMETERS_ERR;
     }
-    auto feedfunc = [this, buffer, retry]() mutable {
-        DealSendSoftbusEvent(buffer, retry + 1);
+    auto feedfunc = [this, buffer, retry, accountId]() mutable {
+        DealSendSoftbusEvent(buffer, accountId, retry + 1);
     };
     if (eventHandler_ != nullptr) {
         eventHandler_->RemoveTask(RETRY_SENT_EVENT_TASK);
@@ -163,10 +166,11 @@ int32_t SoftbusAdapter::StopSoftbusEvent()
 }
 // LCOV_EXCL_STOP
 
-void SoftbusAdapter::OnBroadCastRecv(std::string& networkId, uint8_t* data, uint32_t dataLen)
+void SoftbusAdapter::OnBroadCastRecv(std::string& networkId, uint8_t* data, uint32_t dataLen,
+    std::string accountIdTrunc)
 {
     if (softbusAdapterListener_ != nullptr) {
-        softbusAdapterListener_->OnDataRecv(networkId, data, dataLen);
+        softbusAdapterListener_->OnDataRecv(networkId, data, dataLen, accountIdTrunc);
     } else {
         HILOGE("softbusAdapterListener_ is nullptr");
     }
@@ -183,12 +187,23 @@ int32_t SoftbusAdapter::RegisterSoftbusEventListener(const std::shared_ptr<Softb
         softbusAdapterListener_ = listener;
     }
 
-    HILOGI("RegisterSoftbusEventListener pkgName: %s.", pkgName_.c_str());
+    HILOGI("RegisterSoftbusEventListener pkgName: %{public}s.", pkgName_.c_str());
     if (dmsAdapetr_.RegisterSoftbusEventListener == nullptr) {
         HILOGE("Dms interactive RegisterSoftbusEventListener is null.");
         return INVALID_PARAMETERS_ERR;
     }
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    int32_t getOhosAccountInfoResult = DmsUserAndAccountUtil::GetForegroundAccountInfo(accountInfo);
+    if (getOhosAccountInfoResult != ERR_OK) {
+        HILOGE("Get Account info failed!");
+        return INVALID_PARAMETERS_ERR;
+    }
+    int32_t ret = dmsAdapetr_.RegisterSoftbusEventListenerForMultiAccount(
+        true, (void *)OnBroadCastRecvAdapt, accountInfo.uid_);
+#else
     int32_t ret = dmsAdapetr_.RegisterSoftbusEventListener(true, (void *)OnBroadCastRecvAdapt);
+#endif
     DmsRadar::GetInstance().RegisterSoftbusCallbackRes("RegisterSoftbusEventListener", ret);
     if (ret != SOFTBUS_OK) {
         HILOGE("RegisterSoftbusEventListener failed, ret: %{public}d.", ret);
@@ -213,7 +228,18 @@ int32_t SoftbusAdapter::UnregisterSoftbusEventListener(const std::shared_ptr<Sof
         HILOGE("Dms interactive UnregisterSoftbusEventListener is null.");
         return INVALID_PARAMETERS_ERR;
     }
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    int32_t getOhosAccountInfoResult = DmsUserAndAccountUtil::GetForegroundAccountInfo(accountInfo);
+    if (getOhosAccountInfoResult != ERR_OK) {
+        HILOGE("Get Account info failed!");
+        return INVALID_PARAMETERS_ERR;
+    }
+    int32_t ret = dmsAdapetr_.UnregisterSoftbusEventListenerForMultiAccount(
+        true, (void *)OnBroadCastRecvAdapt, accountInfo.uid_);
+#else
     int32_t ret = dmsAdapetr_.UnregisterSoftbusEventListener(true, (void *)OnBroadCastRecvAdapt);
+#endif
     if (ret != SOFTBUS_OK) {
         HILOGE("UnregisterSoftbusEventListener failed, ret: %{public}d.", ret);
         return ret;

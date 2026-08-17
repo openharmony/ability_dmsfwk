@@ -25,7 +25,7 @@
 #include "mission/dms_continue_condition_manager.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include "os_account_manager.h"
-#include "ohos_account_kits.h"
+#include "util/dms_user_and_account_util.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -182,6 +182,7 @@ void MultiUserManager::InitNewUser(int32_t accountId)
     UserSwitchedOnRegisterListenerCache();
     DmsContinueConditionMgr::GetInstance().OnUserSwitched(accountId);
     DataShareManager::GetInstance().CheckAndHandleContinueSwitch();
+    HILOGI("UserSwitched end");
 }
 
 // LCOV_EXCL_START
@@ -190,6 +191,26 @@ void MultiUserManager::UserSwitchedOnRegisterListenerCache()
     HILOGI("UserSwitchedOnRegisterListenerCache start");
     {
         std::lock_guard<std::mutex> lock(listenerMutex_);
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+        if (!multiListenerCache_.empty()) {
+            HILOGI("Cache invoke register listener. userId: %{public}d.", currentUserId_.load());
+            auto recvMgr = GetCurrentRecvMgr();
+            if (recvMgr == nullptr) {
+                HILOGI("GetRecvMgr failed.");
+                return;
+            }
+            auto it = multiListenerCache_.find(currentUserId_.load());
+            if (it != multiListenerCache_.end() && !it->second.empty()) {
+                for (auto param = it->second.begin(); param != it->second.end(); param ++) {
+                    std::string type = param->first;
+                    MultiAccountListenerInfo info = param->second;
+                    recvMgr->RegisterOnListenerForMultiAccount(type, info.obj, info.accountInfo);
+                }
+                multiListenerCache_.erase(it);
+                HILOGI("Cache remove. userId: %{public}d.", currentUserId_.load());
+            }
+        }
+#else
         if (!listenerCache_.empty()) {
             HILOGI("Cache invoke register listener. userId: %{public}d.", currentUserId_.load());
             auto recvMgr = GetCurrentRecvMgr();
@@ -208,6 +229,7 @@ void MultiUserManager::UserSwitchedOnRegisterListenerCache()
                 HILOGI("Cache remove. userId: %{public}d.", currentUserId_.load());
             }
         }
+#endif
     }
     HILOGI("UserSwitchedOnRegisterListenerCache end");
 }
@@ -383,17 +405,45 @@ std::shared_ptr<DMSContinueRecomMgr> MultiUserManager::GetRecomMgrByCallingUid(i
 int32_t MultiUserManager::OnRegisterOnListener(const std::string& type,
     const sptr<IRemoteObject>& obj, int32_t callingUid)
 {
-    int32_t accountId = -1;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, accountId);
-    HILOGI("OnRegisterOnListener. accountId: %{public}d , callingUid: %{public}d.", accountId, callingUid);
+    int32_t userId = -1;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
+    HILOGI("OnRegisterOnListener. userId: %{public}d , callingUid: %{public}d.", userId, callingUid);
+
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+    int32_t ForegroundUserId = -1;
+    DmsUserAndAccountUtil::GetForegroundUserId(ForegroundUserId);
+    if (userId <= 0 || userId != ForegroundUserId) {
+        HILOGE("Invalid user id!");
+        return INVALID_PARAMETERS_ERR;
+    }
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    int32_t getAccountInfoResult = DmsUserAndAccountUtil::GetAccountInfoFromUserId(userId, accountInfo);
+    if (getAccountInfoResult != ERR_OK) {
+        HILOGI("Get account info from callingUid(%{public}d) failed.", callingUid);
+        return INVALID_PARAMETERS_ERR;
+    }
+    std::map<std::string, MultiAccountListenerInfo> param;
+    MultiAccountListenerInfo info;
+    info.accountInfo = accountInfo;
+    info.obj = obj;
+    param[type] = info;
+    multiListenerCache_[userId] = param;
+
+    auto recvMgr = GetCurrentRecvMgr();
+    if (recvMgr == nullptr) {
+        HILOGI("GetRecvMgr failed.");
+        return DMS_NOT_GET_MANAGER;
+    }
+    return recvMgr->RegisterOnListenerForMultiAccount(type, obj, accountInfo);
+#else
     {
         std::lock_guard<std::mutex> lock(listenerMutex_);
-        if (accountId != 0 && (!IsUserForeground(accountId) || accountId != currentUserId_.load())) {
-            HILOGW("The current user is not foreground. accountId: %{public}d , currentUserId_.load(): %{public}d.",
-                accountId, currentUserId_.load());
+        if (userId != 0 && (!IsUserForeground(userId) || userId != currentUserId_.load())) {
+            HILOGW("The current user is not foreground. accountId: %{public}d , currentUserId_: %{public}d.",
+                   userId, currentUserId_.load());
             std::map<std::string, sptr<IRemoteObject>> param;
             param.emplace(type, obj);
-            listenerCache_.emplace(accountId, param);
+            listenerCache_.emplace(userId, param);
             return ERR_OK;
         }
     }
@@ -403,6 +453,7 @@ int32_t MultiUserManager::OnRegisterOnListener(const std::string& type,
         return DMS_NOT_GET_MANAGER;
     }
     return recvMgr->RegisterOnListener(type, obj);
+#endif
 }
 
 int32_t MultiUserManager::OnRegisterOffListener(const std::string& type,
@@ -485,69 +536,134 @@ bool MultiUserManager::CheckRegSoftbusListener()
     return hasRegSoftbusEventListener_;
 }
 
-std::string MultiUserManager::GetDistributedAccountIdByLocalId(int32_t localId)
+void MultiUserManager::HandleDistributedAccountLogin(int32_t userId)
 {
-    if (localId < 0) {
-        HILOGW("invalid localId: %{public}d", localId);
-        return "";
-    }
-    AccountSA::OhosAccountInfo accountInfo;
-    ErrCode ret = AccountSA::OhosAccountKits::GetInstance().GetOsAccountDistributedInfo(localId, accountInfo);
+    HILOGI("HandleDistributedAccountLogin: localId=%{public}d", userId);
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    int32_t ret = DmsUserAndAccountUtil::GetAccountInfoFromUserId(userId, accountInfo);
     if (ret != ERR_OK) {
-        HILOGW("GetOsAccountDistributedInfo failed, localId=%{public}d, ret=%{public}d", localId, ret);
-        return "";
-    }
-    if (accountInfo.uid_.empty()) {
-        HILOGW("distributedAccountId is empty, localId=%{public}d", localId);
-        return "";
-    }
-    HILOGI("GetDistributedAccountIdByLocalId ok, localId=%{public}d, distributedAccountId=%{public}s",
-        localId, GetAnonymStr(accountInfo.uid_).c_str());
-    return accountInfo.uid_;
-}
-
-void MultiUserManager::HandleDistributedAccountLogin(int32_t localId)
-{
-    HILOGI("HandleDistributedAccountLogin: localId=%{public}d", localId);
-    std::string distributedAccountId = GetDistributedAccountIdByLocalId(localId);
-    if (distributedAccountId.empty()) {
-        HILOGW("HandleDistributedAccountLogin resolve failed, localId=%{public}d", localId);
+        HILOGE("Failed to get accountInfo for userId %{public}d", userId);
         return;
     }
+    HandleAccountLogin(userId, accountInfo);
     std::lock_guard<std::mutex> lock(distributedAccountMutex_);
-    localIdToDistributedAccountMap_[localId] = distributedAccountId;
+    localIdToDistributedAccountMap_[userId] = accountInfo.uid_;
     HILOGI("HandleDistributedAccountLogin cached, localId=%{public}d, distributedAccountId=%{public}s",
-        localId, GetAnonymStr(distributedAccountId).c_str());
+           userId, GetAnonymStr(accountInfo.uid_).c_str());
 }
 
-void MultiUserManager::HandleDistributedAccountLogout(int32_t localId)
+void MultiUserManager::HandleDistributedAccountLogout(int32_t userId)
 {
-    HILOGI("HandleDistributedAccountLogout: localId=%{public}d", localId);
+    HILOGI("HandleDistributedAccountLogout: localId=%{public}d", userId);
+    HandleAccountLogout(userId);
     std::string distributedAccountId;
     {
         std::lock_guard<std::mutex> lock(distributedAccountMutex_);
-        auto it = localIdToDistributedAccountMap_.find(localId);
+        auto it = localIdToDistributedAccountMap_.find(userId);
         if (it != localIdToDistributedAccountMap_.end()) {
             distributedAccountId = it->second;
             localIdToDistributedAccountMap_.erase(it);
         }
     }
     if (distributedAccountId.empty()) {
-        distributedAccountId = GetDistributedAccountIdByLocalId(localId);
+        OHOS::AccountSA::OhosAccountInfo accountInfo;
+        int32_t ret = DmsUserAndAccountUtil::GetAccountInfoFromUserId(userId, accountInfo);
+        if (ret != ERR_OK) {
+            HILOGW("HandleDistributedAccountLogout no AccountId, localId=%{public}d, skip cleanup", userId);
+            return;
+        }
+        distributedAccountId = accountInfo.uid_;
     }
-    if (distributedAccountId.empty()) {
-        HILOGW("HandleDistributedAccountLogout no distributedAccountId, localId=%{public}d, skip intent cleanup",
-            localId);
-        return;
-    }
+
     auto plugin = DistributedSchedService::GetInstance().GetIntentPlugin();
     if (plugin == nullptr) {
-        HILOGW("intent plugin not loaded, skip intent cleanup, localId=%{public}d", localId);
+        HILOGW("Plugin not loaded, skip cleanup, localId=%{public}d", userId);
         return;
     }
-    plugin->DisconnectAllSessionsForDistributedAccount(localId, distributedAccountId);
+    plugin->DisconnectAllSessionsForDistributedAccount(userId, distributedAccountId);
     HILOGI("HandleDistributedAccountLogout done, localId=%{public}d, distributedAccountId=%{public}s",
-        localId, GetAnonymStr(distributedAccountId).c_str());
+           userId, GetAnonymStr(distributedAccountId).c_str());
+}
+
+void MultiUserManager::HandleAccountLogin(int32_t userId, const OHOS::AccountSA::OhosAccountInfo& accountInfo)
+{
+    std::lock_guard<std::mutex> lock(accountMutex_);
+    HILOGI("HandleAccountLogin: userId=%{public}d", userId);
+    if (userId < 0) {
+        HILOGE("invalid userId: %{public}d", userId);
+        return;
+    }
+    DataShareManager::GetInstance().SetCurrentContinueSwitch(
+        SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
+    DistributedSchedService::GetInstance()
+            .RegisterDataShareObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY);
+    DistributedSchedService::GetInstance()
+            .RegisterDataShareObserver(SwitchStatusDependency::GetInstance().RECOMMEND_INSTALLATION_SWITCH_KEY);
+
+    std::shared_ptr<DMSContinueSendMgr> sendMgr;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr;
+    {
+        std::lock_guard<std::mutex> lock(sendMutex_);
+        if (sendMgrMap_.find(userId) == sendMgrMap_.end()) {
+            CreateNewSendMgrLocked(userId);
+        }
+        sendMgr = sendMgrMap_[userId];
+    }
+    {
+        std::lock_guard<std::mutex> lock(recvMutex_);
+        if (recvMgrMap_.find(userId) == recvMgrMap_.end()) {
+            CreateNewRecvMgrLocked(userId);
+        }
+        recvMgr = recvMgrMap_[userId];
+    }
+
+    if (sendMgr == nullptr || recvMgr == nullptr) {
+        HILOGE("Failed to get SendMgr or RecvMgr for userId %{public}d", userId);
+        return;
+    }
+
+    sendMgr->SetAccountInfo(accountInfo);
+    recvMgr->SetAccountInfo(accountInfo);
+
+    if (DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
+        sendMgr->OnDeviceOnline();
+        DSchedContinueManager::GetInstance().UnInit();
+        DSchedContinueManager::GetInstance().Init();
+    } else {
+        recvMgr->OnContinueSwitchOff();
+        HILOGI("CurrentContinueSwitch is off, %{public}d",
+               DataShareManager::GetInstance().IsCurrentContinueSwitchOn());
+        DSchedContinueManager::GetInstance().UnInit();
+    }
+
+    DmsContinueConditionMgr::GetInstance().OnUserSwitched(userId);
+    DataShareManager::GetInstance().CheckAndHandleContinueSwitch();
+    HILOGI("HandleAccountLogin end");
+}
+
+void MultiUserManager::HandleAccountLogout(int32_t userId)
+{
+    std::lock_guard<std::mutex> lock(accountMutex_);
+    HILOGI("HandleAccountLogout: userId=%{public}d", userId);
+    if (userId < 0) {
+        HILOGE("invalid userId: %{public}d", userId);
+        return;
+    }
+
+    auto sendMgr = GetCurrentSendMgr();
+    if (sendMgr != nullptr) {
+        sendMgr->OnUserSwitched();
+        HILOGI("SendMgr OnUserSwitched called for userId %{public}d", userId);
+    }
+
+    auto recvMgr = GetCurrentRecvMgr();
+    if (recvMgr != nullptr) {
+        recvMgr->OnUserSwitch();
+        HILOGI("RecvMgr OnUserSwitch called for userId %{public}d", userId);
+    }
+
+    DSchedContinueManager::GetInstance().UnInit();
+    HILOGI("HandleAccountLogout end");
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

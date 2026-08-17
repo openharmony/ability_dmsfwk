@@ -56,7 +56,8 @@ HWTEST_F(SoftbusAdapterTest, SendSoftbusEvent_001, TestSize.Level3)
     DTEST_LOG << "SoftbusAdapterTest SendSoftbusEvent_001 begin" << std::endl;
     uint32_t sendDataLen = 1;
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(sendDataLen);
-    uint32_t result = SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer);
+    std::string accountId = "0000";
+    uint32_t result = SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer, accountId);
     EXPECT_EQ(result, SOFTBUS_OK);
     DTEST_LOG << "SoftbusAdapterTest SendSoftbusEvent_001 end" << std::endl;
 }
@@ -85,7 +86,8 @@ HWTEST_F(SoftbusAdapterTest, RegisterSoftbusEventListener_001, TestSize.Level3)
     std::string networkId = NETWORKID_01;
     uint8_t* sendData = nullptr;
     uint32_t sendDataLen = 1;
-    SoftbusAdapter::GetInstance().OnBroadCastRecv(networkId, sendData, sendDataLen);
+    std::string accountId = "0000";
+    SoftbusAdapter::GetInstance().OnBroadCastRecv(networkId, sendData, sendDataLen, accountId);
     DTEST_LOG << "SoftbusAdapterTest OnBroadCastRecv_001 end" << std::endl;
     
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_001 begin" << std::endl;

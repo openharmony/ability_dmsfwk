@@ -32,10 +32,18 @@
 #include "mission/distributed_mission_broadcast_listener.h"
 #include "mission/distributed_mission_died_listener.h"
 #include "mission/distributed_mission_focused_listener.h"
+#include "account_info.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 const std::string CONTINUE_RECV_MANAGER = "continue_recv_manager";
+
+struct MultiAccountListenerInfo {
+    uint16_t uidHash;
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    sptr<IRemoteObject> obj;
+};
+
 struct currentIconInfo {
     std::string senderNetworkId;
     std::string bundleName;
@@ -91,25 +99,39 @@ public:
     ~DMSContinueRecvMgr();
     void Init(int32_t accountId);
     void UnInit();
-    void NotifyDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen);
+    void NotifyDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen, std::string accountIdTrunc);
     int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj);
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+    int32_t RegisterOnListenerForMultiAccount(const std::string& type, const sptr<IRemoteObject>& obj,
+        const OHOS::AccountSA::OhosAccountInfo& accountInfo);
+#endif
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj);
     void NotifyDied(const sptr<IRemoteObject>& obj);
     void NotifyDeviceOffline(const std::string& networkId);
     void NotifyPackageRemoved(const std::string& sinkBundleName);
-    void NotifyIconDisappear(uint16_t bundleNameId, const std::string &senderNetworkId, const int32_t state);
-    int32_t DealDockDisplayBusiness(uint16_t bundleNameId, const currentIconInfo info, const int32_t state);
-    int32_t NotifyDockDisplay(uint16_t bundleNameId, const currentIconInfo& continueInfo, const int32_t state);
+    void NotifyIconDisappear(uint16_t bundleNameId, const std::string &senderNetworkId, int32_t state);
+    int32_t DealDockDisplayBusiness(uint16_t bundleNameId, const currentIconInfo info, int32_t state);
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+    int32_t DealDockDisplayBusinessForMultiAccount(uint16_t bundleNameId, const currentIconInfo info,
+        const int32_t state, std::string accountIdTrunc);
+#endif
+    int32_t NotifyDockDisplay(uint16_t bundleNameId, const currentIconInfo& continueInfo, int32_t state);
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+    int32_t NotifyDockDisplayForMultiAccount(uint16_t bundleNameId, const currentIconInfo& continueInfo,
+        int32_t state, std::string accountIdTrunc);
+#endif
     void OnDeviceScreenOff();
     void OnContinueSwitchOff();
     void OnUserSwitch();
     std::string GetContinueType(const std::string& bundleName);
     std::string GetSenderNetworkId();
 
+    void SetAccountInfo(const OHOS::AccountSA::OhosAccountInfo& accountInfo);
+
 private:
     void StartEvent();
-    int32_t RetryPostBroadcast(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
-        const int32_t state, const int32_t retry);
+    int32_t RetryPostBroadcast(const std::string& senderNetworkId, uint16_t bundleNameId,
+        uint8_t continueTypeId, std::string accountIdTrunc, const int32_t state, const int32_t retry);
     bool GetFinalBundleNameInternal(DmsBundleInfo& distributedBundleInfo,  std::string &finalBundleName,
         AppExecFwk::BundleInfo& localBundleInfo, std::string& continueType);
     bool GetFinalBundleName(DmsBundleInfo& distributedBundleInfo,  std::string &finalBundleName,
@@ -129,13 +151,13 @@ private:
     int32_t VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& srcBundleName,
         const std::string& sinkBundleName, const std::string& continueType, const int32_t state);
     void PostOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
-        const int32_t state, const int32_t delay = 0, const int32_t retry = 0);
+        std::string accountIdTrunc, const int32_t state, const int32_t delay = 0, const int32_t retry = 0);
     void FindContinueType(const DmsBundleInfo &distributedBundleInfo, uint8_t &continueTypeId,
         std::string &continueType, DmsAbilityInfo &abilityInfo);
     bool ValidateAndPrepareBundleInfo(DmsBundleInfo& distributedBundleInfo, uint8_t continueTypeId,
         const int32_t state, BundleValidationContext& context);
     int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
-        const int32_t state, const int32_t retry = 0);
+        std::string accountIdTrunc, const int32_t state, const int32_t retry = 0);
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const currentIconInfo& continueInfo, const int32_t state);
     bool IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo, const std::string &srcAbilityName,
         const std::string &srcModuleName, const std::string &srcContinueType);
@@ -147,12 +169,14 @@ private:
     sptr<DistributedMissionDiedListener> missionDiedListener_;
     std::string onType_;
     std::map<std::string, std::vector<sptr<IRemoteObject>>> registerOnListener_;
+    std::map<std::string, std::vector<MultiAccountListenerInfo>> multiAccountListener_;
     std::thread eventThread_;
     std::condition_variable eventCon_;
     std::mutex eventMutex_;
     std::mutex iconMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     int32_t accountId_ = -1;
+    OHOS::AccountSA::OhosAccountInfo accountInfo_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

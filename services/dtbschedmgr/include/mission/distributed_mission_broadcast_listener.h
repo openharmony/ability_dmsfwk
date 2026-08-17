@@ -29,7 +29,8 @@ public:
      *
      * @param networkId, network Id.
      */
-    void OnDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen) override;
+    void OnDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen,
+        std::string accountIdTrunc) override;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
