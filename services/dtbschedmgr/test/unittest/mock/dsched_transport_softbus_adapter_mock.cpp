@@ -136,7 +136,7 @@ bool IDSchedTransportSoftbusAdapter::GetSessionIdByDeviceId(const std::string &p
 
 bool DSchedTransportSoftbusAdapter::IsDeviceConnected(const std::string &peerDeviceId)
 {
-    if(IDSchedTransportSoftbusAdapter::adapterMock == nullptr){
+    if (IDSchedTransportSoftbusAdapter::adapterMock == nullptr) {
         return false;
     }
     return IDSchedTransportSoftbusAdapter::adapterMock->IsDeviceConnected(peerDeviceId);
