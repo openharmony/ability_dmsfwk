@@ -797,9 +797,6 @@ bool DistributedSchedPermission::VerifyPermission(uint64_t accessToken, const st
 bool DistributedSchedPermission::CheckAccountAccessPermission(const CallerInfo& callerInfo,
     const AccountInfo& accountInfo, const std::string& targetBundleName, bool isNewCollab)
 {
-    if (!VerifySourceDeviceConnected(callerInfo)) {
-        return false;
-    }
     std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(callerInfo.sourceDeviceId);
     std::string dstNetworkId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(dstNetworkId)) {
