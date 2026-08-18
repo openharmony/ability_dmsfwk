@@ -610,17 +610,6 @@ std::string DSchedTransportSoftbusAdapter::GetPeerDeviceIdBySocket(const int32_t
     return "";
 }
 
-bool DSchedTransportSoftbusAdapter::IsDeviceConnected(const std::string &peerDeviceId)
-{
-    std::lock_guard<std::mutex> sessionLock(sessionMutex_);
-    for (auto iter = sessions_.begin(); iter != sessions_.end(); iter++) {
-        if (iter->second != nullptr && peerDeviceId == iter->second->GetPeerDeviceId()) {
-            return true;
-        }
-    }
-    return false;
-}
-
 void DSchedTransportSoftbusAdapter::OnShutdown(int32_t sessionId, bool isSelfcalled)
 {
     {
