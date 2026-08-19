@@ -38,6 +38,7 @@ public:
     virtual void UnregisterListener(int32_t serviceType, std::shared_ptr<IDataListener> listener) = 0;
     virtual void SetCallingTokenId(int32_t callingTokenId) = 0;
     virtual bool GetSessionIdByDeviceId(const std::string &peerDeviceId, int32_t &sessionId) = 0;
+    virtual bool IsDeviceConnected(const std::string &peerDeviceId) = 0;
     virtual bool IsNeedAllConnect(DSchedServiceType type) = 0;
 public:
     static inline std::shared_ptr<IDSchedTransportSoftbusAdapter> adapterMock = nullptr;
@@ -59,6 +60,7 @@ public:
     MOCK_METHOD2(UnregisterListener, void(int32_t serviceType, std::shared_ptr<IDataListener> listener));
     MOCK_METHOD1(SetCallingTokenId, void(int32_t callingTokenId));
     MOCK_METHOD2(GetSessionIdByDeviceId, bool(const std::string &peerDeviceId, int32_t &sessionId));
+    MOCK_METHOD1(IsDeviceConnected, bool(const std::string &peerDeviceId));
     MOCK_METHOD1(IsNeedAllConnect, bool(DSchedServiceType type));
 };
 }

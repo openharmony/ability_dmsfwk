@@ -22,6 +22,7 @@
 #include "test_log.h"
 #include "mission/distributed_bm_storage.h"
 #include "continue_scene_session_handler.h"
+#include "mock/dsched_transport_softbus_adapter_mock.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1782,9 +1783,13 @@ HWTEST_F(DSchedContinueTest, ExecuteContinueData_085, TestSize.Level1)
     conti_->continueInfo_.sourceDeviceId_ = "srcDeviceId";
     conti_->continueInfo_.sinkDeviceId_ = "localDeviceId";
 
+    auto transportMock = std::make_shared<DSchedTransportSoftbusAdapterMock>();
+    IDSchedTransportSoftbusAdapter::adapterMock = transportMock;
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true)).WillOnce(Return(true));
+    EXPECT_CALL(*transportMock, IsDeviceConnected(_)).WillOnce(Return(true));
     int32_t ret = conti_->ExecuteContinueData(cmd);
     EXPECT_NE(ret, ERR_OK);
+    IDSchedTransportSoftbusAdapter::adapterMock = nullptr;
     DTEST_LOG << "DSchedContinueTest ExecuteContinueData_085 end" << std::endl;
 }
 

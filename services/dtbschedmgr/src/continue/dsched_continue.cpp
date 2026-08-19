@@ -980,7 +980,8 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
     std::string localDeviceId;
     std::string deviceId = cmd->want_.GetElement().GetDeviceID();
     if (!GetLocalDeviceId(localDeviceId) ||
-        !CheckDeviceIdFromRemote(localDeviceId, deviceId, cmd->callerInfo_.sourceDeviceId)) {
+        !CheckDeviceIdFromRemote(localDeviceId, deviceId, cmd->callerInfo_.sourceDeviceId) ||
+        !DistributedSchedPermission::GetInstance().VerifySourceDeviceConnected(cmd->callerInfo_)) {
         HILOGE("check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
