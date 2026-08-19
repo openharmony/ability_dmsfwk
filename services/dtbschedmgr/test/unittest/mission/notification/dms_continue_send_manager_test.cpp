@@ -598,12 +598,14 @@ HWTEST_F(DMSContinueSendMgrTest, ExecuteSendStrategyBackground_001, TestSize.Lev
     auto strategy = std::make_shared<SendStrategyBackground>(sendMgr);
     sendMgr->strategyMap_[MISSION_EVENT_BACKGROUND] = strategy;
     sendMgr->screenLockedHandler_ = std::make_shared<DMSContinueSendMgr::ScreenLockedHandler>(sendMgr);
-    EXPECT_CALL(*mgrMock_, IsScreenLocked()).WillOnce(Return(false));
+
+    testing::Sequence seq;
+    EXPECT_CALL(*mgrMock_, IsScreenLocked()).InSequence(seq).WillOnce(Return(false));
     int32_t ret = sendMgr->ExecuteSendStrategy(MISSION_EVENT_BACKGROUND, status, sendType);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(sendType, BROADCAST_TYPE_DISAPPEAR);
 
-    EXPECT_CALL(*mgrMock_, IsScreenLocked()).WillOnce(Return(true));
+    EXPECT_CALL(*mgrMock_, IsScreenLocked()).InSequence(seq).WillOnce(Return(true));
     ret = sendMgr->ExecuteSendStrategy(MISSION_EVENT_BACKGROUND, status, sendType);
     EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
     EXPECT_EQ(sendType, BROADCAST_TYPE_DISAPPEAR);
@@ -1018,6 +1020,7 @@ HWTEST_F(DMSContinueSendMgrTest, SendStrategyBackground_IsScreenLocked_001, Test
     uint8_t sendType = 0;
 
     auto strategy = std::make_shared<SendStrategyBackground>(sendMgr);
+    ON_CALL(*mgrMock_, IsScreenLocked()).WillByDefault(Return(true));
     EXPECT_CALL(*mgrMock_, IsScreenLocked()).WillOnce(Return(true));
     int32_t ret = strategy->ExecuteSendStrategy(status, sendType);
     EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
