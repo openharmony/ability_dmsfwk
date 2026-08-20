@@ -52,7 +52,7 @@ OHOS::ErrCode OHOS::DistributedSchedule::DmsUserAndAccountUtil::GetForegroundAcc
         HILOGE("GetOsAccountDistributedInfo failed, ret: %{public}d", ret);
         return ret;
     }
-    HILOGI("GetForegroundAccountInfo end, userId: %{public}s", accountInfo.uid_.c_str());
+    HILOGI("GetForegroundAccountInfo end, accountId: %{public}s", GetAnonymStr(accountInfo.uid_).c_str());
     return ERR_OK;
 }
 
@@ -64,7 +64,7 @@ ErrCode DmsUserAndAccountUtil::GetAccountInfoFromUserId(int32_t userId, OHOS::Ac
         HILOGE("GetOsAccountDistributedInfo failed, ret: %{public}d", ret);
         return ret;
     }
-    HILOGI("GetOsAccountInfoFromUserId end, userId: %{public}s", accountInfo.uid_.c_str());
+    HILOGI("GetOsAccountInfoFromUserId end, accountId: %{public}s", GetAnonymStr(accountInfo.uid_).c_str());
     return ERR_OK;
 }
 
@@ -95,7 +95,7 @@ ErrCode DmsUserAndAccountUtil::GetAccountInfoFromCallingUid(int32_t callingUid,
         HILOGE("GetOsAccountDistributedInfo failed, ret: %{public}d", ret);
         return ret;
     }
-    HILOGI("GetOsAccountInfoFromCallingUid end, userId: %{public}s", accountInfo.uid_.c_str());
+    HILOGI("GetOsAccountInfoFromCallingUid end, accountId: %{public}s", GetAnonymStr(accountInfo.uid_).c_str());
     return ERR_OK;
 }
 }

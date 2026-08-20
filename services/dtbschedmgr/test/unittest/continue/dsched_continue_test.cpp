@@ -1789,6 +1789,7 @@ HWTEST_F(DSchedContinueTest, ExecuteContinueData_085, TestSize.Level1)
     EXPECT_CALL(*transportMock, IsDeviceConnected(_)).WillOnce(Return(true));
     int32_t ret = conti_->ExecuteContinueData(cmd);
     EXPECT_NE(ret, ERR_OK);
+
     IDSchedTransportSoftbusAdapter::adapterMock = nullptr;
     DTEST_LOG << "DSchedContinueTest ExecuteContinueData_085 end" << std::endl;
 }
