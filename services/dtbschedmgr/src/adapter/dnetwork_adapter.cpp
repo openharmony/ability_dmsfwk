@@ -48,7 +48,8 @@ std::set<std::shared_ptr<DeviceListener>> DnetworkAdapter::listenerSet_;
 
 std::shared_ptr<DnetworkAdapter> DnetworkAdapter::GetInstance()
 {
-    static auto instance = std::make_shared<DnetworkAdapter>();
+    static DnetworkAdapter* rawInstance = new DnetworkAdapter();
+    static std::shared_ptr<DnetworkAdapter> instance(rawInstance, [](DnetworkAdapter*) {});
     return instance;
 }
 

@@ -225,7 +225,10 @@ std::optional<SessionDataHeader> SessionDataHeader::Deserialize(const uint8_t* b
 int32_t SessionDataHeader::ReadTlvItemFromBuffer(TlvItem& tlvItem, SessionDataHeader& sessionHeader,
     const uint8_t* header, const uint8_t* end)
 {
-    // assign item format
+    if (header + TlvItem::HEADER_TYPE_BYTES + TlvItem::HEADER_LEN_BYTES > end) {
+        HILOGE("reserverd bytes not sufficient");
+        return READ_TLV_ITEM_FROM_BUFFER_FAILED;
+    }
     uint8_t* current = const_cast<uint8_t*>(header);
     tlvItem.type = static_cast<TLV_TYPE>(ReadUint16(current));
     current += TlvItem::HEADER_TYPE_BYTES;
