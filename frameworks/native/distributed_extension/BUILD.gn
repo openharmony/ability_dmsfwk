@@ -46,6 +46,7 @@ ohos_shared_library("distributed_extension_ability_native") {
 
   deps = [ "${dms_path}/common:distributed_sched_utils" ]
   external_deps = [
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_context_native",
     "ability_runtime:app_context",
     "ability_runtime:extensionkit_native",

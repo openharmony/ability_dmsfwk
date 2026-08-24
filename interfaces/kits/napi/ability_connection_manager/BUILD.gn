@@ -57,6 +57,7 @@ ohos_shared_library("abilityconnectionmanager_napi") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_context_native",
     "ability_runtime:abilitykit_native",
     "ability_runtime:extensionkit_native",

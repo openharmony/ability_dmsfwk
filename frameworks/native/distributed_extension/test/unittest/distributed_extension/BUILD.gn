@@ -39,6 +39,7 @@ ohos_unittest("distributed_extension_js_test") {
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_context_native",
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_context",
@@ -181,6 +182,7 @@ ohos_unittest("distributed_extension_context_js_test") {
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:ability_start_options",
@@ -256,6 +258,7 @@ ohos_unittest("distributed_extension_context_test") {
   deps = [ "${dms_path}/common:distributed_sched_utils" ]
   external_deps = [
     "ability_base:want",
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
@@ -310,6 +313,7 @@ ohos_unittest("distributed_extension_base_test") {
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_context_native",
     "ability_runtime:abilitykit_native",
     "ability_runtime:ani_common",
