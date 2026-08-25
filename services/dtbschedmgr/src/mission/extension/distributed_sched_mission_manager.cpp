@@ -648,8 +648,11 @@ void DistributedSchedMissionManager::StopSyncMissionsFromRemote(const std::strin
     {
         std::lock_guard<std::mutex> autoLock(remoteSyncDeviceLock_);
         remoteSyncDeviceSet_.erase(networkId);
-        if (remoteSyncDeviceSet_.empty()) {
+        if (remoteSyncDeviceSet_.empty() && isRegMissionChange_) {
             auto func = [this]() {
+                if (!isRegMissionChange_) {
+                    return;
+                }
                 int32_t ret = mainServiceChannel_->UnRegisterMissionListener(missionChangeListener_);
                 if (ret == ERR_OK) {
                     isRegMissionChange_ = false;

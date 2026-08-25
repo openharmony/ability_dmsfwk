@@ -120,7 +120,10 @@ std::optional<MessageDataHeader> MessageDataHeader::Deserialize(const uint8_t* b
 int32_t MessageDataHeader::ReadTlvItemFromBuffer(MessageTlvItem& tlvItem, MessageDataHeader& messageHeader,
     const uint8_t* header, const uint8_t* end)
 {
-    // assign item format
+    if (header + MessageTlvItem::HEADER_TYPE_BYTES + MessageTlvItem::HEADER_LEN_BYTES > end) {
+        HILOGE("reserverd bytes not sufficient");
+        return READ_TLV_ITEM_FROM_BUFFER_FAILED;
+    }
     uint8_t* current = const_cast<uint8_t*>(header);
     tlvItem.type = static_cast<MESSAGE_TLV_TYPE>(ReadUint16(current));
     current += MessageTlvItem::HEADER_TYPE_BYTES;
