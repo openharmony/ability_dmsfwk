@@ -593,6 +593,7 @@ void MultiUserManager::HandleAccountLogin(int32_t userId, const OHOS::AccountSA:
         HILOGE("invalid userId: %{public}d", userId);
         return;
     }
+    SoftbusAdapter::GetInstance().ReRegister();
     DataShareManager::GetInstance().SetCurrentContinueSwitch(
         SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
     DistributedSchedService::GetInstance()

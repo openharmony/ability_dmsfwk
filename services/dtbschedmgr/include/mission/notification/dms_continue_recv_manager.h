@@ -164,6 +164,9 @@ private:
     std::string ContinueTypeFormat(const std::string &continueType);
     void FindToNotifyRecvBroadcast(const std::string& senderNetworkId, const std::string& bundleName,
         const std::string& continueType);
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+    bool CaseInsensitiveEqual(const std::string& a, const std::string& b);
+#endif
 private:
     currentIconInfo iconInfo_;
     sptr<DistributedMissionDiedListener> missionDiedListener_;
