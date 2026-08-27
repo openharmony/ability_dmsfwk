@@ -702,7 +702,7 @@ int32_t DMSContinueRecvMgr::NotifyDockDisplayForMultiAccount(uint16_t bundleName
     std::vector<MultiAccountListenerInfo> objs = iterItem->second;
     for (const auto& iter: objs) {
         HILOGI("state: %{public}d, accountIdTrunc: %{public}s, uid: %{public}s",
-               state, accountIdTrunc, GetAnonymStr(iter.accountInfo.uid_).c_str());
+               state, accountIdTrunc.c_str(), GetAnonymStr(iter.accountInfo.uid_).c_str());
         if (!CaseInsensitiveEqual(iter.accountInfo.uid_.substr(0, VALID_ACCOUNT_ID_LENGTH),
             accountIdTrunc.substr(0, VALID_ACCOUNT_ID_LENGTH))) {
             HILOGI("account id does not match");
