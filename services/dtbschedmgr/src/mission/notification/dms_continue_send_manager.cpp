@@ -487,7 +487,7 @@ void DMSContinueSendMgr::ScreenLockedHandler::SetMissionContinueStateInfo(const 
 
 void DMSContinueSendMgr::SetAccountInfo(const OHOS::AccountSA::OhosAccountInfo& accountInfo)
 {
-    HILOGI("SetAccountInfo: accountId=%{public}s", accountInfo.uid_.c_str());
+    HILOGI("SetAccountInfo: accountId=%{public}s", GetAnonymStr(accountInfo.uid_).c_str());
     accountInfo_ = accountInfo;
 }
 } // namespace DistributedSchedule

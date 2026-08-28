@@ -55,7 +55,7 @@ const std::string QUICK_START_CONFIGURATION = "_ContinueQuickStart";
 const std::string ICON_TIMEOUT_TASK = "icon_timeout_task";
 constexpr int32_t TIMEOUT_SENT_EVENT_DELAY = 60000;
 #ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
-constexpr int32_t VALID_ACCOUNT_ID_LENGTH = 2;
+constexpr int32_t VALID_ACCOUNT_ID_LENGTH = 4;
 #endif
 }
 
@@ -177,8 +177,8 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
 int32_t DMSContinueRecvMgr::RegisterOnListenerForMultiAccount(const std::string& type, const sptr<IRemoteObject>& obj,
     const OHOS::AccountSA::OhosAccountInfo& accountInfo)
 {
-    HILOGI("RegisterOnListenerForMultiAccount start, type: %{public}s. accountName: %{public}s.",
-        type.c_str(), GetAnonymStr(accountInfo.name_).c_str());
+    HILOGI("RegisterOnListenerForMultiAccount start, type: %{public}s. accountId: %{public}s.",
+        type.c_str(), GetAnonymStr(accountInfo.uid_).c_str());
     if (obj == nullptr) {
         HILOGE("obj is null, type: %{public}s", type.c_str());
         return INVALID_PARAMETERS_ERR;
@@ -701,18 +701,26 @@ int32_t DMSContinueRecvMgr::NotifyDockDisplayForMultiAccount(uint16_t bundleName
     }
     std::vector<MultiAccountListenerInfo> objs = iterItem->second;
     for (const auto& iter: objs) {
-        HILOGI("state: %{public}d; Account Hash: %{public}d, name: %{public}s, uid: %{public}s, status: %{public}d, "
-                "callingUid: %{public}d, nickname: %{public}s, avatar: %{public}s, scalableData: %{public}s",
-               state, iter.uidHash, iter.accountInfo.name_.c_str(), iter.accountInfo.uid_.c_str(),
-               iter.accountInfo.status_, iter.accountInfo.callingUid_, iter.accountInfo.nickname_.c_str(),
-               iter.accountInfo.avatar_.c_str(), iter.accountInfo.scalableData_.c_str());
-        if (iter.accountInfo.uid_.substr(0, VALID_ACCOUNT_ID_LENGTH) !=
-            accountIdTrunc.substr(0, VALID_ACCOUNT_ID_LENGTH)) {
+        HILOGI("state: %{public}d, accountIdTrunc: %{public}s, uid: %{public}s",
+               state, accountIdTrunc.c_str(), GetAnonymStr(iter.accountInfo.uid_).c_str());
+        if (!CaseInsensitiveEqual(iter.accountInfo.uid_.substr(0, VALID_ACCOUNT_ID_LENGTH),
+            accountIdTrunc.substr(0, VALID_ACCOUNT_ID_LENGTH))) {
+            HILOGI("account id does not match");
             continue;
         }
         NotifyRecvBroadcast(iter.obj, continueInfo, state);
     }
     return ERR_OK;
+}
+
+bool DMSContinueRecvMgr::CaseInsensitiveEqual(const std::string& a, const std::string& b)
+{
+    if (a.length() != b.length()) return false;
+    return std::equal(a.begin(), a.end(), b.begin(),
+        [](char c1, char c2) {
+            return std::tolower(static_cast<unsigned char>(c1)) ==
+                   std::tolower(static_cast<unsigned char>(c2));
+        });
 }
 #endif
 

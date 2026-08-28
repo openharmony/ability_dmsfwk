@@ -540,6 +540,57 @@ HWTEST_F(DMSContinueRecvMgrTest, GetSenderNetworkId_Test_001, TestSize.Level1)
     DTEST_LOG << "DMSContinueRecvMgrTest GetSenderNetworkId_Test_001 end" << std::endl;
 }
 
+#ifdef DMSFWK_ENABLE_MULTI_DISTRIBUTED_ACCOUNTS
+/**
+ * @tc.name: CaseInsensitiveEqual_Test_001
+ * @tc.desc: test CaseInsensitiveEqual with same strings
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueRecvMgrTest, CaseInsensitiveEqual_Test_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecvMgrTest CaseInsensitiveEqual_Test_001 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    EXPECT_TRUE(recvMgr->CaseInsensitiveEqual("abc", "abc"));
+    EXPECT_TRUE(recvMgr->CaseInsensitiveEqual("ABC", "ABC"));
+    EXPECT_TRUE(recvMgr->CaseInsensitiveEqual("", ""));
+    DTEST_LOG << "DMSContinueRecvMgrTest CaseInsensitiveEqual_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CaseInsensitiveEqual_Test_002
+ * @tc.desc: test CaseInsensitiveEqual with different case
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueRecvMgrTest, CaseInsensitiveEqual_Test_002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecvMgrTest CaseInsensitiveEqual_Test_002 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    EXPECT_TRUE(recvMgr->CaseInsensitiveEqual("abc", "ABC"));
+    EXPECT_TRUE(recvMgr->CaseInsensitiveEqual("AbC", "aBc"));
+    EXPECT_TRUE(recvMgr->CaseInsensitiveEqual("Test", "TEST"));
+    DTEST_LOG << "DMSContinueRecvMgrTest CaseInsensitiveEqual_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: CaseInsensitiveEqual_Test_003
+ * @tc.desc: test CaseInsensitiveEqual with different strings
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueRecvMgrTest, CaseInsensitiveEqual_Test_003, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecvMgrTest CaseInsensitiveEqual_Test_003 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    EXPECT_FALSE(recvMgr->CaseInsensitiveEqual("abc", "abd"));
+    EXPECT_FALSE(recvMgr->CaseInsensitiveEqual("abc", "ab"));
+    EXPECT_FALSE(recvMgr->CaseInsensitiveEqual("abc", "abcd"));
+    EXPECT_FALSE(recvMgr->CaseInsensitiveEqual("", "a"));
+    DTEST_LOG << "DMSContinueRecvMgrTest CaseInsensitiveEqual_Test_003 end" << std::endl;
+}
+#endif
+
 HWTEST_F(DMSContinueSendMgrTest, ExecuteSendStrategyFocused_001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueSendMgrTest ExecuteSendStrategyFocused_001 start" << std::endl;
