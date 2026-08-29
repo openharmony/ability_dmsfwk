@@ -27,6 +27,10 @@ using namespace AAFwk;
 
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+constexpr int32_t NOTIFY_TYPE_UNINSTALL_STATE = 15;
+}
+
 class CommonEventListenerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -170,6 +174,33 @@ HWTEST_F(CommonEventListenerTest, OnReceiveEvent003, TestSize.Level3)
     EXPECT_NO_FATAL_FAILURE(applyMonitor->OnReceiveEvent(eventData));
 
     DTEST_LOG << "CommonEventListenerTest OnReceiveEvent003 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnReceiveEvent004
+ * @tc.desc: verify PACKAGE_CHANGED with UNINSTALL_STATE type is filtered out
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventListenerTest, OnReceiveEvent004, TestSize.Level3)
+{
+    DTEST_LOG << "CommonEventListenerTest OnReceiveEvent004 start" << std::endl;
+    AAFwk::Want want;
+    EventFwk::CommonEventData eventData;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
+    want.SetParam("type", NOTIFY_TYPE_UNINSTALL_STATE);
+    eventData.SetWant(want);
+    EXPECT_NO_FATAL_FAILURE(applyMonitor->OnReceiveEvent(eventData));
+
+    want.SetParam("type", 0);
+    eventData.SetWant(want);
+    EXPECT_NO_FATAL_FAILURE(applyMonitor->OnReceiveEvent(eventData));
+
+    AAFwk::Want wantNoType;
+    wantNoType.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
+    eventData.SetWant(wantNoType);
+    EXPECT_NO_FATAL_FAILURE(applyMonitor->OnReceiveEvent(eventData));
+
+    DTEST_LOG << "CommonEventListenerTest OnReceiveEvent004 end" << std::endl;
 }
 }
 }

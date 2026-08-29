@@ -39,7 +39,7 @@ private:
     void HandleScreenOn();
     void HandleUserSwitched(int32_t accountId);
     void HandlePackageAdded(const std::string& bundleName);
-    void HandlePackageChange(const std::string& bundleName);
+    void HandlePackageChange(const AAFwk::Want& want);
     void HandlePackageRemoved(const std::string& bundleName);
     void HandleUserRemoved(int32_t accountId);
     void HandleBatteryCharging();

@@ -46,6 +46,8 @@ const uint8_t DISTRIBUTED_ACCOUNT_LOGIN = 10;
 const uint8_t DISTRIBUTED_ACCOUNT_LOGOUT = 11;
 constexpr static int32_t INVALID_ID = 0;
 constexpr int64_t MIN_TIME_INTERVAL = 60 * 1000; // 1min
+const std::string EVENT_INFO_TYPE = "type";
+constexpr int32_t NOTIFY_TYPE_UNINSTALL_STATE = 15;
 std::atomic<int64_t> g_lastExecuteTime(0);
 std::map<std::string, uint8_t> receiveEvent = {
     {EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED, SCREEN_LOCKED},
@@ -89,7 +91,7 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
             HandlePackageAdded(want.GetElement().GetBundleName());
             break;
         case PACKAGE_CHANGED :
-            HandlePackageChange(want.GetElement().GetBundleName());
+            HandlePackageChange(want);
             break;
         case PACKAGE_REMOVED :
             HandlePackageRemoved(want.GetElement().GetBundleName());
@@ -177,8 +179,14 @@ void CommonEventListener::HandlePackageAdded(const std::string& bundleName)
     DmsBmStorage::GetInstance()->SaveStorageDistributeInfo(bundleName);
 }
 
-void CommonEventListener::HandlePackageChange(const std::string& bundleName)
+void CommonEventListener::HandlePackageChange(const AAFwk::Want& want)
 {
+    int32_t notifyType = want.GetIntParam(EVENT_INFO_TYPE, 0);
+    if (notifyType == NOTIFY_TYPE_UNINSTALL_STATE) {
+        HILOGI("PACKAGE_CHANGED skipped, uninstall state changed only");
+        return;
+    }
+    std::string bundleName = want.GetElement().GetBundleName();
     HILOGI("PACKAGE_CHANGED: %{public}s", bundleName.c_str());
     DmsBmStorage::GetInstance()->SaveStorageDistributeInfo(bundleName, true);
 }
