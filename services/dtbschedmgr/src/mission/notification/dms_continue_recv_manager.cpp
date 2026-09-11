@@ -154,11 +154,12 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
         }
         auto result = registerOnListener_.emplace(type, std::vector<sptr<IRemoteObject>>{});
         iterItem = result.first;
-    }
-    for (auto iter : iterItem->second) {
-        if (iter == obj) {
-            HILOGI("already have obj");
-            return NO_MISSION_INFO_FOR_MISSION_ID;
+    } else {
+        for (auto iter : iterItem->second) {
+            if (iter == obj) {
+                HILOGI("already have obj");
+                return NO_MISSION_INFO_FOR_MISSION_ID;
+            }
         }
     }
     wptr<IRemoteObject> weakObj = obj;
