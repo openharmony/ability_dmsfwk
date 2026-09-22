@@ -14,8 +14,7 @@
  */
 
 #include "util/distributed_sched_memory_utils.h"
-#include <fstream>
-#include <fcntl.h>
+#include <cstdio>
 #include <sstream>
 #include <unistd.h>
 #include "parameters.h"
@@ -56,17 +55,17 @@ void DistributedSchedMemoryUtils::ReclaimNow()
 void DistributedSchedMemoryUtils::WriteToProcFile(const std::string &path,
     const std::string &content)
 {
-    int fd = open(path.c_str(), O_WRONLY | O_CLOEXEC);
-    if (fd == -1) {
+    FILE *fp = fopen(path.c_str(), "we");
+    if (fp == nullptr) {
         HILOGE("Failed to open %{public}s", path.c_str());
         return;
     }
 
     size_t content_len = content.length();
-    ssize_t written = write(fd, content.c_str(), content_len);
-    close(fd);
+    size_t written = fwrite(content.c_str(), 1, content_len, fp);
+    fclose(fp);
 
-    if (written < 0 || static_cast<size_t>(written) != content_len) {
+    if (written != content_len) {
         HILOGE("Failed to write to %{public}s", path.c_str());
     }
 }
