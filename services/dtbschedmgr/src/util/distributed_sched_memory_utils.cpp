@@ -14,6 +14,7 @@
  */
 
 #include "util/distributed_sched_memory_utils.h"
+#include <climits>
 #include <cstdio>
 #include <sstream>
 #include <unistd.h>
@@ -55,9 +56,20 @@ void DistributedSchedMemoryUtils::ReclaimNow()
 void DistributedSchedMemoryUtils::WriteToProcFile(const std::string &path,
     const std::string &content)
 {
-    FILE *fp = fopen(path.c_str(), "we");
+    if (path.empty() || path.size() >= PATH_MAX) {
+        HILOGE("Invalid path length");
+        return;
+    }
+
+    char realPath[PATH_MAX] = {0};
+    if (realpath(path.c_str(), realPath) == nullptr) {
+        HILOGE("Failed to realpath %{public}s, errno=%{public}d", path.c_str(), errno);
+        return;
+    }
+
+    FILE *fp = fopen(realPath, "we");
     if (fp == nullptr) {
-        HILOGE("Failed to open %{public}s", path.c_str());
+        HILOGE("Failed to open %{public}s", realPath);
         return;
     }
 
@@ -66,7 +78,7 @@ void DistributedSchedMemoryUtils::WriteToProcFile(const std::string &path,
     fclose(fp);
 
     if (written != content_len) {
-        HILOGE("Failed to write to %{public}s", path.c_str());
+        HILOGE("Failed to write to %{public}s", realPath);
     }
 }
 } // namespace DistributedSchedule
