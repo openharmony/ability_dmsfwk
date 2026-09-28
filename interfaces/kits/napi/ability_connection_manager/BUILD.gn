@@ -79,6 +79,7 @@ ohos_shared_library("abilityconnectionmanager_napi") {
     "ipc:ipc_core",
     "media_foundation:media_foundation",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
   if (!dmsfwk_disable_distributedsched_service) {
     external_deps += [ "dsoftbus:softbus_client" ]

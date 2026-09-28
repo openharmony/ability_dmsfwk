@@ -101,6 +101,7 @@ taihe_shared_library("dmsfwk_taihe_native") {
     "image_framework:image_native",
     "image_framework:image_taihe",
     "media_foundation:media_foundation",
+    "node:node_header_notice",
   ]
   if (!dmsfwk_disable_distributedsched_service) {
     external_deps += [ "dsoftbus:softbus_client" ]
