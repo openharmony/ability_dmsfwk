@@ -62,6 +62,7 @@ ohos_shared_library("distributed_extension_ability_native") {
     "ipc:ipc_single",
     "ipc:rpc_taihe",
     "napi:ace_napi",
+    "node:node_header_notice",
     "runtime_core:ani",
   ]
 
