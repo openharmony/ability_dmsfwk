@@ -15,6 +15,8 @@
 
 #include "distributed_ability_manager_service.h"
 
+#include "base/parse_token_int.h"
+
 #include <chrono>
 #include <thread>
 
@@ -66,8 +68,11 @@ void DistributedAbilityManagerService::OnStart()
     {
         std::lock_guard<std::mutex> tokenLock(tokenMutex_);
         std::string tokenStr = system::GetParameter(TOKEN_KEY, DEFAULT_TOKEN_VALUE);
-        if (!tokenStr.empty()) {
-            token_.store(std::atoi(tokenStr.c_str()));
+        int32_t parsedToken = 0;
+        if (!tokenStr.empty() && ParseTokenInt32(tokenStr, parsedToken)) {
+            token_.store(parsedToken);
+        } else if (!tokenStr.empty()) {
+            HILOGE("invalid system parameter (%{public}s): %{public}s", TOKEN_KEY.c_str(), tokenStr.c_str());
         }
     }
     notifierDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new NotifierDeathRecipient());
